@@ -35,7 +35,9 @@ public class Proxy {
 		public OFSwitchHandler(Socket ofSwitch) throws UnknownHostException,
 				IOException {
 			ofSwitchSocket = ofSwitch;
+			ofSwitchSocket.setSoTimeout(0); // block reading
 			controllerSocket = new Socket("127.0.0.1", controllerPort);
+			controllerSocket.setSoTimeout(0); // block reading
 			controllerInputStream = controllerSocket.getInputStream();
 			controllerOutputStream = controllerSocket.getOutputStream();
 			ofSwitchInputStream = ofSwitchSocket.getInputStream();
