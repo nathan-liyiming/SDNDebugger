@@ -23,6 +23,9 @@ public abstract class OFStatisticsMessageBase extends OFMessage implements
     protected OFStatisticsType statisticsType;
     protected short flags;
     protected List<? extends OFStatistics> statistics;
+    
+    // if statisticsType == null
+    private short statisticsTypeValue;
 
     /**
      * Construct a ofp_statistics_* message
@@ -84,23 +87,42 @@ public abstract class OFStatisticsMessageBase extends OFMessage implements
         this.statisticsFactory = statisticsFactory;
     }
 
+    /**
+     * Hacked by brown sys.
+     */
     @Override
     public void readFrom(ByteBuffer data) {
         super.readFrom(data);
-        this.statisticsType = OFStatisticsType.valueOf(data.getShort(), this
+        short tmpType = data.getShort();
+        this.statisticsType = OFStatisticsType.valueOf(tmpType, this
                 .getType());
         this.flags = data.getShort();
         data.getInt(); //pad
-        if (this.statisticsFactory == null)
-            throw new RuntimeException("OFStatisticsFactory not set");
-        this.statistics = statisticsFactory.parseStatistics(this.getType(),
-                this.statisticsType, data, super.getLengthU() - MINIMUM_LENGTH);
+        if (this.statisticsType == null && this.getType() == OFType.STATS_REQUEST) {
+        	if (tmpType == 0 || tmpType == 7 || tmpType == 8 || tmpType == 11 || tmpType == 13) {
+        		this.statisticsTypeValue = tmpType;
+        	} else {
+        		throw new RuntimeException("statisticsType not set");
+        	}
+        } else {
+        	if (this.statisticsFactory == null)
+        		throw new RuntimeException("OFStatisticsFactory not set");
+        	this.statistics = statisticsFactory.parseStatistics(this.getType(),
+        			this.statisticsType, data, super.getLengthU() - MINIMUM_LENGTH);
+        }
     }
 
+    /**
+     * Hacked by brown sys.
+     */
     @Override
     public void writeTo(ByteBuffer data) {
         super.writeTo(data);
-        data.putShort(this.statisticsType.getTypeValue());
+        if (this.statisticsType == null) {
+        	data.putShort(this.statisticsTypeValue);
+        } else {
+        	data.putShort(this.statisticsType.getTypeValue());
+        }
         data.putShort(this.flags);
         data.putInt(0); //pad
         if (this.statistics != null) {

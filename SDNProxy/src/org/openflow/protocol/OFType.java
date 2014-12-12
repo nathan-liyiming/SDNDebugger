@@ -35,10 +35,10 @@ public enum OFType {
                             public OFMessage instantiate() {
                                 return new OFEchoReply();
                             }}),
-    VENDOR        (4, OFVendor.class, new Instantiable<OFMessage>() {
+    EXPERIMENTER        (4, OFExperimenter.class, new Instantiable<OFMessage>() {
                             @Override
                             public OFMessage instantiate() {
-                                return new OFVendor();
+                                return new OFExperimenter();
                             }}),
     FEATURES_REQUEST    (5, OFFeaturesRequest.class, new Instantiable<OFMessage>() {
                             @Override

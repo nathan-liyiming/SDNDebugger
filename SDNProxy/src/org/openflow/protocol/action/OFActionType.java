@@ -97,10 +97,10 @@ public enum OFActionType {
                             public OFAction instantiate() {
                                 return new OFActionPopPBB();
                             }}),
-    VENDOR        (0xffff, OFActionVendor.class, new Instantiable<OFAction>() {
+    EXPERIMENTER        (0xffff, OFActionExperimenter.class, new Instantiable<OFAction>() {
                             @Override
                             public OFAction instantiate() {
-                                return new OFActionVendor();
+                                return new OFActionExperimenter();
                             }});
 
     protected static Map<Short, OFActionType> mapping;

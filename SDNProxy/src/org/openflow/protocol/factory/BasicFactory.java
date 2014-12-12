@@ -16,7 +16,7 @@ import org.openflow.protocol.statistics.OFStatistics;
 import org.openflow.protocol.statistics.OFStatisticsType;
 import org.openflow.protocol.hello.OFHelloElement;
 import org.openflow.protocol.hello.OFHelloElementType;
-import org.openflow.protocol.statistics.OFVendorStatistics;
+import org.openflow.protocol.statistics.OFExperimenterStatistics;
 import org.openflow.protocol.meter.OFMeterBand;
 import org.openflow.protocol.meter.OFMeterBandType;
 import org.openflow.protocol.statistics.tableFeatures.OFTableFeaturesProperty;
@@ -264,9 +264,9 @@ public class BasicFactory implements OFMessageFactory, OFActionFactory,
         int count = 0;
 
         while (limit == 0 || results.size() <= limit) {
-            // Create a separate MUX/DEMUX path for vendor stats
-            if (statistics instanceof OFVendorStatistics)
-                ((OFVendorStatistics)statistics).setLength(length);
+            // Create a separate MUX/DEMUX path for experimenter stats
+            if (statistics instanceof OFExperimenterStatistics)
+                ((OFExperimenterStatistics)statistics).setLength(length);
 
             /**
              * can't use data.remaining() here, b/c there could be other data

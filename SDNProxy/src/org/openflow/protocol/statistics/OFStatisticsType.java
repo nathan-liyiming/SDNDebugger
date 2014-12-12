@@ -164,17 +164,17 @@ public enum OFStatisticsType {
                             return new OFPortDescription();
                         }
                     }),
-    VENDOR     (0xffff, OFVendorStatistics.class, OFVendorStatistics.class,
+    EXPERIMENTER     (0xffff, OFExperimenterStatistics.class, OFExperimenterStatistics.class,
                     new Instantiable<OFStatistics>() {
                         @Override
                         public OFStatistics instantiate() {
-                            return new OFVendorStatistics();
+                            return new OFExperimenterStatistics();
                         }
                     },
                     new Instantiable<OFStatistics>() {
                         @Override
                         public OFStatistics instantiate() {
-                            return new OFVendorStatistics();
+                            return new OFExperimenterStatistics();
                         }
                     });
 

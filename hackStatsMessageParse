@@ -1,0 +1,277 @@
+Starting net.sdn.proxy.Proxy on port 8000 with 10 threads
+Proxy: got new connection from 127.0.0.1:48473, then, connected to 127.0.0.1:6633
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+GOT HELLO from 127.0.0.1:6633
+Proxy: got new connection from 127.0.0.1:48475, then, connected to 127.0.0.1:6633
+GOT HELLO from 127.0.0.1:48475
+GOT HELLO from 127.0.0.1:6633
+Unhandled OF message: FEATURES_REQUEST from /127.0.0.1
+GOT FEATURE_REPLY from 127.0.0.1:48475
+--> Data:OFFeaturesReply [datapathId=1, buffers=256, tables=254, auxiliaryId=0, capabilities=[OFPC_FLOW_STATS, OFPC_TABLE_STATS, OFPC_PORT_STATS, OFPC_QUEUE_STATS], reserved=0]
+Unhandled OF message: SET_CONFIG from /127.0.0.1
+Unhandled OF message: BARRIER_REQUEST from /127.0.0.1
+Unhandled OF message: GET_CONFIG_REQUEST from /127.0.0.1
+Unhandled OF message: BARRIER_REPLY from /127.0.0.1
+Unhandled OF message: GET_CONFIG_REPLY from /127.0.0.1
+Proxy: got new connection from 127.0.0.1:48477, then, connected to 127.0.0.1:6633
+GOT HELLO from 127.0.0.1:6633
+GOT HELLO from 127.0.0.1:48477
+Unhandled OF message: FEATURES_REQUEST from /127.0.0.1
+Unhandled OF message: STATS_REQUEST from /127.0.0.1
+GOT FEATURE_REPLY from 127.0.0.1:48477
+--> Data:OFFeaturesReply [datapathId=2, buffers=256, tables=254, auxiliaryId=0, capabilities=[OFPC_FLOW_STATS, OFPC_TABLE_STATS, OFPC_PORT_STATS, OFPC_QUEUE_STATS], reserved=0]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=256, totalLength=78, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=118]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=256, totalLength=78, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=118]
+GOT STATS_REPLY from 127.0.0.1:48475
+Unhandled OF message: SET_CONFIG from /127.0.0.1
+Unhandled OF message: BARRIER_REQUEST from /127.0.0.1
+Unhandled OF message: GET_CONFIG_REQUEST from /127.0.0.1
+--> Data:OFStatisticsMessage [type=PORT_DESC, flags=0, data=[OFPhysicalPort [name=s1-eth1, portNumber=1, hardwareAddress=1e:98:63:9d:fd:59, config=0, state=UP, currSpeed=10000000kbps, maxSpeed=0kbps, currentFeatures=[10GB full-duplex, Copper], advertisedFeatures=[], supportedFeatures=[], peerFeatures=[]], OFPhysicalPort [name=s1-eth2, portNumber=2, hardwareAddress=be:2d:88:0f:6a:c9, config=0, state=UP, currSpeed=10000000kbps, maxSpeed=0kbps, currentFeatures=[10GB full-duplex, Copper], advertisedFeatures=[], supportedFeatures=[], peerFeatures=[]], OFPhysicalPort [name=s1, portNumber=-2, hardwareAddress=3a:9b:c1:2d:84:47, config=0, state=UP, currSpeed=0kbps, maxSpeed=0kbps, currentFeatures=[], advertisedFeatures=[], supportedFeatures=[], peerFeatures=[]]]]
+Unhandled OF message: BARRIER_REPLY from /127.0.0.1
+Unhandled OF message: GET_CONFIG_REPLY from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=257, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=130]
+Unhandled OF message: STATS_REQUEST from /127.0.0.1
+GOT STATS_REPLY from 127.0.0.1:48475
+--> Data:OFStatisticsMessage [type=DESC, flags=0, data=[OFDescriptionStatistics [Vendor: Nicira, Inc., Model: Open vSwitch, Make: None, Version: 2.0.2, S/N: None]]]
+Unhandled OF message: STATS_REQUEST from /127.0.0.1
+GOT STATS_REPLY from 127.0.0.1:48477
+--> Data:OFStatisticsMessage [type=PORT_DESC, flags=0, data=[OFPhysicalPort [name=s2-eth1, portNumber=1, hardwareAddress=32:d0:98:24:b9:b7, config=0, state=UP, currSpeed=10000000kbps, maxSpeed=0kbps, currentFeatures=[10GB full-duplex, Copper], advertisedFeatures=[], supportedFeatures=[], peerFeatures=[]], OFPhysicalPort [name=s2-eth2, portNumber=2, hardwareAddress=a6:37:c1:4f:19:48, config=0, state=UP, currSpeed=10000000kbps, maxSpeed=0kbps, currentFeatures=[10GB full-duplex, Copper], advertisedFeatures=[], supportedFeatures=[], peerFeatures=[]], OFPhysicalPort [name=s2, portNumber=-2, hardwareAddress=d6:11:28:0b:63:49, config=0, state=UP, currSpeed=0kbps, maxSpeed=0kbps, currentFeatures=[], advertisedFeatures=[], supportedFeatures=[], peerFeatures=[]]]]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=257, totalLength=78, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=118]
+Unhandled OF message: EXPERIMENTER from /127.0.0.1
+Unhandled OF message: STATS_REQUEST from /127.0.0.1
+GOT ERROR from 127.0.0.1:48475
+--> Data:OFError [type=OFPET_BAD_REQUEST, code=OFPBRC_BAD_EXP_TYPE]
+GOT STATS_REPLY from 127.0.0.1:48477
+--> Data:OFStatisticsMessage [type=DESC, flags=0, data=[OFDescriptionStatistics [Vendor: Nicira, Inc., Model: Open vSwitch, Make: None, Version: 2.0.2, S/N: None]]]
+Unhandled OF message: EXPERIMENTER from /127.0.0.1
+GOT ERROR from 127.0.0.1:48477
+--> Data:OFError [type=OFPET_BAD_REQUEST, code=OFPBRC_BAD_EXP_TYPE]
+Unhandled OF message: FLOW_MOD from /127.0.0.1
+Unhandled OF message: BARRIER_REQUEST from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=258, totalLength=78, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=118]
+Unhandled OF message: BARRIER_REPLY from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=259, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=130]
+Unhandled OF message: FLOW_MOD from /127.0.0.1
+Unhandled OF message: BARRIER_REQUEST from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=260, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=261, totalLength=61, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=101]
+Unhandled OF message: BARRIER_REPLY from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=262, totalLength=69, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=109]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=258, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=130]
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=259, totalLength=61, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=101]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=260, totalLength=69, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=109]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=261, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=262, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=263, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=263, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=264, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=265, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=266, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=264, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=265, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=266, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=267, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=268, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=267, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=268, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=269, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=269, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=270, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=271, totalLength=110, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=150]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=270, totalLength=337, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=377]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=271, totalLength=183, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=223]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=272, totalLength=337, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=377]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=273, totalLength=183, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=223]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=272, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=274, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=275, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=273, totalLength=337, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=377]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=276, totalLength=337, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=377]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=274, totalLength=110, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=150]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=275, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=277, totalLength=90, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=130]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=276, totalLength=337, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=377]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=278, totalLength=337, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=377]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=277, totalLength=319, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=359]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=279, totalLength=319, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=359]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=278, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=280, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=279, totalLength=183, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=223]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=280, totalLength=342, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=382]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=281, totalLength=183, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=223]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=282, totalLength=342, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=382]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=281, totalLength=319, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=359]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=283, totalLength=319, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=359]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=282, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=284, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=283, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=110]
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=284, totalLength=259, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=299]
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=285, totalLength=259, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=299]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=286, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=287, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=285, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=286, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=288, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=287, totalLength=319, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=359]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=289, totalLength=319, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=359]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=288, totalLength=342, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=382]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=289, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=290, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=290, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=291, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=1]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=292, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=291, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=-2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=292, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=110]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=293, totalLength=70, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=110]
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=294, totalLength=342, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=382]
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=293, totalLength=61, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=101]
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=295, totalLength=61, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=101]
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=294, totalLength=342, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=382]
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=295, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=296, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=297, totalLength=342, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=382]
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=296, totalLength=61, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=101]
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=298, totalLength=61, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=101]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=299, totalLength=69, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=109]
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+Unhandled OF message: PACKET_OUT from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=297, totalLength=69, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=109]
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=298, totalLength=342, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=382]
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REQUEST from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+Unhandled OF message: ECHO_REPLY from /127.0.0.1
+GOT PACKET_IN from 127.0.0.1:48475
+--> Data:OFPacketIn [bufferId=299, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+GOT PACKET_IN from 127.0.0.1:48477
+--> Data:OFPacketIn [bufferId=300, totalLength=107, reason=0, tableId=0, cookie=0, match=OFMatch [type=OXM, length=16, matchFields=[OFMatchField [type=OFOXMFieldType [name=in_port, value=0, payloadLength=4],HasMask=0, length=8, value=2]]], length=147]
+

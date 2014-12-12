@@ -30,11 +30,11 @@ public class OFQueuePropertyType {
             });
 
 /* TODO
-    public static OFQueuePropertyType VENDOR = new OFQueuePropertyType(0xFFFF, "VENDOR",
-            OFQueuePropertyVendor.class, new Instantiable<OFQueueProperty>() {
+    public static OFQueuePropertyType EXPERIMENTER = new OFQueuePropertyType(0xFFFF, "EXPERIMENTER",
+            OFQueuePropertyExperimenter.class, new Instantiable<OFQueueProperty>() {
                 @Override
                 public OFQueueProperty instantiate() {
-                    return new OFQueuePropertyVendor();
+                    return new OFQueuePropertyExperimenter();
                 }
             });
 */

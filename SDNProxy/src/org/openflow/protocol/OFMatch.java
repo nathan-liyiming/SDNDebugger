@@ -46,7 +46,7 @@ public class OFMatch implements Cloneable {
         NXM_0                ((short)0x0000),
         NXM_1                ((short)0x0001),
         OPENFLOW_BASIC       ((short)0x8000),
-        VENDOR               ((short)0xffff);
+        EXPERIMENTER         ((short)0xffff);
 
         protected short value;
 
@@ -382,7 +382,7 @@ public class OFMatch implements Cloneable {
                 this.setField(OFOXMFieldType.IPV6_DST, networkDestination);
                 break;
             case ETH_TYPE_ARP:
-                this.setField(OFOXMFieldType.ARP_TPA, networkDestination);
+                this.setField(OFOXMFieldType.ARP_THA, networkDestination);
                 break;
         }
         return this;
@@ -415,7 +415,7 @@ public class OFMatch implements Cloneable {
                 this.setField(OFOXMFieldType.IPV6_DST, networkDestination, networkMask);
                 break;
             case ETH_TYPE_ARP:
-                this.setField(OFOXMFieldType.ARP_TPA, networkDestination, networkMask);
+                this.setField(OFOXMFieldType.ARP_THA, networkDestination, networkMask);
                 break;
         }
         return this;
@@ -472,7 +472,7 @@ public class OFMatch implements Cloneable {
                 this.setField(OFOXMFieldType.IPV4_SRC, networkSource);
                 break;
             case ETH_TYPE_ARP:
-                this.setField(OFOXMFieldType.ARP_SPA, networkSource);
+                this.setField(OFOXMFieldType.ARP_SHA, networkSource);
                 break;
         }
         return this;
@@ -505,7 +505,7 @@ public class OFMatch implements Cloneable {
                 this.setField(OFOXMFieldType.IPV6_SRC, networkSource, networkMask);
                 break;
             case ETH_TYPE_ARP:
-                this.setField(OFOXMFieldType.ARP_SPA, networkSource, networkMask);
+                this.setField(OFOXMFieldType.ARP_SHA, networkSource, networkMask);
                 break;
         }
         return this;

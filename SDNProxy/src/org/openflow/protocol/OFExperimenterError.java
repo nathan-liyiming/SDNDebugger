@@ -6,37 +6,37 @@ import java.util.Arrays;
 import org.openflow.util.U16;
 
 /**
- * Represents an ofp_error_vendor_msg
+ * Represents an ofp_error_experimenter_msg
  *
  * @author Srini Seetharaman (srini.seetharaman@gmail.com)
  */
-public class OFVendorError extends OFError {
+public class OFExperimenterError extends OFError {
     public static int MINIMUM_LENGTH = 16;
 
     protected short expType;
-    protected int vendor;
+    protected int experimenter;
     protected byte[] errorData;
 
-    public OFVendorError() {
+    public OFExperimenterError() {
         super();
-        this.errorType = (short) OFError.OFErrorType.OFPET_VENDOR.ordinal();
+        this.errorType = (short) OFError.OFErrorType.OFPET_EXPERIMENTER.ordinal();
         this.length = U16.t(MINIMUM_LENGTH);
     }
 
     /**
-     * Get vendor_id
+     * Get experimenter_id
      * @return
      */
-    public int getVendor() {
-        return this.vendor;
+    public int getExperimenter() {
+        return this.experimenter;
     }
 
     /**
-     * Set vendor_id
-     * @param vendor
+     * Set experimenter_id
+     * @param experimenter
      */
-    public OFVendorError setVendor(int vendor) {
-        this.vendor = vendor;
+    public OFExperimenterError setExperimenter(int experimenter) {
+        this.experimenter = experimenter;
         return this;
     }
 
@@ -52,9 +52,9 @@ public class OFVendorError extends OFError {
      * Sets the packet data, and updates the length of this message
      * @param errorData
      */
-    public OFVendorError setPacketData(byte[] errorData) {
+    public OFExperimenterError setPacketData(byte[] errorData) {
         this.errorData = errorData;
-        this.length = U16.t(OFVendorError.MINIMUM_LENGTH + errorData.length);
+        this.length = U16.t(OFExperimenterError.MINIMUM_LENGTH + errorData.length);
         return this;
     }
 
@@ -70,7 +70,7 @@ public class OFVendorError extends OFError {
      * Set in_port
      * @param expType
      */
-    public OFVendorError setExpType(short expType) {
+    public OFExperimenterError setExpType(short expType) {
         this.expType = expType;
         return this;
     }
@@ -79,7 +79,7 @@ public class OFVendorError extends OFError {
     public void readFrom(ByteBuffer data) {
         super.readFrom(data);
         this.expType = data.getShort();
-        this.vendor = data.getInt();
+        this.experimenter = data.getInt();
         this.errorData = new byte[getLengthU() - MINIMUM_LENGTH];
         data.get(this.errorData);
     }
@@ -88,7 +88,7 @@ public class OFVendorError extends OFError {
     public void writeTo(ByteBuffer data) {
         super.writeTo(data);
         data.putShort(expType);
-        data.putInt(vendor);
+        data.putInt(experimenter);
         data.put(this.errorData);
     }
 
@@ -97,7 +97,7 @@ public class OFVendorError extends OFError {
         final int prime = 283;
         int result = super.hashCode();
         result = prime * result + expType;
-        result = prime * result + vendor;
+        result = prime * result + experimenter;
         result = prime * result + Arrays.hashCode(errorData);
         return result;
     }
@@ -110,11 +110,11 @@ public class OFVendorError extends OFError {
         if (!super.equals(obj)) {
             return false;
         }
-        if (!(obj instanceof OFVendorError)) {
+        if (!(obj instanceof OFExperimenterError)) {
             return false;
         }
-        OFVendorError other = (OFVendorError) obj;
-        if (vendor != other.vendor) {
+        OFExperimenterError other = (OFExperimenterError) obj;
+        if (experimenter != other.experimenter) {
             return false;
         }
         if (expType != other.expType) {

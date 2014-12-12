@@ -32,11 +32,11 @@ public class OFMeterBandType {
             });
 
 /* TODO
-    public static OFMeterBandType VENDOR = new OFMeterBandType(1, "VENDOR",
-            OFMeterBandVendor.class, new Instantiable<OFMeterBand>() {
+    public static OFMeterBandType EXPERIMENTER = new OFMeterBandType(1, "EXPERIMENTER",
+            OFMeterBandExperimenter.class, new Instantiable<OFMeterBand>() {
                 @Override
                 public OFMeterBand instantiate() {
-                    return new OFMeterBandVendor();
+                    return new OFMeterBandExperimenter();
                 }
             });
 */

@@ -44,10 +44,10 @@ public enum OFInstructionType {
                                 return new OFInstructionMeter();
 /* TODO
                             }}),
-    VENDOR        (0xffff, OFInstructionVendor.class, new Instantiable<OFInstruction>() {
+    EXPERIMENTER        (0xffff, OFInstructionExperimenter.class, new Instantiable<OFInstruction>() {
                             @Override
                             public OFInstruction instantiate() {
-                                return new OFInstructionVendor();
+                                return new OFInstructionExperimenter();
 */
                             }});
 
