@@ -3,6 +3,7 @@ package net.sdn.proxy;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -74,15 +75,15 @@ public class Proxy implements SelectListener {
 		}
 
 		public String downInf() {
-			return socketDown.socket().getInetAddress().getHostAddress()
-					+ ":" + socketDown.socket().getPort();
+			return socketDown.socket().getInetAddress().getHostAddress() + ":"
+					+ socketDown.socket().getPort();
 		}
-		
+
 		public String upInf() {
 			return socketUp.socket().getInetAddress().getHostAddress() + ":"
 					+ socketUp.socket().getPort();
 		}
-		
+
 		public SocketChannel getSocketDown() {
 			return socketDown;
 		}
@@ -185,17 +186,20 @@ public class Proxy implements SelectListener {
 
 					switch (m.getType()) {
 					case PACKET_IN:
-						System.err.println("GOT PACKET_IN from " + sw.downInf());
+						System.err
+								.println("GOT PACKET_IN from " + sw.downInf());
 						System.err.println("--> Data:"
 								+ ((OFPacketIn) m).toString());
 						break;
 					case FEATURES_REPLY:
-						System.err.println("GOT FEATURE_REPLY from " + sw.downInf());
+						System.err.println("GOT FEATURE_REPLY from "
+								+ sw.downInf());
 						System.err.println("--> Data:"
 								+ ((OFFeaturesReply) m).toString());
 						break;
 					case STATS_REPLY:
-						System.err.println("GOT STATS_REPLY from " + sw.downInf());
+						System.err.println("GOT STATS_REPLY from "
+								+ sw.downInf());
 						System.err.println("--> Data:"
 								+ ((OFStatisticsReply) m).toString());
 						break;
@@ -226,56 +230,65 @@ public class Proxy implements SelectListener {
 
 	protected void handleUpEvent(SelectionKey key, SocketChannel sock) {
 		OFSwitch sw = upSockets.get(sock);
-		OFMessageAsyncStream streamDown = sw.getStreamDown();
-		OFMessageAsyncStream streamUp = sw.getStreamUp();
+		// OFMessageAsyncStream streamDown = sw.getStreamDown();
+		// OFMessageAsyncStream streamUp = sw.getStreamUp();
+		SocketChannel socketDown = sw.getSocketDown();
+		SocketChannel socketUp = sw.getSocketUp();
 		try {
-			if (key.isReadable()) {
-				List<OFMessage> msgs = streamUp.read();
-				if (msgs == null) {
-					key.cancel();
-					upSockets.remove(sock);
-					return;
-				}
-
-				for (OFMessage m : msgs) {
-					// send to up
-					streamDown.write(m);					
-					
-					switch (m.getType()) {
-					case PACKET_IN:
-						System.err.println("GOT PACKET_IN from " + sw.upInf());
-						System.err.println("--> Data:"
-								+ ((OFPacketIn) m).toString());
-						break;
-					case FEATURES_REPLY:
-						System.err.println("GOT FEATURE_REPLY from " + sw.upInf());
-						System.err.println("--> Data:"
-								+ ((OFFeaturesReply) m).toString());
-						break;
-					case STATS_REPLY:
-						System.err.println("GOT STATS_REPLY from " + sw.upInf());
-						System.err.println("--> Data:"
-								+ ((OFStatisticsReply) m).toString());
-						break;
-					case HELLO:
-						System.err.println("GOT HELLO from " + sw.upInf());
-						break;
-					case ERROR:
-						System.err.println("GOT ERROR from " + sw.upInf());
-						System.err.println("--> Data:"
-								+ ((OFError) m).toString());
-						break;
-					default:
-						System.err.println("Unhandled OF message: "
-								+ m.getType() + " from "
-								+ sock.socket().getInetAddress());
-					}
-				}
+			ByteBuffer inBuf = ByteBuffer
+					.allocateDirect(OFMessageAsyncStream.defaultBufferSize);
+			int read = socketUp.read(inBuf);
+			if (read != -1) {
+				inBuf.flip();
+				socketDown.write(inBuf);
+				inBuf.compact();
 			}
-
-			streamDown.flush();
-
-		} catch (IOException e) {
+			// if (key.isReadable()) {
+			// List<OFMessage> msgs = streamUp.read();
+			// if (msgs == null) {
+			// key.cancel();
+			// upSockets.remove(sock);
+			// return;
+			// }
+			//
+			// for (OFMessage m : msgs) {
+			// // send to up
+			// streamDown.write(m);
+			//
+			// switch (m.getType()) {
+			// case PACKET_IN:
+			// System.err.println("GOT PACKET_IN from " + sw.upInf());
+			// System.err.println("--> Data:"
+			// + ((OFPacketIn) m).toString());
+			// break;
+			// case FEATURES_REPLY:
+			// System.err.println("GOT FEATURE_REPLY from " + sw.upInf());
+			// System.err.println("--> Data:"
+			// + ((OFFeaturesReply) m).toString());
+			// break;
+			// case STATS_REPLY:
+			// System.err.println("GOT STATS_REPLY from " + sw.upInf());
+			// System.err.println("--> Data:"
+			// + ((OFStatisticsReply) m).toString());
+			// break;
+			// case HELLO:
+			// System.err.println("GOT HELLO from " + sw.upInf());
+			// break;
+			// case ERROR:
+			// System.err.println("GOT ERROR from " + sw.upInf());
+			// System.err.println("--> Data:"
+			// + ((OFError) m).toString());
+			// break;
+			// default:
+			// System.err.println("Unhandled OF message: "
+			// + m.getType() + " from "
+			// + sock.socket().getInetAddress());
+			// }
+			// }
+			// }
+			//
+			// streamDown.flush();
+		} catch (Exception e) {
 			// if we have an exception, disconnect the switch
 			key.cancel();
 			upSockets.remove(sock);
