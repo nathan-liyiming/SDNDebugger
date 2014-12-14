@@ -230,19 +230,9 @@ public class Proxy implements SelectListener {
 
 	protected void handleUpEvent(SelectionKey key, SocketChannel sock) {
 		OFSwitch sw = upSockets.get(sock);
-		 OFMessageAsyncStream streamDown = sw.getStreamDown();
-		 OFMessageAsyncStream streamUp = sw.getStreamUp();
-//		SocketChannel socketDown = sw.getSocketDown();
-//		SocketChannel socketUp = sw.getSocketUp();
+		OFMessageAsyncStream streamDown = sw.getStreamDown();
+		OFMessageAsyncStream streamUp = sw.getStreamUp();
 		try {
-//			ByteBuffer inBuf = ByteBuffer
-//					.allocateDirect(OFMessageAsyncStream.defaultBufferSize);
-//			int read = socketUp.read(inBuf);
-//			if (read != -1) {
-//				inBuf.flip();
-//				socketDown.write(inBuf);
-//				inBuf.compact();
-//			}
 			if (key.isReadable()) {
 				List<OFMessage> msgs = streamUp.read();
 				if (msgs == null) {
@@ -290,7 +280,7 @@ public class Proxy implements SelectListener {
 			}
 
 			streamDown.flush();
-			
+
 		} catch (IOException e) {
 			// if we have an exception, disconnect the switch
 			key.cancel();
