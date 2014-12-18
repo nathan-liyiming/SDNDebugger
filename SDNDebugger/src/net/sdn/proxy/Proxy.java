@@ -40,6 +40,8 @@ import org.openflow.protocol.factory.BasicFactory;
 import org.openflow.util.LRULinkedHashMap;
 import org.openflow.util.U16;
 
+import static net.sdn.debugger.Debugger.*;
+
 /**
  * @author Rob Sherwood (rob.sherwood@stanford.edu), David Erickson
  *         (daviderickson@cs.stanford.edu)
@@ -376,7 +378,7 @@ public class Proxy implements SelectListener {
 		// options.addOption("n", true, "the number of packets to send");
 		options.addOption("p", "port", 8000, "the port to listen on");
 		options.addOption("t", "threads", 10, "the number of threads to run");
-		options.addOption("d", "debugger", 8100,
+		options.addOption("d", "debugger", DEFAULT_PROXY_PORT,
 				"port number the debugger listen on");
 		try {
 			SimpleCLI cmd = SimpleCLI.parse(options, args);
