@@ -19,6 +19,7 @@ package net.sdn.debugger;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.openflow.io.OFMessageAsyncStream;
 import org.openflow.protocol.OFError;
 import org.openflow.protocol.OFFeaturesReply;
 import org.openflow.protocol.OFMessage;
@@ -50,14 +51,18 @@ public final class Debugger {
     private BasicFactory factory;
     
     private List<OFMessage> list;
+    
+    private ByteBuffer proxyIncomingBuffer;
 
     public Debugger(int port) {
         this.port = port;
         this.factory = BasicFactory.getInstance();
+        proxyIncomingBuffer = ByteBuffer
+				.allocateDirect(OFMessageAsyncStream.defaultBufferSize);
     }
 
     public RxServer<ByteBuf, ByteBuf> createServer() {
-        RxServer<ByteBuf, ByteBuf> server = RxNetty.createTcpServer(DEFAULT_PORT, new ConnectionHandler<ByteBuf, ByteBuf>() {
+        RxServer<ByteBuf, ByteBuf> server = RxNetty.createTcpServer(port, new ConnectionHandler<ByteBuf, ByteBuf>() {
             @Override
             public Observable<Void> handle(
                     final ObservableConnection<ByteBuf, ByteBuf> connection) {
@@ -66,12 +71,13 @@ public final class Debugger {
                     @Override
                     public Observable<Notification<Void>> call(ByteBuf msg) {
                         ByteBuffer inBuf = msg.nioBuffer();
-                        inBuf.flip();
-                        list = factory.parseMessages(inBuf, 0);
-                        if (inBuf.hasRemaining())
-                            inBuf.compact();
+                        proxyIncomingBuffer.put(inBuf);
+                        proxyIncomingBuffer.flip();
+                        list = factory.parseMessages(proxyIncomingBuffer, 0);
+                        if (proxyIncomingBuffer.hasRemaining())
+                        	proxyIncomingBuffer.compact();
                         else
-                            inBuf.clear();
+                        	proxyIncomingBuffer.clear();
                         printOFMessages(list);
                         return Observable.empty();
                     }

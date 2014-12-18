@@ -41,7 +41,8 @@ import org.openflow.util.LRULinkedHashMap;
 import org.openflow.util.U16;
 
 /**
- * @author Rob Sherwood (rob.sherwood@stanford.edu), David Erickson (daviderickson@cs.stanford.edu)
+ * @author Rob Sherwood (rob.sherwood@stanford.edu), David Erickson
+ *         (daviderickson@cs.stanford.edu)
  * @author Srini Seetharaman (srini.seetharaman@gmail.com)
  * 
  * @author Da Yu, Yiming Li (modified)
@@ -65,6 +66,8 @@ public class Proxy implements SelectListener {
 		protected SocketChannel socketUp;
 		protected OFMessageAsyncStream streamDown;
 		protected OFMessageAsyncStream streamUp;
+		protected ByteBuffer debuggerBufferDown;
+		protected ByteBuffer debuggerBufferUp;
 
 		public OFSwitch(SocketChannel socketDown, SocketChannel socketUp,
 				OFMessageAsyncStream streamDown, OFMessageAsyncStream streamUp) {
@@ -72,6 +75,10 @@ public class Proxy implements SelectListener {
 			this.socketUp = socketUp;
 			this.streamDown = streamDown;
 			this.streamUp = streamUp;
+			debuggerBufferDown = ByteBuffer
+					.allocateDirect(OFMessageAsyncStream.defaultBufferSize);
+			debuggerBufferUp = ByteBuffer
+					.allocateDirect(OFMessageAsyncStream.defaultBufferSize);
 		}
 
 		public String toString() {
@@ -108,13 +115,21 @@ public class Proxy implements SelectListener {
 		public OFMessageAsyncStream getStreamUp() {
 			return streamUp;
 		}
+		
+		public ByteBuffer getDebuggerBufferDown() {
+			return debuggerBufferDown;
+		}
+		
+		public ByteBuffer getDebuggerBufferUp() {
+			return debuggerBufferUp;
+		}
 	}
 
 	public Proxy(int port, int debugger) throws IOException {
 		debugerSock = SocketChannel.open();
 		debugerSock.connect(new InetSocketAddress("127.0.0.1", debugger));
 		System.out.println("Succesfully connected to the Debugger!");
-		
+
 		listenSock = ServerSocketChannel.open();
 		listenSock.configureBlocking(false);
 		listenSock.socket().bind(new java.net.InetSocketAddress(port));
@@ -129,7 +144,7 @@ public class Proxy implements SelectListener {
 		// register this connection for accepting
 		listenSelectLoop.register(listenSock, SelectionKey.OP_ACCEPT,
 				listenSock);
-		
+
 		this.factory = BasicFactory.getInstance();
 	}
 
@@ -193,16 +208,12 @@ public class Proxy implements SelectListener {
 					downSockets.remove(sock);
 					return;
 				}
-				
-				ByteBuffer outBuf = ByteBuffer
-		                .allocateDirect(OFMessageAsyncStream.defaultBufferSize);
 
 				for (OFMessage m : msgs) {
 					// send to up
 					streamUp.write(m);
 					// write to debugger
-					m.writeTo(outBuf);
-					debugerSock.write(outBuf);
+					m.writeTo(sw.getDebuggerBufferDown());
 
 					switch (m.getType()) {
 					case PACKET_IN:
@@ -240,6 +251,12 @@ public class Proxy implements SelectListener {
 			}
 
 			streamUp.flush();
+			
+			sw.getDebuggerBufferDown().flip();
+			synchronized(this){
+				debugerSock.write(sw.getDebuggerBufferDown());
+			}
+			sw.getDebuggerBufferDown().compact();
 
 		} catch (IOException e) {
 			// if we have an exception, disconnect the switch
@@ -260,16 +277,12 @@ public class Proxy implements SelectListener {
 					upSockets.remove(sock);
 					return;
 				}
-				
-				ByteBuffer outBuf = ByteBuffer
-		                .allocateDirect(OFMessageAsyncStream.defaultBufferSize);
-				
+
 				for (OFMessage m : msgs) {
 					// send to up
 					streamDown.write(m);
 					// write to debugger
-					m.writeTo(outBuf);
-					debugerSock.write(outBuf);
+					m.writeTo(sw.getDebuggerBufferUp());
 
 					switch (m.getType()) {
 					case PACKET_IN:
@@ -306,6 +319,12 @@ public class Proxy implements SelectListener {
 			}
 
 			streamDown.flush();
+
+			sw.getDebuggerBufferUp().flip();
+			synchronized(this){
+				debugerSock.write(sw.getDebuggerBufferUp());
+			}
+			sw.getDebuggerBufferUp().compact();
 
 		} catch (IOException e) {
 			// if we have an exception, disconnect the switch
@@ -357,7 +376,8 @@ public class Proxy implements SelectListener {
 		// options.addOption("n", true, "the number of packets to send");
 		options.addOption("p", "port", 8000, "the port to listen on");
 		options.addOption("t", "threads", 10, "the number of threads to run");
-		options.addOption("d", "debugger", 8100, "port number the debugger listen on");
+		options.addOption("d", "debugger", 8100,
+				"port number the debugger listen on");
 		try {
 			SimpleCLI cmd = SimpleCLI.parse(options, args);
 			if (cmd.hasOption("h")) {
