@@ -1,7 +1,6 @@
 package net.sdn.proxy;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -13,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.openflow.example.SelectListener;
 import org.openflow.example.SelectLoop;
@@ -70,6 +71,7 @@ public class Proxy implements SelectListener {
 		protected OFMessageAsyncStream streamUp;
 		protected ByteBuffer debuggerBufferDown;
 		protected ByteBuffer debuggerBufferUp;
+		protected Lock lock;
 
 		public OFSwitch(SocketChannel socketDown, SocketChannel socketUp,
 				OFMessageAsyncStream streamDown, OFMessageAsyncStream streamUp) {
@@ -81,6 +83,7 @@ public class Proxy implements SelectListener {
 					.allocateDirect(OFMessageAsyncStream.defaultBufferSize);
 			debuggerBufferUp = ByteBuffer
 					.allocateDirect(OFMessageAsyncStream.defaultBufferSize);
+			lock = new ReentrantLock();
 		}
 
 		public String toString() {
@@ -117,11 +120,11 @@ public class Proxy implements SelectListener {
 		public OFMessageAsyncStream getStreamUp() {
 			return streamUp;
 		}
-		
+
 		public ByteBuffer getDebuggerBufferDown() {
 			return debuggerBufferDown;
 		}
-		
+
 		public ByteBuffer getDebuggerBufferUp() {
 			return debuggerBufferUp;
 		}
@@ -215,7 +218,9 @@ public class Proxy implements SelectListener {
 					// send to up
 					streamUp.write(m);
 					// write to debugger
+					sw.lock.lock();
 					m.writeTo(sw.getDebuggerBufferDown());
+					sw.lock.unlock();
 
 					switch (m.getType()) {
 					case PACKET_IN:
@@ -253,12 +258,6 @@ public class Proxy implements SelectListener {
 			}
 
 			streamUp.flush();
-			
-			sw.getDebuggerBufferDown().flip();
-			synchronized(this){
-				debugerSock.write(sw.getDebuggerBufferDown());
-			}
-			sw.getDebuggerBufferDown().compact();
 
 		} catch (IOException e) {
 			// if we have an exception, disconnect the switch
@@ -284,7 +283,9 @@ public class Proxy implements SelectListener {
 					// send to up
 					streamDown.write(m);
 					// write to debugger
+					sw.lock.lock();
 					m.writeTo(sw.getDebuggerBufferUp());
+					sw.lock.unlock();
 
 					switch (m.getType()) {
 					case PACKET_IN:
@@ -321,12 +322,6 @@ public class Proxy implements SelectListener {
 			}
 
 			streamDown.flush();
-
-			sw.getDebuggerBufferUp().flip();
-			synchronized(this){
-				debugerSock.write(sw.getDebuggerBufferUp());
-			}
-			sw.getDebuggerBufferUp().compact();
 
 		} catch (IOException e) {
 			// if we have an exception, disconnect the switch
@@ -368,6 +363,9 @@ public class Proxy implements SelectListener {
 		int debugger = Integer.valueOf(cmd.getOptionValue("d"));
 		Proxy sc = new Proxy(port, debugger);
 		sc.threadCount = Integer.valueOf(cmd.getOptionValue("t"));
+		// run round robin to send message to debugger
+		ConnectToDebugger connect = sc.new ConnectToDebugger();
+		new Thread(connect).start();
 		sc.run();
 	}
 
@@ -399,5 +397,46 @@ public class Proxy implements SelectListener {
 	public static void printUsage(Options options) {
 		SimpleCLI.printHelp("Usage: " + Proxy.class.getCanonicalName()
 				+ " [options]", options);
+	}
+
+	/**
+	 * Round robin and send to debugger
+	 * 
+	 */
+	public class ConnectToDebugger implements Runnable {
+		private boolean done = true;
+
+		public void run() {
+			try {
+				while (done) {
+					for (OFSwitch down : downSockets.values()) {
+						down.lock.lock();
+						if (down.getDebuggerBufferDown().remaining() != OFMessageAsyncStream.defaultBufferSize) {
+							down.getDebuggerBufferDown().flip();
+							debugerSock.write(down.getDebuggerBufferDown());
+							down.getDebuggerBufferDown().compact();
+						}
+						down.lock.unlock();
+					}
+
+					for (OFSwitch up : upSockets.values()) {
+						up.lock.lock();
+						if (up.getDebuggerBufferUp().remaining() != OFMessageAsyncStream.defaultBufferSize) {
+							up.getDebuggerBufferUp().flip();
+							debugerSock.write(up.getDebuggerBufferUp());
+							up.getDebuggerBufferUp().compact();
+						}
+						up.lock.unlock();
+					}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		public void cancel() {
+			done = false;
+		}
 	}
 }
