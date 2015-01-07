@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """
 Custom topologies for cs168, Fall 2014, Final Project
+Has been modified for debugger
 """
 
 import sys
-from mininet.cli import CLI
 from mininet.net import Mininet
 from mininet.node import OVSSwitch, RemoteController
 from mininet.topo import Topo,SingleSwitchTopo,LinearTopo
@@ -12,6 +12,7 @@ from mininet.topolib import TreeTopo
 from mininet.log import setLogLevel, info
 from mininet.util import customConstructor,quietRun
 from functools import partial
+from mininet.util import dumpNodeConnections
 
 class AssignOneTopo(Topo):
     def __init__(self, **opts):
@@ -116,7 +117,40 @@ def stophttp():
           quietRun( "pkill -9 -f SimpleHTTPServer" ), '\n' )    
     info( '*** Shutting down stale webservers', 
           quietRun( "pkill -9 -f webserver.py" ), '\n' )    
-   
+
+def do_net(mn):
+    "List network connections."
+    dumpNodeConnections(mn.values())
+
+def do_stop(mn):
+    "Stop network."
+    stophttp()
+    mn.stop()
+
+def readCommand():
+    "Read one command"
+    command = ''
+    ignoreChar = sys.stdin.read(1)
+    while ignoreChar != '"':
+	ignoreChar = sys.stdin.read(1)
+    eachChar = sys.stdin.read(1)
+    while eachChar != '"':
+        command += eachChar
+        eachChar = sys.stdin.read(1)
+    return command
+
+def readLine(mn):
+    command = readCommand()
+    print command
+    if command == 'net': 
+        do_net(mn)
+        readLine(mn)
+    elif command == 'pingall':
+	mn.ping()
+    	readLine(mn)
+    elif command == 'stop': 
+        do_stop(mn)
+ 
 if __name__ == '__main__':
     setLogLevel( 'info' )
 
@@ -160,7 +194,5 @@ if __name__ == '__main__':
         info('*** ARPing from host %s\n' % (h.name))
         h.cmd('arping -c 2 -A -I '+h.name+'-eth0 '+h.IP())
         starthttp(h)
-    CLI( net )
-    stophttp()
-    net.stop()
+    readLine(net)
 
