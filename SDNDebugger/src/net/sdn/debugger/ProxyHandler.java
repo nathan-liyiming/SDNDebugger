@@ -71,7 +71,7 @@ public class ProxyHandler implements Runnable {
 															.compact();
 												else
 													proxyIncomingBuffer.clear();
-												printOFMessages(list);
+												//printOFMessages(list);
 												return Observable.empty();
 											}
 										})

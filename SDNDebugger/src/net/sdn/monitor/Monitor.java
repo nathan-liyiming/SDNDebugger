@@ -12,7 +12,7 @@ import static net.sdn.debugger.Debugger.*;
 
 public class Monitor {
 	private final static String TSHARKPARAMS[] = { "/usr/bin/sudo",
-			"/usr/bin/tshark", "-l", "-i", "s1-eth1", "-i", "s1-eth2", "-T",
+			"/usr/bin/tshark", "-l", "-i", "s1-eth1", "-f", "icmp", "-T",
 			"fields", "-e", "frame.interface_id", "-e", "eth.type", "-e",
 			"eth.src", "-e", "eth.dst", "-e", "ip.src", "-e", "ip.dst" };
 
