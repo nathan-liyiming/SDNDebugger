@@ -22,8 +22,8 @@ public final class Debugger {
 	public static final int DEFAULT_MONITOR_PORT = 8200;
 
     public static void main(final String[] args) {
-        new Thread(new ProxyHandler(DEFAULT_PROXY_PORT)).start();
-        //new Thread(new MonitorHandler(DEFAULT_MONITOR_PORT)).start();
-        new Thread(new ICMPMonitor(DEFAULT_MONITOR_PORT)).start();
+        //new Thread(new ProxyHandler(DEFAULT_PROXY_PORT)).start();
+        new Thread(new MonitorHandler(DEFAULT_MONITOR_PORT)).start();
+        //new Thread(new ICMPMonitor(DEFAULT_MONITOR_PORT)).start();
     }
 }
