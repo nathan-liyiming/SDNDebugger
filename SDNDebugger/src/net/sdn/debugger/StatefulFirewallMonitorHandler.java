@@ -80,8 +80,23 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		return server;
 	}
 	
-	private void Oracle(String pkt){
+	private void Oracle(String pkt) {
+		if(pkt.contains("of_echo_request") || pkt.contains("of_echo_reply"))
+			return;
+		else {
+			String assertion = this.checkPoints.peek();
+			System.out.println("Oracle:" + assertion);
+			if (!pkt.contains(assertion)){
+				System.err.println("Oracle Failed!");
+			} else {
+				System.out.println("Success");
+				this.checkPoints.poll();
+			}
+		}
 		
+		if (this.checkPoints.size() == 0){
+			System.out.println("All Tests are passed!");
+		}
 	}
 	
 	// Since in this test cases we know the behavior of the StatefulFirewall, we can hard code

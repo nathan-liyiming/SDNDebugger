@@ -3,6 +3,6 @@ sleep 1
 #xterm -T "proxy" -e java -cp "bin:lib/*" net.sdn.proxy.Proxy &
 #sleep 1
 xterm -T "mininet" -e mn/run_mininet.py single,2 &
-sleep 10
+sleep 15
 xterm -T "monitor" -e java -cp "bin:lib/*" net.sdn.monitor.Monitor &
 
