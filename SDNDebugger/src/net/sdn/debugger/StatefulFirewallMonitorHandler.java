@@ -25,6 +25,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	private final int port;
 	// checkPoints is for test points that the Oracle will generate
 	private Queue<String> checkPoints = new LinkedList<String>();
+	// true - continue to testing, false - stop
+	private boolean flag = true;
 
 	public StatefulFirewallMonitorHandler(int port) {
 		this.port = port;
@@ -81,21 +83,29 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	}
 	
 	private void Oracle(String pkt) {
-		if(pkt.contains("of_echo_request") || pkt.contains("of_echo_reply"))
-			return;
-		else {
-			String assertion = this.checkPoints.peek();
-			System.out.println("Oracle:" + assertion);
-			if (!pkt.contains(assertion)){
-				System.err.println("Oracle Failed!");
-			} else {
-				System.out.println("Success");
-				this.checkPoints.poll();
-			}
-		}
+		// maybe more than one lines
+		String lines[] = pkt.split("\n");
+		if (flag) {
+			for (String line : lines) {
+				if(line.contains("of_echo_request") || line.contains("of_echo_reply") || line.contains("Destination unreachable"))
+					return;
+				else {
+					String assertion = this.checkPoints.peek();
+					System.out.println("Oracle:" + assertion);
+					if (!line.contains(assertion)){
+						System.err.println("Oracle Failed!");
+						flag = false;
+					} else {
+						System.out.println("Success");
+						this.checkPoints.poll();
+					}
+				}
 		
-		if (this.checkPoints.size() == 0){
-			System.out.println("All Tests are passed!");
+				if (this.checkPoints.size() == 0){
+					System.out.println("All Tests are passed!");
+					flag = false;
+				}
+			}
 		}
 	}
 	

@@ -5,4 +5,6 @@ Debugger for SDN
 
 *	Mininet example: sudo mn --topo=single,2 --controller=remote,ip=127.0.0.1,port=6633 --switch=ovsk,protocols=OpenFlow13
 
-*	Run script: sudo ./run.sh	
+*	Run script: sudo ./run.sh
+
+*	Ping: h1 ping h2 -i5	
