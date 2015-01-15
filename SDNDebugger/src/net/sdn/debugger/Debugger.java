@@ -23,7 +23,7 @@ public final class Debugger {
 
     public static void main(final String[] args) {
         //new Thread(new ProxyHandler(DEFAULT_PROXY_PORT)).start();
-        new Thread(new MonitorHandler(DEFAULT_MONITOR_PORT)).start();
-        //new Thread(new ICMPMonitor(DEFAULT_MONITOR_PORT)).start();
+        //new Thread(new MonitorHandler(DEFAULT_MONITOR_PORT)).start();
+        new Thread(new StatefulFirewallMonitorHandler(DEFAULT_MONITOR_PORT)).start();
     }
 }
