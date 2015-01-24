@@ -7,6 +7,9 @@ package net.sdn.debugger;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import net.sdn.packet.Packet;
+import net.sdn.packet.PacketDeserializer;
+
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
 import io.reactivex.netty.channel.ObservableConnection;
@@ -28,9 +31,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	// based on the internal network state and the ideal model
 	private Queue<String> expectedEvents = new LinkedList<String>();
 
-	// private HashSet<> internalHosts = new
-
-	// private List<>
+	private static String lines = "";
 
 	public StatefulFirewallMonitorHandler(int port) {
 		this.port = port;
@@ -53,28 +54,48 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 											public Observable<Notification<Void>> call(
 													String msg) {
 												// set filters:
-												String[] temp = msg.split("\n");
-												for (String s : temp) {
+												lines += msg;
+												String temp[] = lines
+														.split("\n");
+												if (temp.length > 1) {
+													for (int i = 0; i < temp.length - 1; i++) {
+														// get pkt
+														// System.out.println(temp[i]);
+														Packet pkt = PacketDeserializer
+																.deserialize(temp[i]);
+														System.out.println(pkt);
 
-													if (s.contains("ICMP")
-															|| s.contains("OF")) {
-														if (!(s.contains("of_echo_request") || s
-																.contains("of_echo_reply")))
-															// pipeline
-															// interested event
-															// to the Oracle
-															if (Oracle(s)) {
+														// need to change here!!!!
+														/*
+														if (s.contains("ICMP")
+																|| s.contains("OF")) {
+															if (!(s.contains("of_echo_request") || s
+																	.contains("of_echo_reply")))
+																// pipeline
+																// interested
+																// event
+																// to the Oracle
+																if (Oracle(s)) {
+																	System.out
+																			.println("Success!");
+																} else {
+																	System.out
+																			.println("Fail!");
+																}
+															if (expectedEvents
+																	.size() == 0) {
 																System.out
-																		.println("Success!");
-															} else {
-																System.out
-																		.println("Fail!");
+																		.println("All Tests are passed!");
 															}
-														if (expectedEvents
-																.size() == 0) {
-															System.out
-																	.println("All Tests are passed!");
 														}
+														*/
+
+													}
+													lines = temp[temp.length - 1];
+													char[] chs = lines
+															.toCharArray();
+													if (chs[chs.length - 1] == '\n') {
+														lines += "\n";
 													}
 												}
 
