@@ -57,8 +57,23 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 												lines += msg;
 												String temp[] = lines
 														.split("\n");
-												if (temp.length > 1) {
-													for (int i = 0; i < temp.length - 1; i++) {
+												
+												char[] chs = lines
+														.toCharArray();		
+												int count = 0;
+												
+												if (chs[chs.length - 1] == '\n') {
+													// full message line
+													count = temp.length;
+													lines = "";
+												} else {
+													// part message line							
+													count = temp.length - 1;
+													lines = temp[temp.length - 1];
+													lines += "\n";
+												}
+												
+													for (int i = 0; i < count; i++) {
 														// get pkt
 														// System.out.println(temp[i]);
 														Packet pkt = PacketDeserializer
@@ -90,14 +105,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 														}
 														*/
 
-													}
-													lines = temp[temp.length - 1];
-													char[] chs = lines
-															.toCharArray();
-													if (chs[chs.length - 1] == '\n') {
-														lines += "\n";
-													}
-												}
+													}											
 
 												return Observable.empty();
 											}
