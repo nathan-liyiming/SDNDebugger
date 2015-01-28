@@ -1,8 +1,0 @@
-package net.sdn.debugger;
-
-import net.sdn.packet.*;
-
-public class TestCase {
-	public Packet pkt;
-
-}

@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;SDNProxy&apos; to &apos;SDNDebugger&apos;" description="Rename resource &apos;SDNProxy&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/SDNProxy" name="SDNDebugger" stamp="1418842654326" updateReferences="true"/>
-</session>

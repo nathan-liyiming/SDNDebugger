@@ -1,9 +1,0 @@
-package net.sdn.debugger;
-
-public class PacketDeserializer {
-	
-	public Packet deserialize(String record){
-		
-	}
-
-}
