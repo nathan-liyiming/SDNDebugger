@@ -2,9 +2,9 @@ package net.sdn.packet;
 
 public class Event {
 	public Packet pkt;
-	public String sw;
-	public String interf;
-	public String timeStamp;
+	public String sw = "";
+	public String interf = "";
+	public String timeStamp = "";
 	
 	public String toString(){
 		if (pkt.of_type < 0)
@@ -18,5 +18,13 @@ public class Event {
 				return timeStamp + "{" + pkt.of_type + ":" + pkt.dl_proto + "," + pkt.nw_proto + "}:" + "controller" + "->" + sw;
 			}
 		}
+	}
+	
+	
+	public boolean equals(Event e){
+		if (pkt.equals(e.pkt) && sw.equals(e.sw) && interf.equals(e.interf))
+			return true;
+		else
+			return false;
 	}
 }

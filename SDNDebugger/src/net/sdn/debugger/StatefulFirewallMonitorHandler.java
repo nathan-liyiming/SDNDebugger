@@ -166,7 +166,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					event.interf = "eth2";
 					synchronized(expectedEvents){
 						expectedEvents.add(event);
-						// this.printEvents(expectedEvents);
+						System.out.println("*****************expectedEvents*****************");
+						printEvents(expectedEvents);
 					}
 				} else {
 					// first time receive icmp, procedures are required
@@ -176,8 +177,9 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					allowedFlow.add(pkt.nw_src);
 					synchronized(expectedEvents){
 						generateExpectedEventsForFirstPacket(pkt);
+						System.out.println("*****************expectedEvents*****************");
+						printEvents(expectedEvents);
 					}
-					printEvents(expectedEvents);
 				}
 			// sent from external hosts
 			} else if (externalHosts.contains(pkt.nw_src) && externalPort.contains(eve.interf)){
@@ -190,6 +192,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					event.interf = "eth1";
 					synchronized(expectedEvents){
 						expectedEvents.add(event);
+						System.out.println("*****************expectedEvents*****************");
+						printEvents(expectedEvents);
 					}
 				} else {
 					// dropped by the firewall
@@ -205,6 +209,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					synchronized(notExpectedEvents){
 						notExpectedEvents.add(event1);
 						notExpectedEvents.add(event2);
+						System.out.println("*****************notExpectedEvents*****************");
+						printEvents(notExpectedEvents);
 					}
 				}	
 			} else {
@@ -214,7 +220,31 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	}
 	
 	private void verify(Event e){
-		System.out.println(e);
+		//System.out.println(e);
+		// check notExpectedEvent List
+		synchronized(notExpectedEvents){
+			for (Event notExpected : notExpectedEvents) {
+				if (notExpected.equals(e)) {
+					System.err.println("Not Expected Event Happened:");
+					System.err.println(notExpected);
+					return;
+				}
+			}
+		}
+		// check expectedEvent List
+		synchronized(expectedEvents){
+			for (Event expected : expectedEvents) {
+				if (expected.equals(e)) {
+					System.out.println("Expected Event Happened:");
+					System.out.println(expected);
+					return;
+				}
+			}
+		}
+		
+		System.err.println("Unknown Event:");
+		System.err.println(e);
+		return;
 	}
 	
 	private void generateExpectedEventsForFirstPacket(Packet p){
@@ -278,5 +308,6 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	private void printEvents(LinkedList<Event> lst){
 		for (Event e : lst)
 			System.out.println(e);
+		System.out.println("***************************************");
 	}
 }

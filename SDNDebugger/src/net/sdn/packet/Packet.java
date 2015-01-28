@@ -31,4 +31,22 @@ public class Packet {
 				tp_dst_port + "\t" +
 				of_type;
 	}
+	
+	public boolean equals(Packet p) {
+		if (((dl_src.equals("") || p.dl_src.equals("")) || (dl_src.equals(p.dl_src))) &&
+			((dl_dst.equals("") || p.dl_dst.equals("")) || (dl_dst.equals(p.dl_dst))) &&
+			((dl_proto.equals("") || p.dl_proto.equals("")) || (dl_proto.equals(p.dl_proto))) &&
+			((nw_src.equals("") || p.nw_src.equals("")) || (nw_src.equals(p.nw_src))) &&
+			((nw_dst.equals("") || p.nw_dst.equals("")) || (nw_dst.equals(p.nw_dst))) &&
+			((nw_proto.equals("") || p.nw_proto.equals("")) || (nw_proto.equals(p.nw_proto))) &&
+			((tp_src_port.equals("") || p.tp_src_port.equals("")) || (tp_src_port.equals(p.tp_src_port))) &&
+			((tp_dst_port.equals("") || p.tp_dst_port.equals("")) || (tp_dst_port.equals(p.tp_dst_port))) &&
+			((of_type == -1 || p.of_type == -1) || (of_type  == p.of_type))){
+			return true;
+		} else
+			return false;
+			
+			
+		
+	}
 }

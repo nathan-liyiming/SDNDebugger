@@ -5,14 +5,11 @@ import java.util.LinkedList;
 
 public class RecordSorter extends Thread {
 
-	private final static double interval = 0.02;
+	private final static double interval = 0.2;
 
 	private LinkedList<Pair> store = new LinkedList<Pair>();
 	private PrintWriter out;
 
-	private boolean flag = true;
-	private double begin;
-	private double end;
 	private double split;
 
 	public RecordSorter(PrintWriter out) {
