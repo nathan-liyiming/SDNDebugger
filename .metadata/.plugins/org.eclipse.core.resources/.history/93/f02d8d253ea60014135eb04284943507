@@ -1,0 +1,9 @@
+package net.sdn.debugger;
+
+import net.sdn.packet.*;
+
+public class Event {
+	public Packet pkt;
+	public String sw;
+	public String interf;
+}

@@ -1,0 +1,6 @@
+package net.sdn.debugger;
+
+public class TestCase {
+	public Packet pkt;
+
+}

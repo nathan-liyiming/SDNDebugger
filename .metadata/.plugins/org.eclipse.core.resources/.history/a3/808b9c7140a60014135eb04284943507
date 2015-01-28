@@ -1,0 +1,16 @@
+package net.sdn.debugger;
+
+import net.sdn.packet.*;
+
+public class Event {
+	public Packet pkt;
+	public String sw;
+	public String interf;
+	
+	public String toString(){
+		
+		return "{" + pkt.dl_proto + ":" + pkt.dl_src + "->" + pkt.dl_dst 
+				+ pkt.nw_proto + ":" + pkt.nw_src + "->" + pkt.nw_dst + "}" 
+				+ " -> " + sw + " : " + interf;
+	}
+}

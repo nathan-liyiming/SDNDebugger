@@ -19,7 +19,6 @@ public class Packet {
 	public String tp_src_port;
 	public String tp_dst_port;
 	public int of_type; //  -e mean 
-	public String interf_switch;
 	
 	public String toString() {
 		return  dl_src + "\t" +
@@ -30,7 +29,6 @@ public class Packet {
 				nw_proto + "\t" +
 				tp_src_port + "\t" +
 				tp_dst_port + "\t" +
-				of_type + "\t" +
-				interf_switch;
+				of_type;
 	}
 }
