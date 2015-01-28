@@ -99,11 +99,11 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 												
 													for (int i = 0; i < count; i++) {
 														// get pkt
-														// System.out.println(temp[i]);
+														//System.out.println(temp[i]);
 														Event eve = EventGenearator.deserialize(temp[i]);
 														Packet pkt = eve.pkt;
 														// set filter
-														if ((pkt.dl_proto != null && pkt.dl_proto.equals("icmp")) || pkt.of_type >= 0){
+														if ((pkt.nw_proto != null && pkt.nw_proto.equals("icmp")) || pkt.of_type >= 0){
 															Oracle(eve);
 														}
 
@@ -151,7 +151,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		//System.out.println(eve);
 		
 		// if packet is an ICMP packet, and the packet is sent from the host
-		if (pkt.of_type <0 && pkt.dl_proto != null && pkt.dl_proto.equals("icmp")){
+		if (pkt.of_type <0 && pkt.nw_proto != null && pkt.nw_proto.equals("icmp")){
 			
 			// sent from internal hosts
 			if (internalHosts.contains(pkt.nw_src) && internalPort.contains(eve.interf)){ 
@@ -177,7 +177,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					synchronized(expectedEvents){
 						generateExpectedEventsForFirstPacket(pkt);
 					}
-					// printEvents(expectedEvents);
+					printEvents(expectedEvents);
 				}
 			// sent from external hosts
 			} else if (externalHosts.contains(pkt.nw_src) && externalPort.contains(eve.interf)){
@@ -208,7 +208,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					}
 				}	
 			} else {
-				//verify(eve);
+				verify(eve);
 			}
 		}
 	}
@@ -258,7 +258,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		// Event 3: ICMP packet sent from the controller
 		event = new Event();
 		pkt = new Packet();
-		pkt.of_type = 13; 
+		pkt.of_type = 13; // PACKET_OUT
 		pkt.tp_src_port = "6633";
 		event.pkt = pkt;
 		event.sw = "s1";

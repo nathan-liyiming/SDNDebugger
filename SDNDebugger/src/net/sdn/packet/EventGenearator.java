@@ -1,6 +1,8 @@
 package net.sdn.packet;
 
 public class EventGenearator {
+	
+	public static double a = 0;
 
 	public static Event deserialize(String record) {
 		Event eve = new Event();
@@ -21,7 +23,7 @@ public class EventGenearator {
 		if (array[5].contains("arp")) {
 			pkt.dl_proto = "arp";
 		} else if (array[5].contains("icmp")) {
-			pkt.dl_proto = "icmp";			
+			pkt.nw_proto = "icmp";			
 		} else if (array[5].contains("tcp")) {
 			// payload maybe openflow
 			pkt.dl_proto = "ip";
@@ -42,8 +44,12 @@ public class EventGenearator {
 		if (array[7].contains("-"))
 			eve.interf = array[7].split("-")[1];
 			
-
 		eve.sw = array[7].split("-")[0];
+		
+		eve.timeStamp = array[8];
+		if (Double.parseDouble(array[8]) <= a)
+			System.out.print(array[8]);
+		
 		eve.pkt = pkt;
 		return eve;
 	}

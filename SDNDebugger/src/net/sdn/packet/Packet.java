@@ -10,14 +10,14 @@ public class Packet {
 		public UDP udp;
 	*/
 	// default is null
-	public String dl_src;
-	public String dl_dst;
-	public String dl_proto;
-	public String nw_src;
-	public String nw_dst;
-	public String nw_proto;
-	public String tp_src_port;
-	public String tp_dst_port;
+	public String dl_src = "";
+	public String dl_dst = "";
+	public String dl_proto = "";
+	public String nw_src = "";
+	public String nw_dst = "";
+	public String nw_proto = "";
+	public String tp_src_port = "";
+	public String tp_dst_port = "";
 	public int of_type; //  -e mean 
 	
 	public String toString() {

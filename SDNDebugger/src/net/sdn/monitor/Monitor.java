@@ -83,6 +83,9 @@ public class Monitor {
 
 		list.add("-Y");
 		list.add("ip || arp || openflow_v4");
+		
+		list.add("-e");
+		list.add("frame.time_relative");
 
 		String[] t = new String[1];
 		return list.toArray(t);
@@ -149,10 +152,10 @@ public class Monitor {
 
 				System.out.println(array[0] + "\t" + array[1] + "\t" + array[2] + "\t"
 						+ array[3] + "\t" + array[4] + "\t" + array[5] + "\t"
-						+ array[6] + "\t" + interf);
+						+ array[6] + "\t" + interf + "\t" + array[8]);
 				out.println(array[0] + "\t" + array[1] + "\t" + array[2] + "\t"
 						+ array[3] + "\t" + array[4] + "\t" + array[5] + "\t"
-						+ array[6] + "\t" + interf);
+						+ array[6] + "\t" + interf + "\t" + array[8]);
 				out.flush();
 			}
 
