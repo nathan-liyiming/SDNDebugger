@@ -104,6 +104,9 @@ public class Monitor {
 
 			BufferedReader stdInput = new BufferedReader(new InputStreamReader(
 					proc.getInputStream()));
+			
+			RecordSorter t = new RecordSorter(out);
+			t.start();
 
 			while ((line = stdInput.readLine()) != null) {
 				// 8 entries, if it doesn't contain, it will be empty string
@@ -153,10 +156,15 @@ public class Monitor {
 				System.out.println(array[0] + "\t" + array[1] + "\t" + array[2] + "\t"
 						+ array[3] + "\t" + array[4] + "\t" + array[5] + "\t"
 						+ array[6] + "\t" + interf + "\t" + array[8]);
-				out.println(array[0] + "\t" + array[1] + "\t" + array[2] + "\t"
+				
+				t.insetRecord(Double.parseDouble(array[8]), array[0] + "\t" + array[1] + "\t" + array[2] + "\t"
 						+ array[3] + "\t" + array[4] + "\t" + array[5] + "\t"
 						+ array[6] + "\t" + interf + "\t" + array[8]);
-				out.flush();
+//				out.println(array[0] + "\t" + array[1] + "\t" + array[2] + "\t"
+//						+ array[3] + "\t" + array[4] + "\t" + array[5] + "\t"
+//						+ array[6] + "\t" + interf + "\t" + array[8]);
+//				out.flush();
+				
 			}
 
 			proc.waitFor();

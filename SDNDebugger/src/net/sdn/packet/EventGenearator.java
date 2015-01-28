@@ -2,7 +2,7 @@ package net.sdn.packet;
 
 public class EventGenearator {
 	
-	public static double a = 0;
+	public static double ass = -1;
 
 	public static Event deserialize(String record) {
 		Event eve = new Event();
@@ -47,8 +47,10 @@ public class EventGenearator {
 		eve.sw = array[7].split("-")[0];
 		
 		eve.timeStamp = array[8];
-		if (Double.parseDouble(array[8]) <= a)
-			System.out.print(array[8]);
+		
+		// for test gurantee no out of order event
+		if (Double.parseDouble(array[8]) <= ass)
+			System.err.println("Error: OUT OF ORDER EVENT: " + array[8]);
 		
 		eve.pkt = pkt;
 		return eve;
