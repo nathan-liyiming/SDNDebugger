@@ -7,9 +7,9 @@ package net.sdn.debugger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import net.sdn.packet.Event;
-import net.sdn.packet.Packet;
-import net.sdn.packet.EventGenearator;
+import net.sdn.event.Event;
+import net.sdn.event.Packet;
+import net.sdn.event.EventGenearator;
 
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
@@ -144,14 +144,12 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		
 		// if packet is an OF13 message but it is a heartbeat, ignore.
 		// For current stage, ignore arp
-		if (pkt.of_type >= 0 && ((pkt.of_type == 2 || pkt.of_type == 3) || (pkt.dl_proto != null && pkt.dl_proto.equals("arp")))){
+		if ((pkt.of_type >= 0 && ((pkt.of_type == 2 || pkt.of_type == 3)) || (pkt.dl_proto != null && pkt.dl_proto.equals("arp")))){
 			return;
 		}
 		
-		//System.out.println(eve);
-		
 		// if packet is an ICMP packet, and the packet is sent from the host
-		if (pkt.of_type <0 && pkt.nw_proto != null && pkt.nw_proto.equals("icmp")){
+		if (pkt.of_type < 0 && pkt.nw_proto.equals("icmp")){
 			
 			// sent from internal hosts
 			if (internalHosts.contains(pkt.nw_src) && internalPort.contains(eve.interf)){ 
@@ -166,8 +164,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					event.interf = "eth2";
 					synchronized(expectedEvents){
 						expectedEvents.add(event);
-						System.out.println("*****************expectedEvents*****************");
-						printEvents(expectedEvents);
+//						System.out.println("*****************expectedEvents*****************");
+//						printEvents(expectedEvents);
 					}
 				} else {
 					// first time receive icmp, procedures are required
@@ -177,8 +175,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					allowedFlow.add(pkt.nw_src);
 					synchronized(expectedEvents){
 						generateExpectedEventsForFirstPacket(pkt);
-						System.out.println("*****************expectedEvents*****************");
-						printEvents(expectedEvents);
+//						System.out.println("*****************expectedEvents*****************");
+//						printEvents(expectedEvents);
 					}
 				}
 			// sent from external hosts
@@ -192,8 +190,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					event.interf = "eth1";
 					synchronized(expectedEvents){
 						expectedEvents.add(event);
-						System.out.println("*****************expectedEvents*****************");
-						printEvents(expectedEvents);
+//						System.out.println("*****************expectedEvents*****************");
+//						printEvents(expectedEvents);
 					}
 				} else {
 					// dropped by the firewall
@@ -209,13 +207,16 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 					synchronized(notExpectedEvents){
 						notExpectedEvents.add(event1);
 						notExpectedEvents.add(event2);
-						System.out.println("*****************notExpectedEvents*****************");
-						printEvents(notExpectedEvents);
+//						System.out.println("*****************notExpectedEvents*****************");
+//						printEvents(notExpectedEvents);
 					}
 				}	
 			} else {
 				verify(eve);
 			}
+		}
+		else {
+			verify(eve);
 		}
 	}
 	
@@ -227,6 +228,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 				if (notExpected.equals(e)) {
 					System.err.println("Not Expected Event Happened:");
 					System.err.println(notExpected);
+					notExpectedEvents.remove(notExpected);
+//					printEvents(notExpectedEvents);
 					return;
 				}
 			}
@@ -237,6 +240,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 				if (expected.equals(e)) {
 					System.out.println("Expected Event Happened:");
 					System.out.println(expected);
+					expectedEvents.remove(expected);
+//					printEvents(expectedEvents);
 					return;
 				}
 			}
@@ -306,6 +311,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	
 	// for test only
 	private void printEvents(LinkedList<Event> lst){
+		System.out.println("***************************************");
 		for (Event e : lst)
 			System.out.println(e);
 		System.out.println("***************************************");

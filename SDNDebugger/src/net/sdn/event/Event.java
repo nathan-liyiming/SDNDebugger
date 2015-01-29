@@ -1,4 +1,4 @@
-package net.sdn.packet;
+package net.sdn.event;
 
 public class Event {
 	public Packet pkt;
