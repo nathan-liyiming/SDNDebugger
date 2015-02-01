@@ -5,6 +5,7 @@ package net.sdn.debugger;
  * @author Da Yu, Yiming Li
  */
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import net.sdn.event.Event;
@@ -25,6 +26,8 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	public void run() {
 		createServer().startAndWait();
 	}
+	
+	public final static double EXPIRE_TIME= 15;
 
 	private final int port;
 	// expectedEvents are events that expected to happened in the real network
@@ -34,24 +37,24 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 	private LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
 
 	private static String lines = "";
-	
+
 	// lists for internal and external hosts
 	private ArrayList<String> externalHosts = new ArrayList<String>();
 	private ArrayList<String> internalHosts = new ArrayList<String>();
-	
+
 	// allowed flow
 	private ArrayList<String> allowedFlow = new ArrayList<String>();
-	
+
 	// switch that connect with internal hosts
 	private ArrayList<String> internalPort = new ArrayList<String>();
 	private ArrayList<String> externalPort = new ArrayList<String>();
-	
-	private void loadHosts(){
+
+	private void loadHosts() {
 		internalHosts.add("10.0.0.1");
 		externalHosts.add("10.0.0.2");
 	}
-	
-	private void loadTopoInfo(){
+
+	private void loadTopoInfo() {
 		internalPort.add("eth1");
 		externalPort.add("eth2");
 	}
@@ -60,7 +63,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		this.port = port;
 		loadHosts();
 		loadTopoInfo();
-		//loadAllowedFlow();
+		// loadAllowedFlow();
 	}
 
 	public RxServer<String, String> createServer() {
@@ -82,32 +85,35 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 												lines += msg;
 												String temp[] = lines
 														.split("\n");
-												
+
 												char[] chs = lines
-														.toCharArray();		
+														.toCharArray();
 												int count = 0;
-												
+
 												if (chs[chs.length - 1] == '\n') {
 													// full message line
 													count = temp.length;
 													lines = "";
 												} else {
-													// part message line							
+													// part message line
 													count = temp.length - 1;
 													lines = temp[temp.length - 1];
 												}
-												
-													for (int i = 0; i < count; i++) {
-														// get pkt
-														//System.out.println(temp[i]);
-														Event eve = EventGenearator.deserialize(temp[i]);
-														Packet pkt = eve.pkt;
-														// set filter
-														if ((pkt.nw_proto != null && pkt.nw_proto.equals("icmp")) || pkt.of_type >= 0){
-															Oracle(eve);
-														}
 
-													}											
+												for (int i = 0; i < count; i++) {
+													// get pkt
+													// System.out.println(temp[i]);
+													Event eve = EventGenearator
+															.deserialize(temp[i]);
+													timer(eve);
+													Packet pkt = eve.pkt;
+													// set filter
+													if ((pkt.nw_proto != null && pkt.nw_proto.equals("icmp"))
+															|| pkt.of_type >= 0) {
+														Oracle(eve);
+													}
+
+												}
 
 												return Observable.empty();
 											}
@@ -117,12 +123,14 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 											@Override
 											public Boolean call(
 													Notification<Void> notification) {
-												return !notification.isOnError();
+												return !notification
+														.isOnError();
 											}
 										}).finallyDo(new Action0() {
 									@Override
 									public void call() {
-										System.out.println(" --> Closing StatefulFireWall Monitor handler and stream");
+										System.out
+												.println(" --> Closing StatefulFireWall Monitor handler and stream");
 									}
 								}).map(new Func1<Notification<Void>, Void>() {
 									@Override
@@ -137,159 +145,198 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		System.out.println("StatefulFireWall Monitor handler started...");
 		return server;
 	}
+	
+	private void timer(Event e){
+		// clean expired events in notExpected and raise error in expectedEvent
+		Iterator<Event> it = this.notExpectedEvents.iterator();
+		while (it.hasNext()){
+			// remove expired rules
+			if (e.timeStamp - it.next().timeStamp >= EXPIRE_TIME)
+				it.remove();
+			else
+				break;
+		}
+		
+		it = this.expectedEvents.iterator();
+		while (it.hasNext()){
+			Event ev = it.next();
+			if (e.timeStamp - ev.timeStamp >= EXPIRE_TIME){
+				System.err.println("Expected Event but Not Happened:");
+				System.err.println(ev);
+				it.remove();
+			} else
+				break;
+		}
+	}
 
 	private void Oracle(Event eve) {
 		// TODO: conflict between expectedList and NotExpectedList
 		Packet pkt = eve.pkt;
-		
+
 		// if packet is an OF13 message but it is a heartbeat, ignore.
 		// For current stage, ignore arp
-		if ((pkt.of_type >= 0 && ((pkt.of_type == 2 || pkt.of_type == 3)) || (pkt.dl_proto != null && pkt.dl_proto.equals("arp")))){
+		if ((pkt.of_type >= 0
+				&& ((pkt.of_type == 2 || pkt.of_type == 3))
+				|| (pkt.of_type >= 0 && pkt.inner_packet != null && pkt.inner_packet.dl_proto.equals("arp")) 
+				|| (pkt.dl_proto != null && pkt.dl_proto.equals("arp")))) {
 			return;
 		}
-		
+
 		// if packet is an ICMP packet, and the packet is sent from the host
-		if (pkt.of_type < 0 && pkt.nw_proto.equals("icmp")){
-			
+		if (pkt.of_type < 0 && pkt.nw_proto.equals("icmp")) {
+
 			// sent from internal hosts
-			if (internalHosts.contains(pkt.nw_src) && internalPort.contains(eve.interf)){ 
-				if (allowedFlow.contains(pkt.nw_dst)){
+			if (internalHosts.contains(pkt.nw_src)
+					&& internalPort.contains(eve.interf)) {
+				if (allowedFlow.contains(pkt.nw_dst)) {
 					// not first time, just await response
-					System.out.println("Received ICMP packet from:" + eve.sw + ":" + eve.interf);
-					// generate 
-					//System.out.println("Expected: Received this ICMP packet at s1-eth2");
+					System.out.println("Received ICMP packet from:" + eve.sw
+							+ ":" + eve.interf);
+					// generate
+					// System.out.println("Expected: Received this ICMP packet at s1-eth2");
 					Event event = new Event();
 					event.pkt = pkt;
 					event.sw = "s1";
 					event.interf = "eth2";
-					synchronized(expectedEvents){
-						expectedEvents.add(event);
-//						System.out.println("*****************expectedEvents*****************");
-//						printEvents(expectedEvents);
-					}
+					event.timeStamp = eve.timeStamp;
+					expectedEvents.add(event);
+						// System.out.println("*****************expectedEvents*****************");
+						// printEvents(expectedEvents);
 				} else {
 					// first time receive icmp, procedures are required
 					// open hole for return flow
-					System.out.println("Received ICMP packet from:" + eve.sw + ":" + eve.interf);
+					System.out.println("Received ICMP packet from:" + eve.sw
+							+ ":" + eve.interf);
 					allowedFlow.add(pkt.nw_dst);
 					allowedFlow.add(pkt.nw_src);
-					synchronized(expectedEvents){
-						generateExpectedEventsForFirstPacket(pkt);
-//						System.out.println("*****************expectedEvents*****************");
-//						printEvents(expectedEvents);
-					}
+					generateExpectedEventsForFirstPacket(eve);
+						// System.out.println("*****************expectedEvents*****************");
+						// printEvents(expectedEvents);
 				}
-			// sent from external hosts
-			} else if (externalHosts.contains(pkt.nw_src) && externalPort.contains(eve.interf)){
-				if (allowedFlow.contains(pkt.nw_dst)){
+				// sent from external hosts
+			} else if (externalHosts.contains(pkt.nw_src)
+					&& externalPort.contains(eve.interf)) {
+				if (allowedFlow.contains(pkt.nw_dst)) {
 					// return flow, pass through
-					System.out.println("Received ICMP packet from:" + eve.sw + ":" + eve.interf);
+					System.out.println("Received ICMP packet from:" + eve.sw
+							+ ":" + eve.interf);
 					Event event = new Event();
 					event.pkt = pkt;
 					event.sw = "s1";
 					event.interf = "eth1";
-					synchronized(expectedEvents){
-						expectedEvents.add(event);
-//						System.out.println("*****************expectedEvents*****************");
-//						printEvents(expectedEvents);
-					}
+					event.timeStamp = eve.timeStamp;
+					expectedEvents.add(event);
+						// System.out.println("*****************expectedEvents*****************");
+						// printEvents(expectedEvents);
 				} else {
 					// dropped by the firewall
+					// sent to the controller first
 					System.out.println("Received ICMP packet from:" + eve.sw + ":" + eve.interf);
+					Event event = new Event();
+					Packet p = new Packet();
+					p.of_type = 10; // PACKET_IN
+					p.tp_dst_port = "6633"; // To the controller
+					// pkt.dl_proto = "icmp";
+					// pkt.nw_src = "127.0.0.1,10.0.0.1";
+					// pkt.nw_dst = "127.0.0.1,10.0.0.2";
+					event.pkt = p;
+					event.sw = "s1";
+					event.timeStamp = eve.timeStamp;
+					expectedEvents.add(event);
+					
 					Event event1 = new Event();
 					event1.pkt = pkt;
 					event1.sw = "s1";
 					event1.interf = "eth1";
+					event1.timeStamp = eve.timeStamp;
 					Event event2 = new Event();
 					event2.pkt = pkt;
 					event2.sw = "s1";
 					event2.interf = "eth2";
-					synchronized(notExpectedEvents){
-						notExpectedEvents.add(event1);
-						notExpectedEvents.add(event2);
-//						System.out.println("*****************notExpectedEvents*****************");
-//						printEvents(notExpectedEvents);
-					}
-				}	
+					event2.timeStamp = eve.timeStamp;
+					notExpectedEvents.add(event1);
+					notExpectedEvents.add(event2);
+						// System.out.println("*****************notExpectedEvents*****************");
+						// printEvents(notExpectedEvents);
+				}
 			} else {
 				verify(eve);
 			}
-		}
-		else {
+		} else {
 			verify(eve);
 		}
 	}
-	
-	private void verify(Event e){
-		//System.out.println(e);
+
+	private void verify(Event e) {
+		// System.out.println(e);
 		// check notExpectedEvent List
-		synchronized(notExpectedEvents){
-			for (Event notExpected : notExpectedEvents) {
-				if (notExpected.equals(e)) {
-					System.err.println("Not Expected Event Happened:");
-					System.err.println(notExpected);
-					notExpectedEvents.remove(notExpected);
-//					printEvents(notExpectedEvents);
-					return;
-				}
+		for (Event notExpected : notExpectedEvents) {
+			if (notExpected.equals(e)) {
+				System.err.println("Not Expected Event Happened:");
+				System.err.println(notExpected);
+				notExpectedEvents.remove(notExpected);
+				// printEvents(notExpectedEvents);
+				return;
 			}
 		}
 		// check expectedEvent List
-		synchronized(expectedEvents){
-			for (Event expected : expectedEvents) {
-				if (expected.equals(e)) {
-					System.out.println("Expected Event Happened:");
-					System.out.println(expected);
-					expectedEvents.remove(expected);
-//					printEvents(expectedEvents);
-					return;
-				}
+		for (Event expected : expectedEvents) {
+			if (expected.equals(e)) {
+				System.out.println("Expected Event Happened:");
+				System.out.println(expected);
+				expectedEvents.remove(expected);
+				// printEvents(expectedEvents);
+				return;
 			}
 		}
-		
+
 		System.err.println("Unknown Event:");
 		System.err.println(e);
 		return;
 	}
-	
-	private void generateExpectedEventsForFirstPacket(Packet p){
+
+	private void generateExpectedEventsForFirstPacket(Event eve) {
+		Packet p = eve.pkt;
 		// TODO: STILL GOT PROBLEM IN MONITOR
-		
+
 		// Event 1: this icmp packet will be sent to the controller
 		Event event = new Event();
 		Packet pkt = new Packet();
 		pkt.of_type = 10; // PACKET_IN
 		pkt.tp_dst_port = "6633"; // To the controller
-//		pkt.dl_proto = "icmp";
-//		pkt.nw_src = "127.0.0.1,10.0.0.1";
-//		pkt.nw_dst = "127.0.0.1,10.0.0.2";
+		// pkt.dl_proto = "icmp";
+		// pkt.nw_src = "127.0.0.1,10.0.0.1";
+		// pkt.nw_dst = "127.0.0.1,10.0.0.2";
 		event.pkt = pkt;
 		event.sw = "s1";
-//		System.out.println("Expected: Sent this ICMP packet to the controller");
+		event.timeStamp = eve.timeStamp;
+		// System.out.println("Expected: Sent this ICMP packet to the controller");
 		expectedEvents.add(event);
-		
+
 		// Event 2: 2 Flow_mod sent from the controller to s1
 		event = new Event();
 		pkt = new Packet();
 		pkt.of_type = 14; // Flow_MOD
 		pkt.tp_src_port = "6633";
-//		pkt.nw_src = "127.0.0.1,10.0.0.1";
-//		pkt.nw_dst = "127.0.0.1,10.0.0.2";
+		// pkt.nw_src = "127.0.0.1,10.0.0.1";
+		// pkt.nw_dst = "127.0.0.1,10.0.0.2";
 		event.pkt = pkt;
 		event.sw = "s1";
-//		System.out.println("Expected: Flow_Mod Sent from the controller");
+		event.timeStamp = eve.timeStamp;
+		// System.out.println("Expected: Flow_Mod Sent from the controller");
 		expectedEvents.add(event);
 		event = new Event();
 		pkt = new Packet();
 		pkt.of_type = 14; // Flow_MOD
 		pkt.tp_src_port = "6633";
-//		pkt.nw_src = "127.0.0.1";
-//		pkt.nw_dst = "127.0.0.1";
+		// pkt.nw_src = "127.0.0.1";
+		// pkt.nw_dst = "127.0.0.1";
 		event.pkt = pkt;
 		event.sw = "s1";
-//		System.out.println("Expected: Flow_Mod Sent from the controller");
+		event.timeStamp = eve.timeStamp;
+		// System.out.println("Expected: Flow_Mod Sent from the controller");
 		expectedEvents.add(event);
-		
+
 		// Event 3: ICMP packet sent from the controller
 		event = new Event();
 		pkt = new Packet();
@@ -297,20 +344,26 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		pkt.tp_src_port = "6633";
 		event.pkt = pkt;
 		event.sw = "s1";
-//		System.out.println("Expected: ICMP packet sent from the controller");
+		event.timeStamp = eve.timeStamp;
+		// System.out.println("Expected: ICMP packet sent from the controller");
 		expectedEvents.add(event);
-		
+
 		// Event 4: ICMP packet received at s1-eth2
 		event = new Event();
-		event.pkt = p; 
+		event.pkt = p;
 		event.sw = "s1";
 		event.interf = "eth2";
-//		System.out.println("Expected: ICMP packet received at s1-eth2");
+		event.timeStamp = eve.timeStamp;
+		// System.out.println("Expected: ICMP packet received at s1-eth2");
 		expectedEvents.add(event);
+		
+		// remove conflict rules
+		if (this.notExpectedEvents.size() > 0)
+			this.notExpectedEvents.clear();
 	}
-	
+
 	// for test only
-	private void printEvents(LinkedList<Event> lst){
+	private void printEvents(LinkedList<Event> lst) {
 		System.out.println("***************************************");
 		for (Event e : lst)
 			System.out.println(e);

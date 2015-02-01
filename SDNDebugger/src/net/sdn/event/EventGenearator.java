@@ -20,10 +20,16 @@ public class EventGenearator {
 			pkt.tp_dst_port = ports[1];
 		}
 
-		/*if (array[5].contains("openflow")) {
+		if (array[5].contains("openflow")) {
 			pkt.dl_proto = "ip";
 			pkt.nw_proto = "tcp";
-		} else */if (array[5].contains("arp")) {
+			pkt.inner_packet = new Packet();
+			if (array[5].contains("arp")) {
+				pkt.inner_packet.dl_proto = "arp";
+			} else if (array[5].contains("icmp")) {
+				pkt.inner_packet.nw_proto = "icmp";
+			}
+		} else if (array[5].contains("arp")) {
 			pkt.dl_proto = "arp";
 		} else if (array[5].contains("icmp")) {
 			pkt.nw_proto = "icmp";
@@ -49,7 +55,7 @@ public class EventGenearator {
 
 		eve.sw = array[7].split("-")[0];
 
-		eve.timeStamp = array[8];
+		eve.timeStamp = Double.parseDouble(array[8]);
 
 		// for test gurantee no out of order event
 		if (Double.parseDouble(array[8]) <= ass) {

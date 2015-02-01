@@ -4,7 +4,7 @@ public class Event {
 	public Packet pkt;
 	public String sw = "";
 	public String interf = "";
-	public String timeStamp = "";
+	public double timeStamp;
 	
 	public String toString(){
 		if (pkt.of_type < 0)

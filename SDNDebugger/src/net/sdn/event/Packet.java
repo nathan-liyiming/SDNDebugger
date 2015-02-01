@@ -19,6 +19,7 @@ public class Packet {
 	public String tp_src_port = "";
 	public String tp_dst_port = "";
 	public int of_type; //  -e mean 
+	public Packet inner_packet;
 	
 	public String toString() {
 		return  dl_src + "\t" +
