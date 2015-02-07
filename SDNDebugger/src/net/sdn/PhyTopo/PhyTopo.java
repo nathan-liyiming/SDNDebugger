@@ -18,9 +18,15 @@ public class PhyTopo {
 	private HashMap<String, Host> hosts = new HashMap<String, Host>();
 	private HashMap<String, Switch> switches = new HashMap<String, Switch>();
 	private ArrayList<Link> links = new ArrayList<Link>();
+	private HashMap<String, Controller> controllers = new HashMap<String, Controller>();
 
-	public PhyTopo(String topoFile) throws IOException {
-		parseTopoFile(topoFile);
+	public PhyTopo(String topoFile) {
+		try {
+			parseTopoFile(topoFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void parseTopoFile(String topoFile) throws IOException {
@@ -33,8 +39,7 @@ public class PhyTopo {
 			DocumentBuilder db = dbf.newDocumentBuilder();
 
 			// parse using builder to get DOM representation of the XML file
-			Document dom = db
-					.parse(topoFile);
+			Document dom = db.parse(topoFile);
 
 			// get the root element
 			Element docEle = dom.getDocumentElement();
@@ -43,6 +48,7 @@ public class PhyTopo {
 			addHosts(docEle);
 			addSwitches(docEle);
 			addLinks(docEle);
+			addControllers(docEle);
 
 		} catch (ParserConfigurationException pce) {
 			pce.printStackTrace();
@@ -145,7 +151,43 @@ public class PhyTopo {
 		}
 	}
 
-//	public static void main(String args[]) throws IOException {
-//		PhyTopo po = new PhyTopo("/home/mininet/SDNDebugger/examples/Firewall/topo.xml");
-//	}
+	public void addControllers(Element docEle) {
+		NodeList nList = docEle.getElementsByTagName("controller");
+
+		for (int temp = 0; temp < nList.getLength(); temp++) {
+
+			Node nNode = (Node) nList.item(temp);
+
+			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+
+				Element eElement = (Element) nNode;
+
+				String id = eElement.getElementsByTagName("id").item(0)
+						.getTextContent();
+				String nw_addr = eElement.getElementsByTagName("nw_addr")
+						.item(0).getTextContent();
+				String port = eElement.getElementsByTagName("port").item(0)
+						.getTextContent();
+
+				Controller controller = new Controller(id, nw_addr, port);
+				controllers.put(id, controller);
+			}
+		}
+	}
+
+	public HashMap<String, Host> getHosts() {
+		return hosts;
+	}
+	
+	public HashMap<String, Switch> getSwitches() {
+		return switches;
+	}
+	
+	public ArrayList<Link> getLinks() {
+		return links;
+	}
+	
+	public HashMap<String, Controller> getControllers() {
+		return controllers;
+	}
 }
