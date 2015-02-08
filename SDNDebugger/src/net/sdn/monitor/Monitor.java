@@ -5,8 +5,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import static net.sdn.debugger.Debugger.*;
@@ -17,22 +18,37 @@ import net.sdn.PhyTopo.Link;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
+import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.packet.format.FormatUtils;
 import org.jnetpcap.protocol.lan.Ethernet;
 import org.jnetpcap.protocol.network.Arp;
 import org.jnetpcap.protocol.network.Icmp;
+import org.jnetpcap.protocol.network.Icmp.IcmpType;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
+import org.openflow.protocol.OFPacketIn;
+import org.openflow.protocol.OFPacketOut;
+import org.openflow.protocol.OFFlowMod;
+import org.openflow.protocol.OFFlowRemoved;
+import org.openflow.protocol.OFMessage;
+import org.openflow.protocol.OFType;
+import org.openflow.protocol.factory.BasicFactory;
+
+import com.google.gson.Gson;
 
 public class Monitor {
 
 	private Socket socket;
 	private PhyTopo topo;
+	private static String[] switches;
+	private static String controller_port;
+	private static int count = 0;
+	private HashMap<String, String> port_sw = new HashMap<String, String>();
 
-	private static Integer lock = new Integer(0);
+	private BasicFactory factory = BasicFactory.getInstance();
 
 	public Monitor(int port, PhyTopo topo) {
 		try {
@@ -72,15 +88,14 @@ public class Monitor {
 			e.printStackTrace();
 		}
 
-		final PrintWriter out = new PrintWriter(outputStream);
+		PrintWriter out = new PrintWriter(outputStream);
+		final RecordSorter rs = new RecordSorter(out);
+		new Thread(rs).start();
 
 		List<PcapIf> alldevs = new ArrayList<PcapIf>(); // Will be filled with
 														// NICs
 		StringBuilder errbuf = new StringBuilder(); // For any error msgs
 
-		/***************************************************************************
-		 * First get a list of devices on this system
-		 **************************************************************************/
 		int r = Pcap.findAllDevs(alldevs, errbuf);
 		if (r == Pcap.NOT_OK || alldevs.isEmpty()) {
 			System.err.printf("Can't read list of devices, error is %s",
@@ -88,25 +103,27 @@ public class Monitor {
 			return;
 		}
 
+		switches = monitor.getPhyTopo().getSwitches().keySet()
+				.toArray(new String[0]);
+		controller_port = monitor.getPhyTopo().getControllers().values()
+				.toArray(new Controller[0])[0].getPort();
+
 		for (Link link : monitor.getPhyTopo().getLinks()) {
 			if (link.left_interf.contains("s")) {
-				monitor.generateHandler(link.left_interf, out);
+				monitor.generateHandler(link.left_interf, rs);
 			}
 			if (link.right_interf.contains("s")) {
-				monitor.generateHandler(link.right_interf, out);
+				monitor.generateHandler(link.right_interf, rs);
 			}
 		}
 
 		// openflow message
-		monitor.generateHandler("lo", out);
+		monitor.generateHandler("lo", rs);
 	}
 
-	public void generateHandler(final String interf, final PrintWriter out) {
+	public void generateHandler(final String interf, final RecordSorter rs) {
 		StringBuilder errbuf = new StringBuilder(); // For any error msgs
 
-		/***************************************************************************
-		 * Second we open up the selected device
-		 **************************************************************************/
 		int snaplen = 64 * 1024; // Capture all packets, no trucation
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 1; // 1 milli
@@ -139,106 +156,222 @@ public class Monitor {
 			}
 		}
 
-		/***************************************************************************
-		 * Third we create a packet handler which will receive packets from the
-		 * libpcap loop.
-		 **************************************************************************/
 		final PcapPacketHandler<String> jpacketHandler = new PcapPacketHandler<String>() {
 
-			public void nextPacket(PcapPacket packet, String interf) {
-//				 timestamp
-//				 eth type
-//				 dl src
-//				 dl dst
-//				 dl op
-//				 nw type
-//				 nw src
-//				 nw dst
-//				 src port
-//				 dst port
-//				 payload
-				
-				 String timestamp = new Long(packet.getCaptureHeader().timestampInNanos()).toString();
-				 String eth_type = "";
-				 String dl_src = "";
-				 String dl_dst = "";
-				 String dl_op = "";
-				 String nw_type = "";
-				 String nw_src = "";
-				 String nw_dst = "";
-				 String nw_op = "";
-				 String src_port = "";
-				 String dst_port = "";
-				 String payload = "";
-				
-				 Ethernet eth = new Ethernet();
-				 Arp arp = new Arp();
-				 Icmp icmp = new Icmp();
-				 Ip4 ip = new Ip4();
-				 Tcp tcp = new Tcp();
-				 Udp udp = new Udp();
-				 
-				 // eth
-				 if (packet.hasHeader(eth)) {
-					 dl_src = FormatUtils.mac(eth.destination());
-					 dl_src = FormatUtils.mac(eth.source());
-					 
-					// arp
-					 if (packet.hasHeader(arp)) {
-						 eth_type = "arp";
-						 dl_src = arp.sha().toString();
-						 dl_dst = arp.tha().toString();
-						 if (arp.operationEnum() == Arp.OpCode.REQUEST){
-							dl_op = "request";
-						 } else if(arp.operationEnum() == Arp.OpCode.REPLY){
-							dl_op = "reply";
-						 }
-						 // IPv4
-					 } else if (packet.hasHeader(ip)){
-						 
-					 }
-						 
-					 
-				 }
-				 
-				
-				 
-				// icmp
-				 Icmp icmp = new Icmp();
-				 if (packet.hasHeader(icmp)){
-					 eth_type = "ip";
-					 dl_src = icmp.get
-				 }
-				
-				// tcp/udp
-				
-				// of message
-				synchronized (lock) {
-					out.println(packet.getCaptureHeader().timestampInNanos() + "");
-					out.flush();
-				}
+			public void nextPacket(PcapPacket jpacket, String interf) {
+				Ethernet eth = new Ethernet();
+				Arp arp = new Arp();
+				Ip4 ip = new Ip4();
+				Icmp icmp = new Icmp();
+				Tcp tcp = new Tcp();
+				Udp udp = new Udp();
 
+				// simplified packets objects
+				net.sdn.event.Event sEvt = new net.sdn.event.Event();
+				net.sdn.event.packet.Packet sPkt = new net.sdn.event.packet.Packet();
+				net.sdn.event.packet.Ethernet sEth = new net.sdn.event.packet.Ethernet();
+				net.sdn.event.packet.Arp sArp = new net.sdn.event.packet.Arp();
+				net.sdn.event.packet.Ip sIp = new net.sdn.event.packet.Ip();
+				net.sdn.event.packet.Icmp sIcmp = new net.sdn.event.packet.Icmp();
+				net.sdn.event.packet.Tcp sTcp = new net.sdn.event.packet.Tcp();
+				net.sdn.event.packet.OFPacket sOf = new net.sdn.event.packet.OFPacket();
+				net.sdn.event.packet.Udp sUdp = new net.sdn.event.packet.Udp();
+
+				// eth
+				if (jpacket.hasHeader(eth)) {
+					sEvt.pkt = sPkt;
+					sPkt.eth = sEth;
+
+					sEth.timeStamp = jpacket.getCaptureHeader()
+							.timestampInNanos();
+					sEth.dl_src = FormatUtils.mac(eth.source());
+					sEth.dl_dst = FormatUtils.mac(eth.destination());
+
+					// arp
+					if (jpacket.hasHeader(arp)) {
+						sEth.dl_type = "arp";
+						sEth.arp = sArp;
+						sArp.sha = FormatUtils.mac(arp.sha());
+						sArp.tha = FormatUtils.mac(arp.tha());
+						if (arp.operationEnum() == Arp.OpCode.REQUEST) {
+							sArp.op = "request";
+						} else if (arp.operationEnum() == Arp.OpCode.REPLY) {
+							sArp.op = "reply";
+						}
+						// IPv4
+					} else if (jpacket.hasHeader(ip)) {
+						sEth.dl_type = "ip";
+						sEth.ip = sIp;
+						sIp.nw_src = FormatUtils.ip(ip.source());
+						sIp.nw_dst = FormatUtils.ip(ip.destination());
+
+						// icmp
+						if (jpacket.hasHeader(icmp)) {
+							sIp.nw_type = "icmp";
+							sIp.icmp = sIcmp;
+							if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
+								sIcmp.op = "request";
+							} else if (icmp.typeEnum() == IcmpType.ECHO_REPLY) {
+								sIcmp.op = "reply";
+							}
+							// tcp
+						} else if (jpacket.hasHeader(tcp)) {
+							sIp.nw_type = "tcp";
+							sIp.tcp = sTcp;
+							sTcp.src_port = new Integer(tcp.source())
+									.toString();
+							sTcp.dst_port = new Integer(tcp.destination())
+									.toString();
+							if (!interf.equals("lo")) {
+								sTcp.payload = tcp.getPayload();
+							} else {
+								sTcp.of_packet = sOf;
+								ByteBuffer buf = ByteBuffer.wrap(tcp
+										.getPayload());
+								List<OFMessage> l = factory.parseMessages(buf);
+								OFMessage message = l.get(0);
+								if (message.getType() == OFType.PACKET_IN) {
+									sOf.type = "packet_in";
+									PcapPacket innerPacket = new PcapPacket(
+											new JBuffer(
+													((OFPacketIn) message)
+															.getPacketData()));
+									sOf.packet = generateInnnerPacket(innerPacket);
+								} else if (message.getType() == OFType.PACKET_OUT) {
+									sOf.type = "packet_out";
+									PcapPacket innerPacket = new PcapPacket(
+											new JBuffer(
+													((OFPacketOut) message)
+															.getPacketData()));
+									sOf.packet = generateInnnerPacket(innerPacket);
+								} else if (message.getType() == OFType.FLOW_MOD) {
+									sOf.type = "flow_mod";
+									sOf.match = ((OFFlowMod) message).getMatch().getMatchFields().toString();
+									sOf.instruction =  ((OFFlowMod) message).getInstructions().toString();
+								} /*else if (message.getType() == OFType.FLOW_REMOVED) {
+									sOf.type = "flow_removed";
+									sOf.match = ((OFFlowRemoved) message).getMatch().getMatchFields().toString();
+									sOf.instruction = ((OFFlowMod) message).getInstructions().toString();
+								} */else {
+									return;
+								}
+							}
+							// udp
+						} else if (jpacket.hasHeader(udp)) {
+							sIp.nw_type = "udp";
+							sIp.udp = sUdp;
+							sUdp.src_port = new Integer(udp.source())
+									.toString();
+							sUdp.dst_port = new Integer(udp.destination())
+									.toString();
+							sUdp.payload = udp.getPayload();
+						}
+					}
+
+					if (!interf.equals("lo")) {
+						sEvt.sw = interf.split("-")[0];
+						sEvt.interf = interf.split("-")[1];
+					} else {
+						String sw_port = "";
+						if (!sTcp.src_port.equals(controller_port)) {
+							sw_port = sTcp.src_port;
+						} else {
+							sw_port = sTcp.dst_port;
+						}
+
+						if (!port_sw.containsKey(sw_port)) {
+							port_sw.put(sw_port, switches[count++]);
+						}
+						sEvt.sw = port_sw.get(sw_port);
+					}
+
+					// serialization
+					Gson gson = new Gson();
+					String json = gson.toJson(sEvt);
+					System.out.println(json);
+					rs.insetRecord(sEth.timeStamp, json);
+				}
 			}
 		};
 
-		/***************************************************************************
-		 * Fourth we enter the loop and tell it to capture 10 packets. The loop
-		 * method does a mapping of pcap.datalink() DLT value to JProtocol ID,
-		 * which is needed by JScanner. The scanner scans the packet buffer and
-		 * decodes the headers. The mapping is done automatically, although a
-		 * variation on the loop method exists that allows the programmer to
-		 * sepecify exactly which protocol ID to use as the data link type for
-		 * this pcap interface.
-		 **************************************************************************/
 		new Thread() {
 			public void run() {
 				pcap.loop(Pcap.LOOP_INFINITE, jpacketHandler, interf);
-
-				/***************************************************************************
-				 * Last thing to do is close the pcap handle
-				 **************************************************************************/
 				pcap.close();
 			}
 		}.start();
+	}
+
+	public net.sdn.event.packet.Packet generateInnnerPacket(PcapPacket jpacket) {
+		Ethernet eth = new Ethernet();
+		Arp arp = new Arp();
+		Ip4 ip = new Ip4();
+		Icmp icmp = new Icmp();
+		Tcp tcp = new Tcp();
+		Udp udp = new Udp();
+
+		// simplified packets objects
+		net.sdn.event.packet.Packet sPkt = new net.sdn.event.packet.Packet();
+		net.sdn.event.packet.Ethernet sEth = new net.sdn.event.packet.Ethernet();
+		net.sdn.event.packet.Arp sArp = new net.sdn.event.packet.Arp();
+		net.sdn.event.packet.Ip sIp = new net.sdn.event.packet.Ip();
+		net.sdn.event.packet.Icmp sIcmp = new net.sdn.event.packet.Icmp();
+		net.sdn.event.packet.Tcp sTcp = new net.sdn.event.packet.Tcp();
+		net.sdn.event.packet.Udp sUdp = new net.sdn.event.packet.Udp();
+
+		// eth
+		if (jpacket.hasHeader(eth)) {
+			sPkt.eth = sEth;
+
+			sEth.timeStamp = jpacket.getCaptureHeader().timestampInNanos();
+			sEth.dl_src = FormatUtils.mac(eth.source());
+			sEth.dl_dst = FormatUtils.mac(eth.destination());
+
+			// arp
+			if (jpacket.hasHeader(arp)) {
+				sEth.dl_type = "arp";
+				sEth.arp = sArp;
+				sArp.sha = FormatUtils.mac(arp.sha());
+				sArp.tha = FormatUtils.mac(arp.tha());
+				if (arp.operationEnum() == Arp.OpCode.REQUEST) {
+					sArp.op = "request";
+				} else if (arp.operationEnum() == Arp.OpCode.REPLY) {
+					sArp.op = "reply";
+				}
+				// IPv4
+			} else if (jpacket.hasHeader(ip)) {
+				sEth.dl_type = "ip";
+				sEth.ip = sIp;
+				sIp.nw_src = FormatUtils.ip(ip.source());
+				sIp.nw_dst = FormatUtils.ip(ip.destination());
+
+				// icmp
+				if (jpacket.hasHeader(icmp)) {
+					sIp.nw_type = "icmp";
+					sIp.icmp = sIcmp;
+					if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
+						sIcmp.op = "request";
+					} else if (icmp.typeEnum() == IcmpType.ECHO_REPLY) {
+						sIcmp.op = "reply";
+					}
+					// tcp
+				} else if (jpacket.hasHeader(tcp)) {
+					sIp.nw_type = "tcp";
+					sIp.tcp = sTcp;
+					sTcp.src_port = new Integer(tcp.source()).toString();
+					sTcp.dst_port = new Integer(tcp.destination()).toString();
+
+					sTcp.payload = tcp.getPayload();
+					// udp
+				} else if (jpacket.hasHeader(udp)) {
+					sIp.nw_type = "udp";
+					sIp.udp = sUdp;
+					sUdp.src_port = new Integer(udp.source()).toString();
+					sUdp.dst_port = new Integer(udp.destination()).toString();
+					sUdp.payload = udp.getPayload();
+				}
+			}
+		}
+		return sPkt;
 	}
 }

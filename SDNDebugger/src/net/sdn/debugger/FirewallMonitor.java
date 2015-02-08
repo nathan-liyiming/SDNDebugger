@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import net.sdn.event.Event;
-import net.sdn.event.Packet;
 import net.sdn.event.EventGenearator;
 
 import io.reactivex.netty.RxNetty;
@@ -23,7 +22,7 @@ import rx.functions.Action0;
 import rx.functions.Func1;
 
 public class FirewallMonitor implements Runnable {
-	public void run() {
+/*	public void run() {
 		createServer().startAndWait();
 	}
 	
@@ -180,5 +179,5 @@ public class FirewallMonitor implements Runnable {
 		for (Event e : lst)
 			System.out.println(e);
 		System.out.println("***************************************");
-	}
+	}*/
 }

@@ -5,24 +5,18 @@ import java.util.LinkedList;
 
 public class RecordSorter extends Thread {
 
-	private final static double interval = 0.2;
+	private final static long interval = 200000000;
 
 	private LinkedList<Pair> store = new LinkedList<Pair>();
 	private PrintWriter out;
-	private double begin, end;
-	private boolean flag;
 
-	private double split;
+	private long split;
 
 	public RecordSorter(PrintWriter out) {
 		this.out = out;
 	}
 
-	public void insetRecord(double time, String recorder) {
-		if (flag) {
-			begin = System.nanoTime();
-			flag = false;
-		}
+	public void insetRecord(long time, String recorder) {
 		int i = 0;
 		synchronized (this) {
 			for (i = store.size() - 1; i >= 0; i--) {
@@ -38,10 +32,7 @@ public class RecordSorter extends Thread {
 	public void run() {
 		// TODO Auto-generated method stub
 		while (true) {
-			
-			end = System.nanoTime();
-			split = (end - begin) / Math.pow(10, 9) - interval;
-//			split += (interval * 1000);
+			split = System.currentTimeMillis() * 1000000 - interval;
 			synchronized (this) {
 				while (store.size() != 0 && store.getFirst().time <= split) {
 					out.println(store.removeFirst().recorder);
@@ -49,7 +40,7 @@ public class RecordSorter extends Thread {
 				}
 			}
 			try {
-				Thread.sleep((long)(interval * 1000));
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -58,10 +49,10 @@ public class RecordSorter extends Thread {
 	}
 
 	public class Pair {
-		public double time;
+		public long time;
 		public String recorder;
 
-		public Pair(double time, String recorder) {
+		public Pair(long time, String recorder) {
 			this.time = time;
 			this.recorder = recorder;
 		}

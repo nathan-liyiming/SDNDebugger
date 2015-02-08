@@ -10,7 +10,6 @@ import java.util.LinkedList;
 
 import net.sdn.PhyTopo.PhyTopo;
 import net.sdn.event.Event;
-import net.sdn.event.Packet;
 import net.sdn.event.EventGenearator;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
@@ -147,7 +146,7 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		System.out.println("StatefulFireWall Monitor handler started...");
 		return server;
 	}
-	
+	/*
 	private void timer(Event e){
 		// clean expired events in notExpected and raise error in expectedEvent
 		Iterator<Event> it = this.notExpectedEvents.iterator();
@@ -370,5 +369,5 @@ public class StatefulFirewallMonitorHandler implements Runnable {
 		for (Event e : lst)
 			System.out.println(e);
 		System.out.println("***************************************");
-	}
+	} */
 }
