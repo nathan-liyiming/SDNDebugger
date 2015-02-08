@@ -19,6 +19,8 @@ import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.nio.JBuffer;
+import org.jnetpcap.packet.JMemoryPacket;
+import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 import org.jnetpcap.packet.format.FormatUtils;
@@ -226,33 +228,49 @@ public class Monitor {
 								sTcp.payload = tcp.getPayload();
 							} else {
 								sTcp.of_packet = sOf;
+
+								// ACK from controller, no payload
+								if (tcp.getPayload().length == 0) {
+									return;
+								}
+
 								ByteBuffer buf = ByteBuffer.wrap(tcp
 										.getPayload());
 								List<OFMessage> l = factory.parseMessages(buf);
 								OFMessage message = l.get(0);
-								if (message.getType() == OFType.PACKET_IN) {
+								// first two heart beat
+								if (message.getType() == OFType.ECHO_REPLY) {
+									sOf.type = "echo_reply";
+								} else if (message.getType() == OFType.ECHO_REQUEST) {
+									sOf.type = "echo_request";
+								} else if (message.getType() == OFType.PACKET_IN) {
 									sOf.type = "packet_in";
-									PcapPacket innerPacket = new PcapPacket(
-											new JBuffer(
-													((OFPacketIn) message)
-															.getPacketData()));
+									JPacket innerPacket = new JMemoryPacket(Ethernet.ID,
+											((OFPacketIn) message)
+											.getPacketData());
 									sOf.packet = generateInnnerPacket(innerPacket);
 								} else if (message.getType() == OFType.PACKET_OUT) {
 									sOf.type = "packet_out";
-									PcapPacket innerPacket = new PcapPacket(
-											new JBuffer(
-													((OFPacketOut) message)
-															.getPacketData()));
+									JPacket innerPacket = new JMemoryPacket(Ethernet.ID,
+											((OFPacketOut) message)
+											.getPacketData());
 									sOf.packet = generateInnnerPacket(innerPacket);
 								} else if (message.getType() == OFType.FLOW_MOD) {
 									sOf.type = "flow_mod";
-									sOf.match = ((OFFlowMod) message).getMatch().getMatchFields().toString();
-									sOf.instruction =  ((OFFlowMod) message).getInstructions().toString();
-								} /*else if (message.getType() == OFType.FLOW_REMOVED) {
-									sOf.type = "flow_removed";
-									sOf.match = ((OFFlowRemoved) message).getMatch().getMatchFields().toString();
-									sOf.instruction = ((OFFlowMod) message).getInstructions().toString();
-								} */else {
+									sOf.match = ((OFFlowMod) message)
+											.getMatch().getMatchFields()
+											.toString();
+									sOf.instruction = ((OFFlowMod) message)
+											.getInstructions().toString();
+								} /*
+								 * else if (message.getType() ==
+								 * OFType.FLOW_REMOVED) { sOf.type =
+								 * "flow_removed"; sOf.match = ((OFFlowRemoved)
+								 * message
+								 * ).getMatch().getMatchFields().toString();
+								 * sOf.instruction = ((OFFlowMod)
+								 * message).getInstructions().toString(); }
+								 */else {
 									return;
 								}
 							}
@@ -302,7 +320,7 @@ public class Monitor {
 		}.start();
 	}
 
-	public net.sdn.event.packet.Packet generateInnnerPacket(PcapPacket jpacket) {
+	public net.sdn.event.packet.Packet generateInnnerPacket(JPacket jpacket) {
 		Ethernet eth = new Ethernet();
 		Arp arp = new Arp();
 		Ip4 ip = new Ip4();
@@ -369,8 +387,14 @@ public class Monitor {
 					sUdp.src_port = new Integer(udp.source()).toString();
 					sUdp.dst_port = new Integer(udp.destination()).toString();
 					sUdp.payload = udp.getPayload();
+				} else {
+					return null;
 				}
+			} else {
+				return null;
 			}
+		} else {
+			return null;
 		}
 		return sPkt;
 	}
