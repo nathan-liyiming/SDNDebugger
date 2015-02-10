@@ -6,4 +6,5 @@ public class Event {
 	public Packet pkt;
 	public String interf;
 	public String sw;
+	public long timeStamp;
 }

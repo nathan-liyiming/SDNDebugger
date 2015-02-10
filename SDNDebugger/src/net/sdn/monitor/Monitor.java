@@ -10,15 +10,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static net.sdn.debugger.Debugger.*;
 import net.sdn.PhyTopo.Controller;
 import net.sdn.PhyTopo.PhyTopo;
 import net.sdn.PhyTopo.Link;
+import net.sdn.event.packet.PacketType;
 
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
-import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.packet.JMemoryPacket;
 import org.jnetpcap.packet.JPacket;
 import org.jnetpcap.packet.PcapPacket;
@@ -34,7 +33,6 @@ import org.jnetpcap.protocol.tcpip.Udp;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFPacketOut;
 import org.openflow.protocol.OFFlowMod;
-import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFType;
 import org.openflow.protocol.factory.BasicFactory;
@@ -80,7 +78,7 @@ public class Monitor {
 	 *            ignored
 	 */
 	public static void main(String[] args) {
-		Monitor monitor = new Monitor(DEFAULT_MONITOR_PORT,
+		Monitor monitor = new Monitor(8200,
 				new PhyTopo(args[0]));
 		OutputStream outputStream = null;
 		try {
@@ -180,18 +178,17 @@ public class Monitor {
 				net.sdn.event.packet.Udp sUdp = new net.sdn.event.packet.Udp();
 
 				// eth
+				sEvt.timeStamp = jpacket.getCaptureHeader().timestampInNanos();
 				if (jpacket.hasHeader(eth)) {
 					sEvt.pkt = sPkt;
 					sPkt.eth = sEth;
 
-					sEth.timeStamp = jpacket.getCaptureHeader()
-							.timestampInNanos();
 					sEth.dl_src = FormatUtils.mac(eth.source());
 					sEth.dl_dst = FormatUtils.mac(eth.destination());
 
 					// arp
 					if (jpacket.hasHeader(arp)) {
-						sEth.dl_type = "arp";
+						sEth.dl_type = PacketType.ARP;
 						sEth.arp = sArp;
 						sArp.sha = FormatUtils.mac(arp.sha());
 						sArp.tha = FormatUtils.mac(arp.tha());
@@ -202,14 +199,14 @@ public class Monitor {
 						}
 						// IPv4
 					} else if (jpacket.hasHeader(ip)) {
-						sEth.dl_type = "ip";
+						sEth.dl_type = PacketType.IP;
 						sEth.ip = sIp;
 						sIp.nw_src = FormatUtils.ip(ip.source());
 						sIp.nw_dst = FormatUtils.ip(ip.destination());
 
 						// icmp
 						if (jpacket.hasHeader(icmp)) {
-							sIp.nw_type = "icmp";
+							sIp.nw_type = PacketType.ICMP;
 							sIp.icmp = sIcmp;
 							if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
 								sIcmp.op = "request";
@@ -218,7 +215,7 @@ public class Monitor {
 							}
 							// tcp
 						} else if (jpacket.hasHeader(tcp)) {
-							sIp.nw_type = "tcp";
+							sIp.nw_type = PacketType.TCP;
 							sIp.tcp = sTcp;
 							sTcp.src_port = new Integer(tcp.source())
 									.toString();
@@ -284,7 +281,7 @@ public class Monitor {
 							}
 							// udp
 						} else if (jpacket.hasHeader(udp)) {
-							sIp.nw_type = "udp";
+							sIp.nw_type = PacketType.UDP;
 							sIp.udp = sUdp;
 							sUdp.src_port = new Integer(udp.source())
 									.toString();
@@ -318,8 +315,7 @@ public class Monitor {
 					// serialization
 					Gson gson = new Gson();
 					String json = gson.toJson(sEvt);
-					System.out.println(json);
-					rs.insetRecord(sEth.timeStamp, json);
+					rs.insertRecord(sEvt.timeStamp, json);
 				}
 			}
 		};
@@ -353,13 +349,12 @@ public class Monitor {
 		if (jpacket.hasHeader(eth)) {
 			sPkt.eth = sEth;
 
-			sEth.timeStamp = jpacket.getCaptureHeader().timestampInNanos();
 			sEth.dl_src = FormatUtils.mac(eth.source());
 			sEth.dl_dst = FormatUtils.mac(eth.destination());
 
 			// arp
 			if (jpacket.hasHeader(arp)) {
-				sEth.dl_type = "arp";
+				sEth.dl_type = PacketType.ARP;
 				sEth.arp = sArp;
 				sArp.sha = FormatUtils.mac(arp.sha());
 				sArp.tha = FormatUtils.mac(arp.tha());
@@ -370,14 +365,14 @@ public class Monitor {
 				}
 				// IPv4
 			} else if (jpacket.hasHeader(ip)) {
-				sEth.dl_type = "ip";
+				sEth.dl_type = PacketType.IP;
 				sEth.ip = sIp;
 				sIp.nw_src = FormatUtils.ip(ip.source());
 				sIp.nw_dst = FormatUtils.ip(ip.destination());
 
 				// icmp
 				if (jpacket.hasHeader(icmp)) {
-					sIp.nw_type = "icmp";
+					sIp.nw_type = PacketType.ICMP;
 					sIp.icmp = sIcmp;
 					if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
 						sIcmp.op = "request";
@@ -386,7 +381,7 @@ public class Monitor {
 					}
 					// tcp
 				} else if (jpacket.hasHeader(tcp)) {
-					sIp.nw_type = "tcp";
+					sIp.nw_type = PacketType.TCP;
 					sIp.tcp = sTcp;
 					sTcp.src_port = new Integer(tcp.source()).toString();
 					sTcp.dst_port = new Integer(tcp.destination()).toString();
@@ -394,7 +389,7 @@ public class Monitor {
 					sTcp.payload = tcp.getPayload();
 					// udp
 				} else if (jpacket.hasHeader(udp)) {
-					sIp.nw_type = "udp";
+					sIp.nw_type = PacketType.UDP;
 					sIp.udp = sUdp;
 					sUdp.src_port = new Integer(udp.source()).toString();
 					sUdp.dst_port = new Integer(udp.destination()).toString();

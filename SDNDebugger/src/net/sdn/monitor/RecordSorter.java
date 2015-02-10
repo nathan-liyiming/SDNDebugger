@@ -16,7 +16,7 @@ public class RecordSorter extends Thread {
 		this.out = out;
 	}
 
-	public void insetRecord(long time, String recorder) {
+	public void insertRecord(long time, String recorder) {
 		int i = 0;
 		synchronized (this) {
 			for (i = store.size() - 1; i >= 0; i--) {
@@ -35,7 +35,9 @@ public class RecordSorter extends Thread {
 			split = System.currentTimeMillis() * 1000000 - interval;
 			synchronized (this) {
 				while (store.size() != 0 && store.getFirst().time <= split) {
-					out.println(store.removeFirst().recorder);
+					String tmp = store.removeFirst().recorder;
+					System.out.println(tmp);
+					out.println(tmp);
 					out.flush();
 				}
 			}
