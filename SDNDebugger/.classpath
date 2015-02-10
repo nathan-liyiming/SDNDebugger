@@ -15,6 +15,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.10.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-simple-1.7.10.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.3.1.jar"/>
-	<classpathentry kind="lib" path="/home/mininet/SDNDebugger/SDNDebugger/lib/openflowj-0.3.9.oe.jar"/>
+	<classpathentry kind="lib" path="lib/openflowj.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
