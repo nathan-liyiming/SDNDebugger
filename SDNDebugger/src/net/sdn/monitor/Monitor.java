@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import net.sdn.PhyTopo.Controller;
-import net.sdn.PhyTopo.PhyTopo;
-import net.sdn.PhyTopo.Link;
 import net.sdn.event.packet.PacketType;
+import net.sdn.phytopo.Controller;
+import net.sdn.phytopo.Link;
+import net.sdn.phytopo.PhyTopo;
 
 import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapBpfProgram;

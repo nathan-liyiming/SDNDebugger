@@ -1,0 +1,21 @@
+// In this example, it only indicates L2, but L3 is similar in this case
+
+learnedAddress.add(event.pkt.dl_src, event.sw.interf);
+
+if switch doesn't know how to reach dl_dst:
+	expectedEvent.add(Packet_in(event.pkt));
+	expectedEvent.add(Packet_out(topo.allPorts(event.sw, event.pkt)));
+	expectedEvent.add(PacketAt(event.pkt, topo.allPorts(event.sw)));
+	expectedEvent.add(PacketAt(event.pkt, topo.allNextHopPorts(event.sw)));
+else:
+	if packet is the first packet:
+		expectedEvent.add(Packet_in(event.pkt));
+		// generate flows for bi-directions
+		expectedEvent.add(Flow_mod(event.pkt.dl_src -> event.pkt.dl_dst, in_port -> internal.outPort, event.sw));
+		expectedEvent.add(Flow_mod(event.pkt.nw_src -> event.pkt.nw_dst, in_port -> internal.outPort, event.sw));
+		expectedEvent.add(Packet_out(event.pkt, event.sw));
+		expectedEvent.add(PacketAt(event.pkt, internal.outPort)) 
+		expectedEvent.add(PacketAt(event.pkt, topo.nextHop(sw, internal.outPort, inport)))
+	else:
+		expectedEvent.add(PacketAt(event.pkt, internal.outPort)) 
+		expectedEvent.add(PacketAt(event.pkt, topo.nextHop(sw, internal.outPort,inport)))

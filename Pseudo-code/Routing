@@ -1,0 +1,13 @@
+if topology change:
+	// change ideal model
+	topo.change(event);
+	internal.calculateShortestPath();
+	// add expectations
+	for every infected switch s:
+		expectedEvent.add(Flow_mod(PreixAndOutport, s));
+else:
+	// normal packets
+	sws = internal.getPath(nw_dst, nw_src);
+	for every switch s on the shortest path:
+		expectedEvent.add(PacketAt(event.pkt, event.sw, internal.outport));
+		expectedEvent.add(PacketAt(event.pkt, topo.nextHop(event.sw), topo.nextPort(event.sw)));

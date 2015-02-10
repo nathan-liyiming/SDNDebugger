@@ -1,0 +1,8 @@
+
+set timer
+
+if packet meet the requirement:
+	Counter.get(event.sw.interf) += event.sw.pkt.size
+
+when timer is notified
+	comapre all counters and get the difference
