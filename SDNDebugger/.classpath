@@ -7,13 +7,13 @@
 	<classpathentry kind="lib" path="lib/rx.jar"/>
 	<classpathentry kind="lib" path="lib/netty-all-4.0.24.Final.jar"/>
 	<classpathentry kind="lib" path="lib/rx-netty-0.3.18.jar"/>
-	<classpathentry kind="lib" path="/home/yli/SDNDebugger/SDNDebugger/lib/jnetpcap-1.4.r1425/jnetpcap.jar">
+	<classpathentry kind="lib" path="lib/jnetpcap-1.4.r1425/jnetpcap.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/yli/SDNDebugger/SDNDebugger/lib/jnetpcap-1.4.r1425"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="lib/jnetpcap-1.4.r1425"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/yli/SDNDebugger/SDNDebugger/lib/slf4j-api-1.7.10.jar"/>
-	<classpathentry kind="lib" path="/home/yli/SDNDebugger/SDNDebugger/lib/slf4j-simple-1.7.10.jar"/>
-	<classpathentry kind="lib" path="/home/yli/SDNDebugger/SDNDebugger/lib/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.10.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-simple-1.7.10.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

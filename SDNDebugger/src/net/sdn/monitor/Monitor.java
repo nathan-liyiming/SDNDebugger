@@ -245,15 +245,23 @@ public class Monitor {
 									sOf.type = "echo_request";
 								} else if (message.getType() == OFType.PACKET_IN) {
 									sOf.type = "packet_in";
-									JPacket innerPacket = new JMemoryPacket(Ethernet.ID,
+									if (((OFPacketIn) message).getPacketData().length == 0) {
+										return;
+									}
+									JPacket innerPacket = new JMemoryPacket(
+											Ethernet.ID,
 											((OFPacketIn) message)
-											.getPacketData());
+													.getPacketData());
 									sOf.packet = generateInnnerPacket(innerPacket);
+									if (sOf.packet == null) {
+										return;
+									}
 								} else if (message.getType() == OFType.PACKET_OUT) {
 									sOf.type = "packet_out";
-									JPacket innerPacket = new JMemoryPacket(Ethernet.ID,
+									JPacket innerPacket = new JMemoryPacket(
+											Ethernet.ID,
 											((OFPacketOut) message)
-											.getPacketData());
+													.getPacketData());
 									sOf.packet = generateInnnerPacket(innerPacket);
 								} else if (message.getType() == OFType.FLOW_MOD) {
 									sOf.type = "flow_mod";
@@ -283,7 +291,11 @@ public class Monitor {
 							sUdp.dst_port = new Integer(udp.destination())
 									.toString();
 							sUdp.payload = udp.getPayload();
+						} else {
+							return;
 						}
+					} else {
+						return;
 					}
 
 					if (!interf.equals("lo")) {
