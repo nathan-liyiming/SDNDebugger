@@ -17,12 +17,13 @@ public class Event {
 	public Event() {
 
 	}
-
-	public Event(int pri, Packet p, String s, List<String> i) {
+	
+	public Event(int pri, Packet p, String s, List<String> i, String direct){
 		pkt = p;
 		sw = s;
 		interf = i;
 		priority = pri;
+		direction = direct;
 	}
 
 	public Event(int pri, Packet p, String s, String i) {
