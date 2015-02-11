@@ -30,11 +30,11 @@ abstract public class Verifier implements Runnable {
 	private LinkedList<Event> expectedEvents = new LinkedList<Event>();
 	private LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
 	private HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
-	
-	private PhyTopo phyTopo;
+
+	private PhyTopo phyTopo = null;
 
 	private final int port = 8200;
-	private final double EXPIRE_TIME = 15;
+	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
 	private String lines = "";
 
 	private void timer(Event e) {
@@ -60,7 +60,7 @@ abstract public class Verifier implements Runnable {
 		}
 	}
 
-	public RxServer<String, String> createServer() {
+	protected RxServer<String, String> createServer() {
 		RxServer<String, String> server = RxNetty.createTcpServer(port,
 				PipelineConfigurators.textOnlyConfigurator(),
 				new ConnectionHandler<String, String>() {
@@ -140,32 +140,83 @@ abstract public class Verifier implements Runnable {
 
 	abstract public void verifier(Event event);
 
-	public void addExpectedEvents(Event eve) {
+	protected void addExpectedEvents(Event eve) {
+		for (int i = 0; i <= expectedEvents.size(); i++){
+			if (expectedEvents.get(i).priority <= eve.priority) {
+				expectedEvents.add(i, eve);
+				return;
+			}
+		}
 		expectedEvents.add(eve);
 	}
 
-	public void addNotExpectedEvents(Event eve) {
+	protected void addNotExpectedEvents(Event eve) {
+		for (int i = 0; i <= notExpectedEvents.size(); i++){
+			if (notExpectedEvents.get(i).priority <= eve.priority) {
+				notExpectedEvents.add(i, eve);
+				return;
+			}
+		}
 		notExpectedEvents.add(eve);
 	}
 
-	public void addInterestedEvents(PacketType t) {
+	protected void addInterestedEvents(PacketType t) {
 		interestedEvents.add(t);
 	}
 
+	// always allow heartbeat for rule expriations
 	private boolean isInterestedEvent(Event e) {
 		if ((interestedEvents.contains(PacketType.ARP) && e.pkt.eth.arp != null)
 				|| (interestedEvents.contains(PacketType.IP) && e.pkt.eth.ip != null)
 				|| (interestedEvents.contains(PacketType.ICMP) && e.pkt.eth.ip.icmp != null)
-				|| (interestedEvents.contains(PacketType.TCP) && e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null)
-				|| (interestedEvents.contains(PacketType.UDP) && e.pkt.eth.ip != null && e.pkt.eth.ip.udp != null)
-				|| (interestedEvents.contains(PacketType.OF) && e.pkt.eth.ip != null
-						&& e.pkt.eth.ip.tcp != null && e.pkt.eth.ip.tcp.of_packet != null)) {
+				|| (interestedEvents.contains(PacketType.TCP)
+						&& e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null && e.pkt.eth.ip.tcp.of_packet == null)
+				|| (interestedEvents.contains(PacketType.UDP)
+						&& e.pkt.eth.ip != null && e.pkt.eth.ip.udp != null)
+				|| (interestedEvents.contains(PacketType.OF)
+						&& e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null && e.pkt.eth.ip.tcp.of_packet != null)
+				|| (e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null
+						&& e.pkt.eth.ip.tcp.of_packet != null && (e.pkt.eth.ip.tcp.of_packet.type
+						.equals("echo_reply") || e.pkt.eth.ip.tcp.of_packet.type
+						.equals("echo_request")))) {
 			return true;
 		}
 		return false;
 	}
-	
-	public void addPhyTopo(PhyTopo pt){
+
+	protected void addPhyTopo(PhyTopo pt) {
 		phyTopo = pt;
 	}
+
+	protected PhyTopo getPhyTopo() {
+		return phyTopo;
+	}
+	
+	protected void verify(Event e) {
+		// check notExpectedEvent List
+		for (Event notExpected : notExpectedEvents) {
+			if (notExpected.equals(e)) {
+				System.err.println("Not Expected Event Happened:");
+				System.err.println(notExpected);
+				notExpectedEvents.remove(notExpected);
+				// printEvents(notExpectedEvents);
+				return;
+			}
+		}
+		// check expectedEvent List
+		for (Event expected : expectedEvents) {
+			if (expected.equals(e)) {
+				System.out.println("Expected Event Happened:");
+				System.out.println(expected);
+				expectedEvents.remove(expected);
+				// printEvents(expectedEvents);
+				return;
+			}
+		}
+
+		System.err.println("Unknown Event:");
+		System.err.println(e);
+		return;
+	}
+
 }

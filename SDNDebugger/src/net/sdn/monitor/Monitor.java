@@ -16,6 +16,7 @@ import net.sdn.phytopo.Link;
 import net.sdn.phytopo.PhyTopo;
 
 import org.jnetpcap.Pcap;
+import org.jnetpcap.Pcap.Direction;
 import org.jnetpcap.PcapBpfProgram;
 import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.JMemoryPacket;
@@ -110,23 +111,26 @@ public class Monitor {
 
 		for (Link link : monitor.getPhyTopo().getLinks()) {
 			if (link.left_interf.contains("s")) {
-				monitor.generateHandler(link.left_interf, rs);
+				monitor.capturePackets(link.left_interf, rs, Direction.IN);
+				monitor.capturePackets(link.left_interf, rs, Direction.OUT);
 			}
 			if (link.right_interf.contains("s")) {
-				monitor.generateHandler(link.right_interf, rs);
+				monitor.capturePackets(link.right_interf, rs, Direction.IN);
+				monitor.capturePackets(link.right_interf, rs, Direction.OUT);
 			}
 		}
 
 		// openflow message
-		monitor.generateHandler("lo", rs);
+		monitor.capturePackets("lo", rs, Direction.INOUT);
 	}
 
-	public void generateHandler(final String interf, final RecordSorter rs) {
+	public void capturePackets(final String interf, final RecordSorter rs, final Direction direction) {
 		StringBuilder errbuf = new StringBuilder(); // For any error msgs
 
 		int snaplen = 64 * 1024; // Capture all packets, no trucation
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 1; // 1 milli
+		
 		final Pcap pcap = Pcap
 				.openLive(interf, snaplen, flags, timeout, errbuf);
 
@@ -135,6 +139,8 @@ public class Monitor {
 					+ errbuf.toString());
 			return;
 		}
+		
+		pcap.setDirection(direction);
 
 		if (interf.equals("lo")) {
 			PcapBpfProgram filter = new PcapBpfProgram();
@@ -179,6 +185,13 @@ public class Monitor {
 
 				// eth
 				sEvt.timeStamp = jpacket.getCaptureHeader().timestampInNanos();
+				if (direction == Direction.IN) {
+					sEvt.direction = "in";
+				} else if (direction == Direction.OUT) {
+					sEvt.direction = "out";
+				} else {
+					sEvt.direction = "inout";
+				}
 				if (jpacket.hasHeader(eth)) {
 					sEvt.pkt = sPkt;
 					sPkt.eth = sEth;
@@ -297,7 +310,7 @@ public class Monitor {
 
 					if (!interf.equals("lo")) {
 						sEvt.sw = interf.split("-")[0];
-						sEvt.interf = interf.split("-")[1];
+						sEvt.interf.add(interf.split("-")[1]);
 					} else {
 						String sw_port = "";
 						if (!sTcp.src_port.equals(controller_port)) {

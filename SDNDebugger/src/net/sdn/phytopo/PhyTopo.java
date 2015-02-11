@@ -8,6 +8,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.sdn.policy.Policy;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -146,6 +148,16 @@ public class PhyTopo {
 
 				Link link = new Link(left_interf, getNode(left), right_interf,
 						getNode(right));
+				
+				// Add port to switches
+				if (left.contains("s")) {
+					getSwitch(left).addPort(left_interf.split("-")[1]);
+				}
+				
+				if (right.contains("s")) {
+					getSwitch(right).addPort(right_interf.split("-")[1]);
+				}
+				
 				links.add(link);
 			}
 		}
@@ -189,5 +201,9 @@ public class PhyTopo {
 	
 	public HashMap<String, Controller> getControllers() {
 		return controllers;
+	}
+	
+	public void addPolicyToSwitch(String s, Policy p){
+		getSwitch(s).addPolicy(p);
 	}
 }
