@@ -13,27 +13,27 @@ public class Event {
 	public long timeStamp;
 	public int priority = DEFAULT_PRIORITY;
 	public String direction = "";
-	
-	public Event(){
-		
+
+	public Event() {
+
 	}
-	
-	public Event(int pri, Packet p, String s, List<String> i){
+
+	public Event(int pri, Packet p, String s, List<String> i) {
 		pkt = p;
 		sw = s;
 		interf = i;
 		priority = pri;
 	}
-	
-	public Event(int pri, Packet p, String s, String i){
+
+	public Event(int pri, Packet p, String s, String i) {
 		pkt = p;
 		sw = s;
 		interf.add(i);
 		priority = pri;
 	}
-	
-	public boolean equals(Event e){
-		// TODO: equals
-		return false;
+
+	public boolean equals(Object e) {
+		return this.sw.equals(((Event) e).sw)
+				&& this.pkt.equals(((Event) e).pkt);
 	}
 }
