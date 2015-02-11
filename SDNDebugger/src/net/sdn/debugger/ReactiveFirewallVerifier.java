@@ -23,10 +23,10 @@ public class ReactiveFirewallVerifier extends Verifier {
 				if (p.isMatched(pkt)) {
 					if (p.action.equals("ALLOW")) {
 						addExpectedEvents(EventGenerator.generateEvent(
-								p.priority, pkt, "s1", s1.getAllPorts()));
+								p.priority, pkt, "s1", s1.getAllPorts(), "out"));
 					} else {
 						addNotExpectedEvents(EventGenerator.generateEvent(
-								p.priority, pkt, "s1", s1.getAllPorts()));
+								p.priority, pkt, "s1", s1.getAllPorts(), "out"));
 					}
 					return;
 				}
@@ -34,7 +34,7 @@ public class ReactiveFirewallVerifier extends Verifier {
 
 			// default drop
 			addNotExpectedEvents(EventGenerator.generateEvent(
-					Event.DEFAULT_PRIORITY, pkt, "s1", s1.getAllPorts()));
+					Event.DEFAULT_PRIORITY, pkt, "s1", s1.getAllPorts(), "out"));
 		} else {
 			verify(event);
 		}
