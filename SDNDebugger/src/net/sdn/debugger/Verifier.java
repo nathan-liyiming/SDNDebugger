@@ -230,6 +230,13 @@ abstract public class Verifier implements Runnable {
 
 		System.err.println("Unknown Event:");
 		System.err.println(e);
+		System.out.println("*********NE***************");
+		for (Event ev : notExpectedEvents)
+			System.out.println(new Gson().toJson(ev).toString());
+		System.out.println("*********E***************");
+		for (Event ev : expectedEvents)
+			System.out.println(new Gson().toJson(ev).toString());
+		
 		return;
 	}
 

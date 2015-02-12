@@ -149,7 +149,10 @@ public class RESTMonitor {
 							sTcp.tcp_dst = new Integer(tcp.destination())
 									.toString();
 							if (jpacket.hasHeader(http)) {
-								sTcp.payload = http.getPayload();
+								if (http.getPayload().length == 0)
+									return;
+								else
+									sTcp.payload = http.getPayload();
 							} else {
 								return;
 							}

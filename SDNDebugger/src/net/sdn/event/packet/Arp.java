@@ -8,11 +8,11 @@ public class Arp {
 	public String tpa;
 
 	public boolean equals(Object arp) {
-		return this.sha.equals(((Arp) arp).sha)
-				&& this.tha.equals(((Arp) arp).tha)
-				&& this.op.equals(((Arp) arp).op)
-				&& this.spa.equals(((Arp) arp).spa)
-				&& this.tpa.equals(((Arp) arp).tpa);
+		return this.sha.equalsIgnoreCase(((Arp) arp).sha)
+				&& this.tha.equalsIgnoreCase(((Arp) arp).tha)
+				&& this.op.equalsIgnoreCase(((Arp) arp).op)
+				&& this.spa.equalsIgnoreCase(((Arp) arp).spa)
+				&& this.tpa.equalsIgnoreCase(((Arp) arp).tpa);
 
 	}
 }

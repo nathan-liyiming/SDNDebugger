@@ -16,7 +16,7 @@ public class ReactiveFirewallVerifier extends Verifier {
 
 	@Override
 	public void verify(Event event) {
-		System.out.println(event);
+//		System.out.println(event);
 		// ideal model
 		PhyTopo phyTopo = getPhyTopo();
 		Packet pkt = event.pkt;
@@ -31,13 +31,14 @@ public class ReactiveFirewallVerifier extends Verifier {
 		Switch s1 = phyTopo.getSwitch("s1");
 		if (event.direction.equals("in")) {
 			for (Policy p : s1.getPolicies()) {
-				// ALLOW
 				if (p.isMatched(pkt)) {
-					if (p.actions.equalsIgnoreCase("ALLOW")) {
-						addExpectedEvents(EventGenerator.generateEvent(
+					// DROP
+					if (p.actions.equalsIgnoreCase("DENY")) {
+						addNotExpectedEvents(EventGenerator.generateEvent(
 								p.priority, pkt, "s1", s1.getAllPortsExcept(event.interf.get(0)), "out"));
 					} else {
-						addNotExpectedEvents(EventGenerator.generateEvent(
+						// ALLOW
+						addExpectedEvents(EventGenerator.generateEvent(
 								p.priority, pkt, "s1", s1.getAllPortsExcept(event.interf.get(0)), "out"));
 					}
 					return;
@@ -53,12 +54,13 @@ public class ReactiveFirewallVerifier extends Verifier {
 	}
 
 	public void changeInternalState(Event e) { // TODO: captured REST API from 8080
+//		System.out.println(new String(e.pkt.eth.ip.tcp.payload));
 		Policy p = new Gson().fromJson(new String(e.pkt.eth.ip.tcp.payload), Policy.class);
 		PhyTopo phyTopo = getPhyTopo();
 		phyTopo.addPolicyToSwitch("s1", p);
 		
 		// solve conflicts
-		if (p.actions.equalsIgnoreCase("deny")){
+		if (p.actions != null && p.actions.equalsIgnoreCase("deny")){
 			// remove expectedEvents
 			Iterator<Event> eIt = expectedEvents.iterator();
 			while(eIt.hasNext()){
