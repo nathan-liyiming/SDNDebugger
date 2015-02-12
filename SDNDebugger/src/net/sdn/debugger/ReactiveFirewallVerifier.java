@@ -16,6 +16,7 @@ public class ReactiveFirewallVerifier extends Verifier {
 
 	@Override
 	public void verify(Event event) {
+		System.out.println(event);
 		// ideal model
 		PhyTopo phyTopo = getPhyTopo();
 		Packet pkt = event.pkt;
@@ -90,7 +91,7 @@ public class ReactiveFirewallVerifier extends Verifier {
 		Verifier v = new ReactiveFirewallVerifier();
 		v.addPhyTopo(po);
 		v.addInterestedEvents(PacketType.TCP);
-		v.addInterestedEvents(PacketType.UDP);
+//		v.addInterestedEvents(PacketType.UDP);
 		v.addInterestedEvents(PacketType.ICMP);
 		new Thread(v).start();
 	}

@@ -102,11 +102,22 @@ abstract public class Verifier implements Runnable {
 															Event.class);
 													// check expired rules and
 													// gc
-													synchronized(this){
+													synchronized (this) {
 														timer(eve);
+														if (eve.pkt.eth != null
+																&& eve.pkt.eth.ip != null
+																&& eve.pkt.eth.ip.tcp != null
+																&& eve.pkt.eth.ip.tcp.of_packet != null
+																&& (eve.pkt.eth.ip.tcp.of_packet.type
+																		.equalsIgnoreCase("echo_reply") || eve.pkt.eth.ip.tcp.of_packet.type
+																		.equalsIgnoreCase("echo_request"))) // default
+																											// filter
+																											// heartbeat
+															return Observable
+																	.empty();
 														if (isInterestedEvent(eve))
 															verify(eve);
-													}	
+													}
 												}
 
 												return Observable.empty();
@@ -143,7 +154,7 @@ abstract public class Verifier implements Runnable {
 	abstract public void verify(Event event);
 
 	protected void addExpectedEvents(Event eve) {
-		for (int i = 0; i <= expectedEvents.size(); i++){
+		for (int i = 0; i < expectedEvents.size(); i++) {
 			if (expectedEvents.get(i).priority <= eve.priority) {
 				expectedEvents.add(i, eve);
 				return;
@@ -153,7 +164,7 @@ abstract public class Verifier implements Runnable {
 	}
 
 	protected void addNotExpectedEvents(Event eve) {
-		for (int i = 0; i <= notExpectedEvents.size(); i++){
+		for (int i = 0; i < notExpectedEvents.size(); i++) {
 			if (notExpectedEvents.get(i).priority <= eve.priority) {
 				notExpectedEvents.add(i, eve);
 				return;
@@ -170,7 +181,8 @@ abstract public class Verifier implements Runnable {
 	private boolean isInterestedEvent(Event e) {
 		if ((interestedEvents.contains(PacketType.ARP) && e.pkt.eth.arp != null)
 				|| (interestedEvents.contains(PacketType.IP) && e.pkt.eth.ip != null)
-				|| (interestedEvents.contains(PacketType.ICMP) && e.pkt.eth.ip.icmp != null)
+				|| (interestedEvents.contains(PacketType.ICMP)
+						&& e.pkt.eth.ip != null && e.pkt.eth.ip.icmp != null)
 				|| (interestedEvents.contains(PacketType.TCP)
 						&& e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null && e.pkt.eth.ip.tcp.of_packet == null)
 				|| (interestedEvents.contains(PacketType.UDP)
@@ -193,7 +205,7 @@ abstract public class Verifier implements Runnable {
 	protected PhyTopo getPhyTopo() {
 		return phyTopo;
 	}
-	
+
 	protected void checkEvents(Event e) {
 		// check notExpectedEvent List
 		for (Event notExpected : notExpectedEvents) {

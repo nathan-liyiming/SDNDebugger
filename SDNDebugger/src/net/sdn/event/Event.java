@@ -3,6 +3,8 @@ package net.sdn.event;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+
 import net.sdn.event.packet.Packet;
 
 public class Event {
@@ -17,8 +19,8 @@ public class Event {
 	public Event() {
 
 	}
-	
-	public Event(int pri, Packet p, String s, List<String> i, String direct){
+
+	public Event(int pri, Packet p, String s, List<String> i, String direct) {
 		pkt = p;
 		sw = s;
 		interf = i;
@@ -35,7 +37,11 @@ public class Event {
 
 	public boolean equals(Object e) {
 		return this.sw.equals(((Event) e).sw)
-				&& this.pkt.equals(((Event) e).pkt) &&
-				((Event) e).interf.contains(this.interf.get(0));
+				&& this.pkt.equals(((Event) e).pkt)
+				&& ((Event) e).interf.contains(this.interf.get(0));
+	}
+
+	public String toString() {
+		return new Gson().toJson(this);
 	}
 }
