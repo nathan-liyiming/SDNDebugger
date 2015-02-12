@@ -20,12 +20,13 @@ public class Event {
 
 	}
 
-	public Event(int pri, Packet p, String s, List<String> i, String direct) {
+	public Event(int pri, Packet p, String s, List<String> i, String direct, long time) {
 		pkt = p;
 		sw = s;
 		interf = i;
 		priority = pri;
 		direction = direct;
+		timeStamp = time;
 	}
 
 	public Event(int pri, Packet p, String s, String i) {
