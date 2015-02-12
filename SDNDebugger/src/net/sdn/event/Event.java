@@ -35,6 +35,7 @@ public class Event {
 
 	public boolean equals(Object e) {
 		return this.sw.equals(((Event) e).sw)
-				&& this.pkt.equals(((Event) e).pkt);
+				&& this.pkt.equals(((Event) e).pkt) &&
+				((Event) e).interf.contains(this.interf.get(0));
 	}
 }

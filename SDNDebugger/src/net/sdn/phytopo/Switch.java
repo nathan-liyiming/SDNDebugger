@@ -52,4 +52,10 @@ public class Switch extends Node{
 	public void addPort(String p){
 		ports.add(p);
 	}
+	
+	public List<String> getAllPortsExcept(String s){
+		List<String> tempPorts = new ArrayList<String>(getAllPorts());
+		tempPorts.remove(s);
+		return tempPorts;
+	}
 }

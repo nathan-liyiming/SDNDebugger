@@ -78,9 +78,9 @@ public class Monitor {
 	 * @param args
 	 *            ignored
 	 */
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
-		Monitor monitor = new Monitor(8200,
-				new PhyTopo(args[0]));
+		Monitor monitor = new Monitor(8200, new PhyTopo(args[0]));
 		OutputStream outputStream = null;
 		try {
 			outputStream = monitor.getSocket().getOutputStream();
@@ -124,13 +124,14 @@ public class Monitor {
 		monitor.capturePackets("lo", rs, Direction.INOUT);
 	}
 
-	public void capturePackets(final String interf, final RecordSorter rs, final Direction direction) {
+	public void capturePackets(final String interf, final RecordSorter rs,
+			final Direction direction) {
 		StringBuilder errbuf = new StringBuilder(); // For any error msgs
 
 		int snaplen = 64 * 1024; // Capture all packets, no trucation
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 1; // 1 milli
-		
+
 		final Pcap pcap = Pcap
 				.openLive(interf, snaplen, flags, timeout, errbuf);
 
@@ -139,7 +140,7 @@ public class Monitor {
 					+ errbuf.toString());
 			return;
 		}
-		
+
 		pcap.setDirection(direction);
 
 		if (interf.equals("lo")) {
@@ -219,7 +220,7 @@ public class Monitor {
 
 						// icmp
 						if (jpacket.hasHeader(icmp)) {
-							sIp.nw_type = PacketType.ICMP;
+							sIp.nw_proto = PacketType.ICMP;
 							sIp.icmp = sIcmp;
 							if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
 								sIcmp.op = "request";
@@ -228,11 +229,10 @@ public class Monitor {
 							}
 							// tcp
 						} else if (jpacket.hasHeader(tcp)) {
-							sIp.nw_type = PacketType.TCP;
+							sIp.nw_proto = PacketType.TCP;
 							sIp.tcp = sTcp;
-							sTcp.src_port = new Integer(tcp.source())
-									.toString();
-							sTcp.dst_port = new Integer(tcp.destination())
+							sTcp.tcp_src = new Integer(tcp.source()).toString();
+							sTcp.tcp_dst = new Integer(tcp.destination())
 									.toString();
 							if (!interf.equals("lo")) {
 								sTcp.payload = tcp.getPayload();
@@ -294,11 +294,10 @@ public class Monitor {
 							}
 							// udp
 						} else if (jpacket.hasHeader(udp)) {
-							sIp.nw_type = PacketType.UDP;
+							sIp.nw_proto = PacketType.UDP;
 							sIp.udp = sUdp;
-							sUdp.src_port = new Integer(udp.source())
-									.toString();
-							sUdp.dst_port = new Integer(udp.destination())
+							sUdp.udp_src = new Integer(udp.source()).toString();
+							sUdp.udp_dst = new Integer(udp.destination())
 									.toString();
 							sUdp.payload = udp.getPayload();
 						} else {
@@ -313,10 +312,10 @@ public class Monitor {
 						sEvt.interf.add(interf.split("-")[1]);
 					} else {
 						String sw_port = "";
-						if (!sTcp.src_port.equals(controller_port)) {
-							sw_port = sTcp.src_port;
+						if (!sTcp.tcp_src.equals(controller_port)) {
+							sw_port = sTcp.tcp_src;
 						} else {
-							sw_port = sTcp.dst_port;
+							sw_port = sTcp.tcp_dst;
 						}
 
 						if (!port_sw.containsKey(sw_port)) {
@@ -385,7 +384,7 @@ public class Monitor {
 
 				// icmp
 				if (jpacket.hasHeader(icmp)) {
-					sIp.nw_type = PacketType.ICMP;
+					sIp.nw_proto = PacketType.ICMP;
 					sIp.icmp = sIcmp;
 					if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
 						sIcmp.op = "request";
@@ -394,18 +393,18 @@ public class Monitor {
 					}
 					// tcp
 				} else if (jpacket.hasHeader(tcp)) {
-					sIp.nw_type = PacketType.TCP;
+					sIp.nw_proto = PacketType.TCP;
 					sIp.tcp = sTcp;
-					sTcp.src_port = new Integer(tcp.source()).toString();
-					sTcp.dst_port = new Integer(tcp.destination()).toString();
+					sTcp.tcp_src = new Integer(tcp.source()).toString();
+					sTcp.tcp_dst = new Integer(tcp.destination()).toString();
 
 					sTcp.payload = tcp.getPayload();
 					// udp
 				} else if (jpacket.hasHeader(udp)) {
-					sIp.nw_type = PacketType.UDP;
+					sIp.nw_proto = PacketType.UDP;
 					sIp.udp = sUdp;
-					sUdp.src_port = new Integer(udp.source()).toString();
-					sUdp.dst_port = new Integer(udp.destination()).toString();
+					sUdp.udp_src = new Integer(udp.source()).toString();
+					sUdp.udp_dst = new Integer(udp.destination()).toString();
 					sUdp.payload = udp.getPayload();
 				} else {
 					return null;

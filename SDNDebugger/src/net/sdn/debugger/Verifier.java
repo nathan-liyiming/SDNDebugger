@@ -27,9 +27,9 @@ abstract public class Verifier implements Runnable {
 		createServer().startAndWait();
 	}
 
-	private LinkedList<Event> expectedEvents = new LinkedList<Event>();
-	private LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
-	private HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
+	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
+	protected LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
+	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
 
 	private PhyTopo phyTopo = null;
 
@@ -102,9 +102,11 @@ abstract public class Verifier implements Runnable {
 															Event.class);
 													// check expired rules and
 													// gc
-													timer(eve);
-													if (isInterestedEvent(eve))
-														verifier(eve);
+													synchronized(this){
+														timer(eve);
+														if (isInterestedEvent(eve))
+															verify(eve);
+													}	
 												}
 
 												return Observable.empty();
@@ -138,7 +140,7 @@ abstract public class Verifier implements Runnable {
 		return server;
 	}
 
-	abstract public void verifier(Event event);
+	abstract public void verify(Event event);
 
 	protected void addExpectedEvents(Event eve) {
 		for (int i = 0; i <= expectedEvents.size(); i++){
@@ -192,7 +194,7 @@ abstract public class Verifier implements Runnable {
 		return phyTopo;
 	}
 	
-	protected void verify(Event e) {
+	protected void checkEvents(Event e) {
 		// check notExpectedEvent List
 		for (Event notExpected : notExpectedEvents) {
 			if (notExpected.equals(e)) {
