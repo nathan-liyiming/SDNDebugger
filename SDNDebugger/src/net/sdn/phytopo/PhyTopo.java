@@ -149,6 +149,14 @@ public class PhyTopo {
 				Link link = new Link(left_interf, getNode(left), right_interf,
 						getNode(right));
 				
+				
+				// test whether a switch is a core
+				if (getNode(left).type.equalsIgnoreCase("h") && getNode(right).type.equalsIgnoreCase("s")) {
+					((Switch)getNode(right)).isCore = false;
+				} else if (getNode(left).type.equalsIgnoreCase("s") && getNode(right).type.equalsIgnoreCase("h")) {
+					((Switch)getNode(left)).isCore = false;
+				}
+				
 				// Add port to switches
 				if (left.contains("s")) {
 					getSwitch(left).addPort(left_interf.split("-")[1]);

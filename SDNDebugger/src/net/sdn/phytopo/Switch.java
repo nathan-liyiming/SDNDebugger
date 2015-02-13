@@ -13,6 +13,7 @@ public class Switch extends Node{
 	public String type = "S";
 	private String id = "";
 	private String dpid = "";
+	public boolean isCore = true;
 	
 	public String getType(){
 		return type;
@@ -57,5 +58,9 @@ public class Switch extends Node{
 		List<String> tempPorts = new ArrayList<String>(getAllPorts());
 		tempPorts.remove(s);
 		return tempPorts;
+	}
+	
+	public boolean isCore(){
+		return isCore;
 	}
 }
