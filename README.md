@@ -1,10 +1,14 @@
 Debugger for SDN
 ================
 
-*	Openflow1.3: Floodlight works, Pox has 1.1 version and doesn't work.
+REST Firewall
+-------------
 
-*	Mininet example: sudo mn --topo=single,2 --controller=remote,ip=127.0.0.1,port=6633 --switch=ovsk,protocols=OpenFlow13
+*	Run Controller app: ryu-manager examples/Firewall/rest\_firewall.py
 
 *	Run script: sudo ./run.sh
 
-*	Ping: h1 ping h2 -i5	
+*	Enable firewall and add rules: examples/Firewall/enable.sh, examples/Firewall/add.sh
+
+*	Ping: h1 ping h2
+	

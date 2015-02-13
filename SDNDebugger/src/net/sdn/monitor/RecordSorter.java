@@ -22,6 +22,14 @@ public class RecordSorter extends Thread {
 			for (i = store.size() - 1; i >= 0; i--) {
 				if (time > store.get(i).time) {
 					break;
+				} else if (time == store.get(i).time) {
+					if (recorder.contains("out")) {
+						// remove "in", add "out"
+						store.remove(i);
+					} else {
+						// has added "out" before
+						return;
+					}
 				}
 			}
 			store.add(i + 1, new Pair(time, recorder));
