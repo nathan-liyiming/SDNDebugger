@@ -154,6 +154,14 @@ abstract public class Verifier implements Runnable {
 	abstract public void verify(Event event);
 
 	protected void addExpectedEvents(Event eve) {
+		// contains eve before
+		for (int i = 0; i < expectedEvents.size(); i++) {
+			if (eve.pkt.equals(expectedEvents.get(i).pkt)
+					&& eve.sw.equals(expectedEvents.get(i).sw)) {
+				return;
+			}
+		}
+
 		for (int i = 0; i < expectedEvents.size(); i++) {
 			if (expectedEvents.get(i).priority <= eve.priority) {
 				expectedEvents.add(i, eve);
@@ -164,6 +172,14 @@ abstract public class Verifier implements Runnable {
 	}
 
 	protected void addNotExpectedEvents(Event eve) {
+		// contains eve before
+		for (int i = 0; i < notExpectedEvents.size(); i++) {
+			if (eve.pkt.equals(notExpectedEvents.get(i).pkt)
+					&& eve.sw.equals(notExpectedEvents.get(i).sw)) {
+				return;
+			}
+		}
+
 		for (int i = 0; i < notExpectedEvents.size(); i++) {
 			if (notExpectedEvents.get(i).priority <= eve.priority) {
 				notExpectedEvents.add(i, eve);
@@ -236,8 +252,6 @@ abstract public class Verifier implements Runnable {
 		System.out.println("*********E***************");
 		for (Event ev : expectedEvents)
 			System.out.println(new Gson().toJson(ev).toString());
-		
-		return;
 	}
 
 }
