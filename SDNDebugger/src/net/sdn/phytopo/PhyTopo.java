@@ -146,26 +146,33 @@ public class PhyTopo {
 						.getElementsByTagName("right_interf").item(0)
 						.getTextContent();
 
-				Link link = new Link(left_interf, getNode(left), right_interf,
-						getNode(right));
-				
-				
+				Link link = new Link(left_interf.split("-")[1], getNode(left),
+						right_interf.split("-")[1], getNode(right));
+
 				// test whether a switch is a core
-				if (getNode(left).type.equalsIgnoreCase("h") && getNode(right).type.equalsIgnoreCase("s")) {
-					((Switch)getNode(right)).isCore = false;
-				} else if (getNode(left).type.equalsIgnoreCase("s") && getNode(right).type.equalsIgnoreCase("h")) {
-					((Switch)getNode(left)).isCore = false;
+				if (getNode(left).getType().equalsIgnoreCase("h")
+						&& getNode(right).getType().equalsIgnoreCase("s")) {
+					((Switch) getNode(right)).isCore = false;
+				} else if (getNode(left).getType().equalsIgnoreCase("s")
+						&& getNode(right).getType().equalsIgnoreCase("h")) {
+					((Switch) getNode(left)).isCore = false;
 				}
-				
+
 				// Add port to switches
-				if (left.contains("s")) {
+				if (getNode(left).getType().equalsIgnoreCase("s")) {
 					getSwitch(left).addPort(left_interf.split("-")[1]);
+				} else {
+					getHost(left).setPort(right_interf.split("-")[1]);
+					getHost(left).setSwitch(getSwitch(right));
 				}
-				
-				if (right.contains("s")) {
+
+				if (getNode(right).getType().equalsIgnoreCase("s")) {
 					getSwitch(right).addPort(right_interf.split("-")[1]);
+				} else {
+					getHost(right).setPort(left_interf.split("-")[1]);
+					getHost(right).setSwitch(getSwitch(left));
 				}
-				
+
 				links.add(link);
 			}
 		}
@@ -198,20 +205,20 @@ public class PhyTopo {
 	public HashMap<String, Host> getHosts() {
 		return hosts;
 	}
-	
+
 	public HashMap<String, Switch> getSwitches() {
 		return switches;
 	}
-	
+
 	public ArrayList<Link> getLinks() {
 		return links;
 	}
-	
+
 	public HashMap<String, Controller> getControllers() {
 		return controllers;
 	}
-	
-	public void addPolicyToSwitch(String s, Policy p){
+
+	public void addPolicyToSwitch(String s, Policy p) {
 		getSwitch(s).addPolicy(p);
 	}
 }

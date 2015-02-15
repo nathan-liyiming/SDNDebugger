@@ -11,7 +11,6 @@ import com.google.gson.Gson;
 
 import net.sdn.event.Event;
 import net.sdn.event.packet.PacketType;
-import net.sdn.phytopo.PhyTopo;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
 import io.reactivex.netty.channel.ObservableConnection;
@@ -29,9 +28,7 @@ abstract public class Verifier implements Runnable {
 
 	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
 	protected LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
-	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
-
-	private PhyTopo phyTopo = null;
+	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();	
 
 	private final int port = 8200;
 	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
@@ -196,14 +193,6 @@ abstract public class Verifier implements Runnable {
 			return true;
 		}
 		return false;
-	}
-
-	protected void addPhyTopo(PhyTopo pt) {
-		phyTopo = pt;
-	}
-
-	protected PhyTopo getPhyTopo() {
-		return phyTopo;
 	}
 
 	protected void checkEvents(Event e) {
