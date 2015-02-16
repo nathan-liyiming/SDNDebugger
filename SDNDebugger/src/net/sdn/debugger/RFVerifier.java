@@ -12,12 +12,12 @@ import net.sdn.phytopo.PhyTopo;
 import net.sdn.phytopo.Switch;
 import net.sdn.policy.Policy;
 
-public class ReactiveFirewallVerifier extends Verifier {
+public class RFVerifier extends Verifier {
 	
 	private Switch firewallSwitch = null;
 	private PhyTopo phyTopo = null;
 	
-	public ReactiveFirewallVerifier(PhyTopo phytopo, Switch s){
+	public RFVerifier(PhyTopo phytopo, Switch s){
 		phyTopo = phytopo;
 		firewallSwitch = s;
 	}
@@ -103,7 +103,7 @@ public class ReactiveFirewallVerifier extends Verifier {
 
 	public static void main(String[] args) {
 		PhyTopo po = new PhyTopo(args[0]);
-		Verifier v = new ReactiveFirewallVerifier(po, po.getSwitch("s1"));
+		Verifier v = new RFVerifier(po, po.getSwitch("s1"));
 		v.addInterestedEvents(PacketType.TCP);
 		// v.addInterestedEvents(PacketType.UDP);
 		v.addInterestedEvents(PacketType.ICMP);

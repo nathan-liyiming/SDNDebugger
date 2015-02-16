@@ -9,11 +9,11 @@ public class Switch extends Node{
 	
 	private List<Policy> policies = new ArrayList<Policy>();
 	private List<String> ports = new ArrayList<String>();
+	private List<String> attachedHosts = new ArrayList<String>();
 	
 	public String type = "S";
 	private String id = "";
 	private String dpid = "";
-	public boolean isCore = true;
 	
 	public String getType(){
 		return type;
@@ -60,7 +60,12 @@ public class Switch extends Node{
 		return tempPorts;
 	}
 	
-	public boolean isCore(){
-		return isCore;
+	public void addAttachedHost(String h){
+		attachedHosts.add(h);
 	}
+	
+	public List<String> getAttachedHosts(){
+		return attachedHosts;
+	}
+	
 }

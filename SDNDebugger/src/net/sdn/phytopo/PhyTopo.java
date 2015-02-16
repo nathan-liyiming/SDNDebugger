@@ -149,15 +149,6 @@ public class PhyTopo {
 				Link link = new Link(left_interf.split("-")[1], getNode(left),
 						right_interf.split("-")[1], getNode(right));
 
-				// test whether a switch is a core
-				if (getNode(left).getType().equalsIgnoreCase("h")
-						&& getNode(right).getType().equalsIgnoreCase("s")) {
-					((Switch) getNode(right)).isCore = false;
-				} else if (getNode(left).getType().equalsIgnoreCase("s")
-						&& getNode(right).getType().equalsIgnoreCase("h")) {
-					((Switch) getNode(left)).isCore = false;
-				}
-
 				// Add port to switches
 				if (getNode(left).getType().equalsIgnoreCase("s")) {
 					getSwitch(left).addPort(left_interf.split("-")[1]);
@@ -221,4 +212,5 @@ public class PhyTopo {
 	public void addPolicyToSwitch(String s, Policy p) {
 		getSwitch(s).addPolicy(p);
 	}
+	 
 }

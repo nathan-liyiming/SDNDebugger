@@ -40,6 +40,15 @@ public class BellmanFord {
 			this.src = src;
 			this.dst = dst;
 		}
+		
+		public boolean equals(Pair p) {
+			return p.src == this.src && p.dst == p.dst;
+		}
+		
+		public int hashCode(){
+			return src.hashCode() + dst.hashCode();
+		}
+		
 	}
 
 	public static class Triple {
