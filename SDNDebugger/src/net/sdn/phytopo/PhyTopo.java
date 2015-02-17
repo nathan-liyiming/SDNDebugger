@@ -155,6 +155,9 @@ public class PhyTopo {
 				} else {
 					getHost(left).setPort(right_interf.split("-")[1]);
 					getHost(left).setSwitch(getSwitch(right));
+
+					// add host to switch
+					getSwitch(right).addAttachedHost(left);
 				}
 
 				if (getNode(right).getType().equalsIgnoreCase("s")) {
@@ -162,6 +165,9 @@ public class PhyTopo {
 				} else {
 					getHost(right).setPort(left_interf.split("-")[1]);
 					getHost(right).setSwitch(getSwitch(left));
+
+					// add host to switch
+					getSwitch(left).addAttachedHost(right);
 				}
 
 				links.add(link);
@@ -212,5 +218,5 @@ public class PhyTopo {
 	public void addPolicyToSwitch(String s, Policy p) {
 		getSwitch(s).addPolicy(p);
 	}
-	 
+
 }

@@ -3,8 +3,6 @@ package net.sdn.debugger;
 import java.util.HashMap;
 import java.util.List;
 
-import com.google.gson.Gson;
-
 import net.sdn.event.Event;
 import net.sdn.event.EventGenerator;
 import net.sdn.event.packet.PacketType;
@@ -39,7 +37,7 @@ public class SPVerifier extends Verifier {
 					for (int i = 1; i < route.size(); i++){
 						Triple hop = route.get(i);
 						addExpectedEvents(EventGenerator.generateEvent(
-								event.priority, event.pkt, hop.sw.getId(), hop.interf, event.direction, event.timeStamp));
+								event.priority, event.pkt, hop.sw.getId(), hop.interf, hop.direction, event.timeStamp));
 					}
 					return;
 				}
