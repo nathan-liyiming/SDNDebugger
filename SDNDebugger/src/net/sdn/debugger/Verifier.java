@@ -28,7 +28,7 @@ abstract public class Verifier implements Runnable {
 
 	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
 	protected LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
-	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();	
+	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
 
 	private final int port = 8200;
 	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
@@ -195,7 +195,7 @@ abstract public class Verifier implements Runnable {
 		return false;
 	}
 
-	protected void checkEvents(Event e) {
+	protected boolean checkEvents(Event e) {
 		// check notExpectedEvent List
 		for (Event notExpected : notExpectedEvents) {
 			if (notExpected.equals(e)) {
@@ -203,7 +203,7 @@ abstract public class Verifier implements Runnable {
 				System.err.println(notExpected);
 				notExpectedEvents.remove(notExpected);
 				// printEvents(notExpectedEvents);
-				return;
+				return true;
 			}
 		}
 		// check expectedEvent List
@@ -213,7 +213,7 @@ abstract public class Verifier implements Runnable {
 				System.out.println(expected);
 				expectedEvents.remove(expected);
 				// printEvents(expectedEvents);
-				return;
+				return true;
 			}
 		}
 
@@ -225,6 +225,7 @@ abstract public class Verifier implements Runnable {
 		System.out.println("*********E***************");
 		for (Event ev : expectedEvents)
 			System.out.println(new Gson().toJson(ev).toString());
+		return false;
 	}
 
 }

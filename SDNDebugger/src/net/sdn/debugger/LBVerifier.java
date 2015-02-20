@@ -28,11 +28,11 @@ public class LBVerifier extends Verifier{
 	}
 	
 	@Override
-	protected void checkEvents(Event e){
+	protected boolean checkEvents(Event e){
 		for (String s : outPorts){
 			System.out.println("Port: " + s + portMonitor.get(s));
 		}
-		
+		return true;
 	}
 
 	@Override
