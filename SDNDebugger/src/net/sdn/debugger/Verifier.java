@@ -176,6 +176,7 @@ abstract public class Verifier implements Runnable {
 
 	// always allow heartbeat for rule expriations
 	private boolean isInterestedEvent(Event e) {
+//		System.out.println(e);
 		if ((interestedEvents.contains(PacketType.ARP) && e.pkt.eth.arp != null)
 				|| (interestedEvents.contains(PacketType.IP) && e.pkt.eth.ip != null)
 				|| (interestedEvents.contains(PacketType.ICMP)

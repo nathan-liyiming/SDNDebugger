@@ -14,6 +14,7 @@ import net.sdn.event.packet.PacketType;
 import net.sdn.phytopo.Controller;
 import net.sdn.phytopo.Link;
 import net.sdn.phytopo.PhyTopo;
+import net.sdn.phytopo.Switch;
 
 import org.jnetpcap.Pcap;
 import org.jnetpcap.Pcap.Direction;
@@ -110,13 +111,13 @@ public class Monitor {
 				.toArray(new Controller[0])[0].getPort();
 
 		for (Link link : monitor.getPhyTopo().getLinks()) {
-			if (link.left_interf.contains("s")) {
-				monitor.capturePackets(link.left_interf, rs, Direction.IN);
-				monitor.capturePackets(link.left_interf, rs, Direction.OUT);
+			if (link.left.getType().equals("S")) {
+				monitor.capturePackets(((Switch)(link.left)).getId() + "-" + link.left_interf, rs, Direction.IN);
+				monitor.capturePackets(((Switch)(link.left)).getId() + "-" + link.left_interf, rs, Direction.OUT);
 			}
-			if (link.right_interf.contains("s")) {
-				monitor.capturePackets(link.right_interf, rs, Direction.IN);
-				monitor.capturePackets(link.right_interf, rs, Direction.OUT);
+			if (link.right.getType().equals("S")) {
+				monitor.capturePackets(((Switch)(link.right)).getId() + "-" + link.right_interf, rs, Direction.IN);
+				monitor.capturePackets(((Switch)(link.right)).getId() + "-" + link.right_interf, rs, Direction.OUT);
 			}
 		}
 
