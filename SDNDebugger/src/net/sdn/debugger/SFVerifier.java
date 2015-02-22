@@ -7,6 +7,7 @@ import net.sdn.event.Event;
 import net.sdn.event.EventGenerator;
 import net.sdn.event.packet.Packet;
 import net.sdn.event.packet.PacketType;
+import net.sdn.phytopo.Host;
 import net.sdn.phytopo.PhyTopo;
 import net.sdn.phytopo.Switch;
 
@@ -25,7 +26,7 @@ public class SFVerifier extends Verifier {
 	public void verify(Event event) {
 		// ideal model
 		// check whether the event is in
-		if (event.direction.equalsIgnoreCase("in")) {
+		if (event.direction.equalsIgnoreCase("in") && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {			
 			String interf = event.interf.get(0);
 			Packet pkt = event.pkt;
 			if (allowInterfs.contains(interf)) {
@@ -35,6 +36,9 @@ public class SFVerifier extends Verifier {
 						firewallSwitch.getAllPortsExcept(interf), "out",
 						event.timeStamp));
 				// Add the allowing interface
+				Host h = phyTopo.getHostByMAC(event.pkt.eth.dl_dst);
+				allowInterfs.add(h.getAttachedSwitchInterf());
+				
 			} else {
 				// DROP
 				addNotExpectedEvents(EventGenerator.generateEvent(0, pkt,
@@ -43,9 +47,7 @@ public class SFVerifier extends Verifier {
 						event.timeStamp));
 			}
 		} else {
-			if (checkEvents(event)) {
-				allowInterfs.add(event.interf.get(0));
-			}
+				checkEvents(event);
 		}
 	}
 

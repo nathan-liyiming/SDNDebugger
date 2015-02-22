@@ -218,5 +218,23 @@ public class PhyTopo {
 	public void addPolicyToSwitch(String s, Policy p) {
 		getSwitch(s).addPolicy(p);
 	}
+	
+	public Host getHostByIP(String ip){
+		for (Host h : this.getHosts().values()){
+			if (h.getNwAddr().equals(ip)){
+				return h;
+			}
+		}
+		return null;
+	}
+	
+	public Host getHostByMAC(String mac){
+		for (Host h : this.getHosts().values()){
+			if (h.getDlAddr().equals(mac)){
+				return h;
+			}
+		}
+		return null;
+	}
 
 }

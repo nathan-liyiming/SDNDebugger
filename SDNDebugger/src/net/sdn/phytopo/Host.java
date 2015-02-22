@@ -34,7 +34,7 @@ public class Host extends Node {
 		this.port = port;
 	}
 
-	public String getPort() {
+	public String getAttachedSwitchInterf() {
 		return port;
 	}
 

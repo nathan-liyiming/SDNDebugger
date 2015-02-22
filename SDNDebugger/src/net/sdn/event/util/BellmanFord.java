@@ -74,7 +74,7 @@ public class BellmanFord {
 			}
 
 			Switch connectionSwitch = host.getSwitch();
-			distances.get(connectionSwitch.getId()).set(1, host.getPort(), "",
+			distances.get(connectionSwitch.getId()).set(1, host.getAttachedSwitchInterf(), "",
 					null);
 
 			for (int i = 0; i < phyTopo.getSwitches().size(); i++) {
@@ -111,7 +111,7 @@ public class BellmanFord {
 
 					// first switch connecting to host
 					list.add(new Triple(otherHost.getSwitch(), otherHost
-							.getPort(), "in"));
+							.getAttachedSwitchInterf(), "in"));
 					Distance dis = distances.get(otherHost.getSwitch().getId());
 					list.add(new Triple(otherHost.getSwitch(), dis.outPort,
 							"out"));

@@ -39,8 +39,12 @@ abstract public class Verifier implements Runnable {
 		Iterator<Event> it = this.notExpectedEvents.iterator();
 		while (it.hasNext()) {
 			// remove expired rules
-			if (e.timeStamp - it.next().timeStamp >= EXPIRE_TIME)
+			Event temp = it.next();
+			if (e.timeStamp - temp.timeStamp >= EXPIRE_TIME){
+				System.out.println("Not Expected Event Expired:");
+				System.out.println(temp);
 				it.remove();
+			}
 			else
 				break;
 		}
@@ -151,6 +155,8 @@ abstract public class Verifier implements Runnable {
 	abstract public void verify(Event event);
 
 	protected void addExpectedEvents(Event eve) {
+		System.out.println("Adding Expected Event:");
+		System.out.println(eve);
 		for (int i = 0; i < expectedEvents.size(); i++) {
 			if (expectedEvents.get(i).priority <= eve.priority) {
 				expectedEvents.add(i, eve);
@@ -161,6 +167,8 @@ abstract public class Verifier implements Runnable {
 	}
 
 	protected void addNotExpectedEvents(Event eve) {
+		System.out.println("Adding Not Expected Event:");
+		System.out.println(eve);
 		for (int i = 0; i < notExpectedEvents.size(); i++) {
 			if (notExpectedEvents.get(i).priority <= eve.priority) {
 				notExpectedEvents.add(i, eve);
@@ -196,7 +204,7 @@ abstract public class Verifier implements Runnable {
 		return false;
 	}
 
-	protected boolean checkEvents(Event e) {
+	protected void checkEvents(Event e) {
 		// check notExpectedEvent List
 		for (Event notExpected : notExpectedEvents) {
 			if (notExpected.equals(e)) {
@@ -204,7 +212,7 @@ abstract public class Verifier implements Runnable {
 				System.err.println(notExpected);
 				notExpectedEvents.remove(notExpected);
 				// printEvents(notExpectedEvents);
-				return true;
+				return;
 			}
 		}
 		// check expectedEvent List
@@ -214,7 +222,7 @@ abstract public class Verifier implements Runnable {
 				System.out.println(expected);
 				expectedEvents.remove(expected);
 				// printEvents(expectedEvents);
-				return true;
+				return;
 			}
 		}
 
@@ -226,7 +234,7 @@ abstract public class Verifier implements Runnable {
 		System.out.println("*********E***************");
 		for (Event ev : expectedEvents)
 			System.out.println(new Gson().toJson(ev).toString());
-		return false;
+		return;
 	}
 
 }
