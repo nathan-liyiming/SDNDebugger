@@ -122,7 +122,7 @@ class StatefulFirewall(app_manager.RyuApp):
             else:
                 self.add_flow(datapath, 1, match, actions)
 
-            datapath.send_msg(out)
+            #datapath.send_msg(out)
 
     def _handle_arp(self, datapath, port, pkt_ethernet, pkt_arp):
         if pkt_arp.opcode != arp.ARP_REQUEST:
