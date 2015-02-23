@@ -237,7 +237,10 @@ public class Monitor {
 							sTcp.tcp_dst = new Integer(tcp.destination())
 									.toString();
 							if (!interf.equals("lo")) {
-								sTcp.payload = tcp.getPayload();
+								if (tcp.source() == 0 || tcp.destination() == 0) {
+									return;
+								}
+								sTcp.payload = tcp.getPayload();	
 							} else {
 								sTcp.of_packet = sOf;
 
