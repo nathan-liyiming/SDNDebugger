@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +15,7 @@ import net.sdn.phytopo.Link;
 import net.sdn.phytopo.PhyTopo;
 import net.sdn.phytopo.Switch;
 
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jnetpcap.Pcap;
 import org.jnetpcap.Pcap.Direction;
 import org.jnetpcap.PcapBpfProgram;
@@ -32,13 +32,14 @@ import org.jnetpcap.protocol.network.Icmp.IcmpType;
 import org.jnetpcap.protocol.network.Ip4;
 import org.jnetpcap.protocol.tcpip.Tcp;
 import org.jnetpcap.protocol.tcpip.Udp;
-import org.openflow.protocol.OFPacketIn;
-import org.openflow.protocol.OFPacketOut;
-import org.openflow.protocol.OFFlowMod;
-import org.openflow.protocol.OFMessage;
-import org.openflow.protocol.OFType;
-import org.openflow.protocol.factory.BasicFactory;
+import org.projectfloodlight.openflow.exceptions.OFParseError;
+import org.projectfloodlight.openflow.protocol.OFFactories;
+import org.projectfloodlight.openflow.protocol.OFMessage;
+import org.projectfloodlight.openflow.protocol.OFPacketIn;
+import org.projectfloodlight.openflow.protocol.OFFlowMod;
 
+import org.projectfloodlight.openflow.protocol.OFPacketOut;
+import org.projectfloodlight.openflow.protocol.OFType;
 import com.google.gson.Gson;
 
 public class Monitor {
@@ -50,7 +51,7 @@ public class Monitor {
 	private static int count = 0;
 	private HashMap<String, String> port_sw = new HashMap<String, String>();
 
-	private BasicFactory factory = BasicFactory.getInstance();
+	//private OFFactory factory = OFFactory.getInstance();
 
 	public Monitor(int port, PhyTopo topo) {
 		try {
@@ -244,53 +245,53 @@ public class Monitor {
 								if (tcp.getPayload().length == 0) {
 									return;
 								}
-
-								ByteBuffer buf = ByteBuffer.wrap(tcp
-										.getPayload());
-								List<OFMessage> l = factory.parseMessages(buf);
-								OFMessage message = l.get(0);
-								// first two heart beat
-								if (message.getType() == OFType.ECHO_REPLY) {
-									sOf.type = "echo_reply";
-								} else if (message.getType() == OFType.ECHO_REQUEST) {
-									sOf.type = "echo_request";
-								} else if (message.getType() == OFType.PACKET_IN) {
-									sOf.type = "packet_in";
-									if (((OFPacketIn) message).getPacketData().length == 0) {
+								
+								OFMessage message = null;
+								try {
+									message = OFFactories.getGenericReader().readFrom(ChannelBuffers.copiedBuffer(tcp.getPayload()));
+									// first two heart beat
+									if (message.getType() == OFType.ECHO_REPLY) {
+										sOf.type = "echo_reply";
+									} else if (message.getType() == OFType.ECHO_REQUEST) {
+										sOf.type = "echo_request";
+									} else if (message.getType() == OFType.PACKET_IN) {
+										sOf.type = "packet_in";
+										if (((OFPacketIn) message).getData().length == 0) {
+											return;
+										}
+										JPacket innerPacket = new JMemoryPacket(
+												Ethernet.ID,
+												((OFPacketIn) message)
+														.getData());
+										sOf.packet = generateInnnerPacket(innerPacket);
+										if (sOf.packet == null) {
+											return;
+										}
+									} else if (message.getType() == OFType.PACKET_OUT) {
+										sOf.type = "packet_out";
+										JPacket innerPacket = new JMemoryPacket(
+												Ethernet.ID,
+												((OFPacketOut) message)
+														.getData());
+										sOf.packet = generateInnnerPacket(innerPacket);
+									} else if (message.getType() == OFType.FLOW_MOD) {
+										sOf.type = "flow_mod";
+										Gson gson = new Gson();
+										sOf.match = gson.toJson((((OFFlowMod) message).getMatch())).toString();
+										sOf.instruction = gson.toJson((((OFFlowMod) message).getInstructions())).toString();
+									} /*
+									 * else if (message.getType() ==
+									 * OFType.FLOW_REMOVED) { sOf.type =
+									 * "flow_removed"; sOf.match = ((OFFlowRemoved)
+									 * message
+									 * ).getMatch().getMatchFields().toString();
+									 * sOf.instruction = ((OFFlowMod)
+									 * message).getInstructions().toString(); }
+									 */else {
 										return;
 									}
-									JPacket innerPacket = new JMemoryPacket(
-											Ethernet.ID,
-											((OFPacketIn) message)
-													.getPacketData());
-									sOf.packet = generateInnnerPacket(innerPacket);
-									if (sOf.packet == null) {
-										return;
-									}
-								} else if (message.getType() == OFType.PACKET_OUT) {
-									sOf.type = "packet_out";
-									JPacket innerPacket = new JMemoryPacket(
-											Ethernet.ID,
-											((OFPacketOut) message)
-													.getPacketData());
-									sOf.packet = generateInnnerPacket(innerPacket);
-								} else if (message.getType() == OFType.FLOW_MOD) {
-									sOf.type = "flow_mod";
-									sOf.match = ((OFFlowMod) message)
-											.getMatch().getMatchFields()
-											.toString();
-									sOf.instruction = ((OFFlowMod) message)
-											.getInstructions().toString();
-								} /*
-								 * else if (message.getType() ==
-								 * OFType.FLOW_REMOVED) { sOf.type =
-								 * "flow_removed"; sOf.match = ((OFFlowRemoved)
-								 * message
-								 * ).getMatch().getMatchFields().toString();
-								 * sOf.instruction = ((OFFlowMod)
-								 * message).getInstructions().toString(); }
-								 */else {
-									return;
+								} catch (OFParseError e) {
+									e.printStackTrace();
 								}
 							}
 							// udp
