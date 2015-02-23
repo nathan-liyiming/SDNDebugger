@@ -41,14 +41,13 @@ public class BellmanFord {
 			this.dst = dst;
 		}
 		
-		public boolean equals(Pair p) {
-			return p.src == this.src && p.dst == p.dst;
+		public boolean equals(Object p) {
+			return ((Pair)p).src.equals(this.src) && ((Pair)p).dst.equals(this.dst);
 		}
 		
-		public int hashCode(){
-			return src.hashCode() + dst.hashCode();
+		public int hashCode() {
+			return this.src.hashCode() + this.dst.hashCode();
 		}
-		
 	}
 
 	public static class Triple {
