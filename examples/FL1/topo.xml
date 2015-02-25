@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topo>
+	<hosts>
+		<host>
+			<id>h1</id>
+			<nw_addr>10.0.0.1</nw_addr>
+			<dl_addr>00:00:00:00:00:01</dl_addr>
+		</host>
+		<host>
+			<id>h2</id>
+			<nw_addr>10.0.0.2</nw_addr>
+			<dl_addr>00:00:00:00:00:02</dl_addr>
+		</host>
+	</hosts>
+
+	<switches>
+		<switch>
+			<id>s1</id>
+			<dpid>0000000000000001</dpid>
+		</switch>
+	</switches>
+
+	<controllers>
+		<controller>
+			<id>c0</id>
+			<nw_addr>127.0.0.1</nw_addr>
+			<port>6633</port>
+		</controller>	
+	</controllers>
+
+	<links>
+		<link>
+			<left>s1</left>
+			<right>h1</right>
+			<left_interf>s1-eth1</left_interf>
+			<right_interf>h1-eth0</right_interf>
+		</link>
+		<link>
+			<left>s1</left>
+			<right>h2</right>
+			<left_interf>s1-eth2</left_interf>
+			<right_interf>h2-eth0</right_interf>
+		</link>
+	</links>
+</topo>

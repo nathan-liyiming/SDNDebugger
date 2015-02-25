@@ -12,3 +12,8 @@ REST Firewall
 
 *	Ping: h1 ping h2
 	
+
+--------
+TODO: update this readme to include installation instructions.
+Note that the examples require Ryu. Installing Ryu can have problems,
+e.g. https://github.com/okfn/piati/issues/65#issuecomment-41514608
