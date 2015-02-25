@@ -1,3 +1,8 @@
+
+# Intended to be run with MAC learning
+# flowlog@flowlog:~/FlowLog/interpreter$ ./flowlog.native -verbose 2 examples/Mac_Learning.flg 
+
+
 # Rebuild Flowlog verifiers
 # (to rebuild the _framework_, run the compile.sh in the SDNDebugger directory )
 

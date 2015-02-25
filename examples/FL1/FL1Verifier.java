@@ -74,6 +74,7 @@ public class FL1Verifier extends Verifier {
 		Verifier v = new FL1Verifier(po, "eth1", po.getSwitch("s1"));
 		v.addInterestedEvents(PacketType.TCP);
 		v.addInterestedEvents(PacketType.ICMP);
+		v.addInterestedEvents(PacketType.OF);
 		// v.addInterestedEvents(PacketType.UDP);
 		new Thread(v).start();
 	}
