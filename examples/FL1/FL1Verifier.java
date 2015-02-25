@@ -10,6 +10,8 @@
 
 	TODO: why such a limited notion of "interesting" event?
 
+	TODO: why is the verifier a void function?
+
 */
 
 package net.sdn.debugger;
@@ -38,9 +40,11 @@ public class FL1Verifier extends Verifier {
 
 	@Override
 	public void verify(Event event) {
-		// ideal model
-		// check whether the event is in
-		if (event.direction.equalsIgnoreCase("in") && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {			
+		
+		System.out.println("verifier received: "+event.toString());
+
+
+/*		if (event.direction.equalsIgnoreCase("in") && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {			
 			String interf = event.interf.get(0);
 			Packet pkt = event.pkt;
 			if (allowInterfs.contains(interf)) {
@@ -62,7 +66,7 @@ public class FL1Verifier extends Verifier {
 			}
 		} else {
 				checkEvents(event);
-		}
+		}*/
 	}
 
 	public static void main(String[] args) {
