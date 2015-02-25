@@ -37,9 +37,10 @@ import org.projectfloodlight.openflow.protocol.OFFactories;
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFPacketIn;
 import org.projectfloodlight.openflow.protocol.OFFlowMod;
-
 import org.projectfloodlight.openflow.protocol.OFPacketOut;
 import org.projectfloodlight.openflow.protocol.OFType;
+import org.projectfloodlight.openflow.protocol.OFVersion;
+
 import com.google.gson.Gson;
 
 public class Monitor {
@@ -281,7 +282,12 @@ public class Monitor {
 										sOf.type = "flow_mod";
 										Gson gson = new Gson();
 										sOf.match = gson.toJson((((OFFlowMod) message).getMatch())).toString();
-										sOf.instruction = gson.toJson((((OFFlowMod) message).getInstructions())).toString();
+										if (message.getVersion() == OFVersion.OF_13)
+											sOf.instruction = gson.toJson((((OFFlowMod) message).getInstructions())).toString();
+//											sOf.instruction =(((OFFlowMod) message).getInstructions()).toString();
+										else
+											sOf.instruction = ((OFFlowMod) message).getActions().toString();
+
 									} /*
 									 * else if (message.getType() ==
 									 * OFType.FLOW_REMOVED) { sOf.type =
