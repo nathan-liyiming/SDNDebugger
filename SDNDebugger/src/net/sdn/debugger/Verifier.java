@@ -32,7 +32,7 @@ abstract public class Verifier implements Runnable {
 
 	private final int port = 8200;
 	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
-	private String lines = "";
+	private String partialLine = "";
 
 	private void timer(Event e) {
 		// clean expired events in notExpected and raise error in expectedEvent
@@ -61,6 +61,32 @@ abstract public class Verifier implements Runnable {
 		}
 	}
 
+	// Extend current partial line by <msg> and extract what full lines have been created.
+	String[] getFullMessages(String msg) {		
+		partialLine += msg;		
+		String temp[] = partialLine.split("\n");		
+		if (partialLine.endsWith("\n")) {
+			// full message line			
+			partialLine = "";			
+			return temp;
+		} else {
+			// part message line			
+			partialLine = temp[temp.length - 1];			
+			return java.util.Arrays.copyOf(temp, temp.length - 1);
+		}		
+	}
+
+	// Is this event an OpenFlow echo request or reply?
+	// TODO: why all of these null checks? Should be a method in the class for this.
+	boolean isOFEcho(Event eve) {
+		return eve.pkt.eth != null
+			&& eve.pkt.eth.ip != null
+			&& eve.pkt.eth.ip.tcp != null
+			&& eve.pkt.eth.ip.tcp.of_packet != null
+			&& (eve.pkt.eth.ip.tcp.of_packet.type.equalsIgnoreCase("echo_reply") || 
+				eve.pkt.eth.ip.tcp.of_packet.type.equalsIgnoreCase("echo_request"));
+	}
+
 	protected RxServer<String, String> createServer() {
 		RxServer<String, String> server = RxNetty.createTcpServer(port,
 				PipelineConfigurators.textOnlyConfigurator(),
@@ -75,47 +101,26 @@ abstract public class Verifier implements Runnable {
 										new Func1<String, Observable<Notification<Void>>>() {
 											@Override
 											public Observable<Notification<Void>> call(
-													String msg) {
-												lines += msg;
-												String temp[] = lines
-														.split("\n");
+													String msg) {							
+												// Add the new string and see if we get any full messages					
+												String[] fullMessages = getFullMessages(msg);
 
-												char[] chs = lines
-														.toCharArray();
-												int count = 0;
-
-												if (chs[chs.length - 1] == '\n') {
-													// full message line
-													count = temp.length;
-													lines = "";
-												} else {
-													// part message line
-													count = temp.length - 1;
-													lines = temp[temp.length - 1];
-												}
-
-												for (int i = 0; i < count; i++) {
+												for (String fullMessage : fullMessages) {
+													//System.out.println("debugger dealing with message: "+fullMessage);
 													// get event
 													// deserialize
+													// TODO: why re-create the Gson object for every event?
 													Gson gson = new Gson();
 													Event eve = gson.fromJson(
-															temp[i],
+															fullMessage,
 															Event.class);
 													// check expired rules and
 													// gc
 													synchronized (this) {
 														timer(eve);
-														if (eve.pkt.eth != null
-																&& eve.pkt.eth.ip != null
-																&& eve.pkt.eth.ip.tcp != null
-																&& eve.pkt.eth.ip.tcp.of_packet != null
-																&& (eve.pkt.eth.ip.tcp.of_packet.type
-																		.equalsIgnoreCase("echo_reply") || eve.pkt.eth.ip.tcp.of_packet.type
-																		.equalsIgnoreCase("echo_request"))) // default
-																											// filter
-																											// heartbeat
-															return Observable
-																	.empty();
+
+														if (isOFEcho(eve)) 														
+															return Observable.empty();
 														if (isInterestedEvent(eve))
 															verify(eve);
 													}
