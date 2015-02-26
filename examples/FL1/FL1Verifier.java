@@ -29,22 +29,41 @@ import net.sdn.phytopo.Switch;
 
 public class FL1Verifier extends Verifier {
 	private PhyTopo phyTopo;
-	private Set<String> allowInterfs = new HashSet<String>();
-	private Switch firewallSwitch;
+	private Set<String> sourcesSeen = new HashSet<String>();
 
-	public FL1Verifier(PhyTopo phytopo, String allowInterf, Switch s) {
-		phyTopo = phytopo;
-		allowInterfs.add(allowInterf);
-		firewallSwitch = s;
+	public FL1Verifier(PhyTopo phytopo) {
+		this.phyTopo = phytopo;
 	}
 
 	@Override
 	public void verify(Event event) {
-		
+
 		System.out.println("verifier received: "+event.toString());
 
+		/*
+			Verify: after <src> appears on the network, packets from <src> never go to the controller
+				once packetOut for that <src> seen. [Tests FL properly sending packetOut before FlowMod, etc.]
 
-/*		if (event.direction.equalsIgnoreCase("in") && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {			
+			That means a two-stage management of expectations:
+			  if this <src> hasn't been seen before, expect a packetout.
+			  seeing that packetout triggers expecting never to see an out to controller.
+
+			FW: Seems this would be suited to LTL statements. "until bleh, expect foo..."
+		*/
+		// TODO: why is the direction field still a string?
+
+		if(event.direction.equalsIgnoreCase("in")) {
+			if(sourcesSeen.contains(event.pkt.eth.dl_src)) return;
+
+			// Remember that the network has now seen this source address
+			sourcesSeen.add(event.pkt.eth.dl_src);
+
+
+		}
+
+		//
+
+/*		if (event.direction.equalsIgnoreCase("in") && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {
 			String interf = event.interf.get(0);
 			Packet pkt = event.pkt;
 			if (allowInterfs.contains(interf)) {
@@ -56,7 +75,7 @@ public class FL1Verifier extends Verifier {
 				// Add the allowing interface
 				Host h = phyTopo.getHostByMAC(event.pkt.eth.dl_dst);
 				allowInterfs.add(h.getAttachedSwitchInterf());
-				
+
 			} else {
 				// DROP
 				addNotExpectedEvents(EventGenerator.generateEvent(0, pkt,
@@ -71,7 +90,7 @@ public class FL1Verifier extends Verifier {
 
 	public static void main(String[] args) {
 		PhyTopo po = new PhyTopo(args[0]);
-		Verifier v = new FL1Verifier(po, "eth1", po.getSwitch("s1"));
+		Verifier v = new FL1Verifier(po);
 		v.addInterestedEvents(PacketType.TCP);
 		v.addInterestedEvents(PacketType.ICMP);
 		v.addInterestedEvents(PacketType.OF);
