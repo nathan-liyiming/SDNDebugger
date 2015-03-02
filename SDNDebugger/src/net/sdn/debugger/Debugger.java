@@ -5,6 +5,8 @@ package net.sdn.debugger;
  */
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -20,11 +22,12 @@ import io.reactivex.netty.server.RxServer;
 import rx.Notification;
 import rx.Observable;
 import rx.functions.Action0;
+import rx.functions.Action1;
 import rx.functions.Func1;
 
 class ErrorEvent extends Event {
 	Throwable exn;
-	ErrorEvent(Throwable exn) {
+	public ErrorEvent(Throwable exn) {
 		this.exn = exn;
 	}
 }
@@ -48,6 +51,13 @@ public class Debugger implements Runnable {
 	public Debugger() {
 		//super();
 	}
+
+	public static Action1<Event> func_printevent = new Action1<Event>() {
+        @Override
+        public void call(Event e) {
+            System.out.println("Event: "+e.toString());
+        }
+    };	    
 
 	private void timer(Event e) {
 		// clean expired events in notExpected and raise error in expectedEvent
@@ -125,7 +135,7 @@ public class Debugger implements Runnable {
 												// Add the new string and see if we get any full messages
 												String[] fullMessages = getFullMessages(msg);
 
-												Set<Event> result = new HashSet<Event>();
+												List<Event> result = new ArrayList<Event>();
 												for (String fullMessage : fullMessages) {
 													// get event; deserialize
 													// TODO: why re-create the Gson object for every event?
