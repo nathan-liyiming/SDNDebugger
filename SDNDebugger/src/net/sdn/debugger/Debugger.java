@@ -128,7 +128,7 @@ public class Debugger implements Runnable {
 						System.out.println("Monitor connection established.");
 						//return connection
 						// Make events available as a field; return empty observable from handle
-						// May have multiple streams coming from multiple connections, so merge them.
+						// May have multiple streams coming from multiple connections, so merge them.						
 						events = Observable.merge(events,
 								connection
 								.getInput()
@@ -162,11 +162,29 @@ public class Debugger implements Runnable {
 												}
 
 												// Return a stream of 0..n events. flatMap will combine the streams in order.
+												System.out.println("Debug: adding "+result.toString());
 												return Observable.from(result); // .just would try to create an Observable<Set<Event>>
 											}
 										}) // end flatMap to construct stream of full events
-/*
-								// keep going while not an error
+
+
+					// "onErrorReturn will instead emit a specified item and invoke the observer’s onCompleted method."
+					.onErrorReturn(new Func1<Throwable, Event>() {
+										@Override
+										public Event call(Throwable exn) {
+											System.out.println(" --> Closing monitor handler and stream");
+											return new ErrorEvent(exn); // include error context in stream
+										}})); // end set events object
+
+						// We're saving incoming events in the events stream
+						// but keep going while not an error
+						return connection.getInput()
+								.flatMap(new Func1<String, Observable<Notification<Void>>>() {
+											@Override
+											public Observable<Notification<Void>> call(
+													String msg) {
+												return Observable.empty();
+											}})			
 								.takeWhile(
 										new Func1<Notification<Void>, Boolean>() {
 											@Override
@@ -187,18 +205,7 @@ public class Debugger implements Runnable {
 											Notification<Void> notification) {
 										return null;
 									}
-								}); */
-
-					// "onErrorReturn will instead emit a specified item and invoke the observer’s onCompleted method."
-					.onErrorReturn(new Func1<Throwable, Event>() {
-										@Override
-										public Event call(Throwable exn) {
-											System.out.println(" --> Closing monitor handler and stream");
-											return new ErrorEvent(exn); // include error context in stream
-										}}));
-
-						// We're saving incoming events in the events stream
-						return Observable.empty();
+								}); 
 
 						} // end handle
 				});
