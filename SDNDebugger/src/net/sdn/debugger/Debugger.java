@@ -25,6 +25,12 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
+// Don't need this here. Scala provides JavaConversions object to convert from 
+// Java Observable to Scala Observable (where we can use lambdas, etc.)
+//import rx.lang.scala.*;
+
+
+
 class ErrorEvent extends Event {
 	Throwable exn;
 	public ErrorEvent(Throwable exn) {
@@ -37,7 +43,7 @@ public class Debugger implements Runnable {
 	public void run() {
 		createServer().startAndWait();
 	}
-
+	
 	public Observable<Event> events = Observable.empty(); // nothing in here to begin with
 
 	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
