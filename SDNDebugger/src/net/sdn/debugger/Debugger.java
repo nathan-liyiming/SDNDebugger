@@ -24,8 +24,9 @@ import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.functions.Func0;
 
-// Don't need this here. Scala provides JavaConversions object to convert from 
+// Don't need this here. Scala provides JavaConversions object to convert from
 // Java Observable to Scala Observable (where we can use lambdas, etc.)
 //import rx.lang.scala.*;
 
@@ -43,7 +44,7 @@ public class Debugger implements Runnable {
 	public void run() {
 		createServer().startAndWait();
 	}
-	
+
 	public Observable<Event> events = Observable.empty(); // nothing in here to begin with
 
 	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
@@ -63,7 +64,7 @@ public class Debugger implements Runnable {
         public void call(Event e) {
             System.out.println("Event: "+e.toString());
         }
-    };	    
+    };
 
 	private void timer(Event e) {
 		// clean expired events in notExpected and raise error in expectedEvent
@@ -118,6 +119,46 @@ public class Debugger implements Runnable {
 				eve.pkt.eth.ip.tcp.of_packet.type.equalsIgnoreCase("echo_request"));
 	}
 
+	private Observable<Event> buildNewStream(ObservableConnection<String, String> connection) {
+		return connection.getInput().flatMap(
+			// flatMap over the stream of string chunks to create event stream
+			// This func turns every string into a stream of events (possibly empty)
+			new Func1<String, Observable<Event>>() {
+				@Override
+				public Observable<Event> call(String msg) {
+					// Add the new string and see if we get any full messages
+					String[] fullMessages = getFullMessages(msg);
+					List<Event> result = new ArrayList<Event>();
+					for (String fullMessage : fullMessages) {
+						// get event; deserialize
+						// TODO: why re-create the Gson object for every event?
+						Gson gson = new Gson();
+						Event eve = gson.fromJson(fullMessage,Event.class);
+						// check expired rules and gc
+						synchronized (this) {
+							timer(eve);
+							//if (isOFEcho(eve))
+							//	return Observable.empty();
+							result.add(eve);
+						}
+					}
+
+					// Return a stream of 0..n events. flatMap will combine the streams in order.
+					System.out.println("Debug: adding event(s): "+result.toString());
+					return Observable.from(result); // .just would try to create an Observable<Set<Event>>
+				}
+			}) // end flatMap to construct stream of full events
+			// "onErrorReturn will instead emit a specified item and invoke the observer’s onCompleted method."
+			.onErrorReturn(new Func1<Throwable, Event>() {
+				@Override
+				public Event call(Throwable exn) {
+					System.out.println(" --> Error/Exception thrown in stream. Returning an ErrorEvent and stopping.");
+					return new ErrorEvent(exn); // include error context in stream
+				}
+			}
+		);
+	}
+
 	protected RxServer<String, String> createServer() {
 		RxServer<String, String> server = RxNetty.createTcpServer(port, PipelineConfigurators.textOnlyConfigurator(),
 				new ConnectionHandler<String, String>() {
@@ -126,91 +167,68 @@ public class Debugger implements Runnable {
 					public Observable<Void> handle(
 							final ObservableConnection<String, String> connection) {
 						System.out.println("Monitor connection established.");
-						//return connection
-						// Make events available as a field; return empty observable from handle
-						// May have multiple streams coming from multiple connections, so merge them.						
-						events = Observable.merge(events,
-								connection
-								.getInput()
-								.flatMap(
-										// flatMap over the stream of string chunks to create event stream
-										// This func turns every string into a stream of events (possibly empty)
-										new Func1<String, Observable<Event>>() {
-											@Override
-											public Observable<Event> call(String msg) {
-												// Add the new string and see if we get any full messages
-												String[] fullMessages = getFullMessages(msg);
 
-												List<Event> result = new ArrayList<Event>();
-												for (String fullMessage : fullMessages) {
-													// get event; deserialize
-													// TODO: why re-create the Gson object for every event?
-													Gson gson = new Gson();
-													Event eve = gson.fromJson(
-															fullMessage,
-															Event.class);
-													// check expired rules and gc
-													synchronized (this) {
-														timer(eve);
+						/*
+							val o = Observable.just(1,2,3,4)
+							o.subscribe(n => println("n = " + n))
+							o.subscribe(n => println("n = " + n))
+							// prints the sequence twice.
+							subscribe returns a subscription object, which at this point is unsubscribed.
 
-														if (isOFEcho(eve))
-															return Observable.empty();
-														//if (isInterestedEvent(eve))
-															//verify(eve);
-														result.add(eve);
-													}
-												}
-
-												// Return a stream of 0..n events. flatMap will combine the streams in order.
-												System.out.println("Debug: adding "+result.toString());
-												return Observable.from(result); // .just would try to create an Observable<Set<Event>>
-											}
-										}) // end flatMap to construct stream of full events
+							merging will complete both streams unless one returns an error (not same as complete)
+						*/
 
 
-					// "onErrorReturn will instead emit a specified item and invoke the observer’s onCompleted method."
-					.onErrorReturn(new Func1<Throwable, Event>() {
-										@Override
-										public Event call(Throwable exn) {
-											System.out.println(" --> Closing monitor handler and stream");
-											return new ErrorEvent(exn); // include error context in stream
-										}})); // end set events object
+							// calling defer here: not quite right
+						Observable<Event> newStream = Observable.defer(
+							new Func0() {
+								@Override
+								public Observable<Event> call () { return buildNewStream(connection); }});
 
-						// We're saving incoming events in the events stream
-						// but keep going while not an error
-						return connection.getInput()
-								.flatMap(new Func1<String, Observable<Notification<Void>>>() {
+						// May have multiple streams coming from multiple connections, so merge them.
+						events = Observable.merge(events, newStream);
+
+						// keep going while not an error
+						//return connection.getInput()
+						return newStream // *** It was not safe to use the above ^. Needed to use newStream here. Why?
+								.flatMap(new Func1<Event, Observable<Notification<Void>>>() {
 											@Override
 											public Observable<Notification<Void>> call(
-													String msg) {
-												return Observable.empty();
-											}})			
-								.takeWhile(
-										new Func1<Notification<Void>, Boolean>() {
+													Event e) {
+												//System.out.println("debug: flatmap: "+e.toString());
+												return Observable.empty(); // normally would call materialize() here to get proper return type
+											}})
+
+										// A Notification is a message _to_ an Observer
+											// *** NOTE *** The Javadoc says "observable" in places, but this is wrong!
+										// can be OnError, OnCompleted, etc.
+
+
+								// Even though above will flatten to the empty stream, this can still be called if an error occurs...
+								.takeWhile(new Func1<Notification<Void>, Boolean>() {
 											@Override
-											public Boolean call(
-													Notification<Void> notification) {
-												return !notification
-														.isOnError();
+											public Boolean call(Notification<Void> notification) {
+												//System.out.println("debug: takewhile predicate (expect not to see): "+!notification.isOnError());
+												return !notification.isOnError();
 											} // once an error, print this message
 										}).finallyDo(new Action0() {
 									@Override
 									public void call() {
-										System.out.println(" --> Closing monitor handler and stream");
+										System.out.println(" --> Closing monitor handler and stream...");
 									}
-										// do nothing for the non-errors (?)
+
 								}).map(new Func1<Notification<Void>, Void>() {
 									@Override
-									public Void call(
-											Notification<Void> notification) {
-										return null;
+									public Void call(Notification<Void> notification) {
+										//System.out.println("debug: null (expect not to see)");
+										return null; // need to return an Observable<Void>, so map into Void (which is uninstantiable)
 									}
-								}); 
+								});
 
 						} // end handle
 				});
 
-		System.out.println("Monitor handler started...");
+		System.out.println("Monitor handler started. Waiting for connections.\n");
 		return server;
 	}
 
