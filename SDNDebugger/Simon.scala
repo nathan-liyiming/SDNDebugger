@@ -16,14 +16,6 @@ object Simon {
 	var d: Debugger = new Debugger();
 	private var running = false;
 	
-	def main(args: Array[String]) {
-		// TODO (this bit doesn't auto-run when loaded in REPL)
-		// Run SIMON on module load in REPL 
-		//   (don't make the user type Simon.run() every time.)
-		Simon.run();
-		println("SIMON loaded!");
-	}
-
 	def run() {
 		if(running) return;
 		println("Creating debugger object and opening monitor listener...");
@@ -47,7 +39,8 @@ object Simon {
 	def showmenext(o: Observable[Event]) {
 		//println("Printing first event in observable (if empty, will print after something arrives):");
 		//o.first.subscribe(e => println(e)); // o.first seems to become cold.
-		// blocking version:
+
+		// blocking version used here
 		// don't confuse Obs.first with BlockingObs.first
 		println("Printing next event to arrive on observable (will block until something arrives):");
 		println(o.toBlocking.first); // BlockingObservable.first returns the event, not an Observable
@@ -58,7 +51,7 @@ object Simon {
 
 	// Expect to see an event matching pred within duration d.
 	// If this isn't seen after d, result contains an ExpectViolation. 
-	// If this is seen before d, result completes.
+	// If this is seen before d, result contains just the event that matched.
 	def expect(pred: Event=>Boolean, d: Duration): Observable[Event] = {
 		// timer, filter components 
 		val t = Observable.timer(d).map(n => new ExpectViolation());
@@ -78,6 +71,13 @@ Simon.expect({e:Event => e.direction == "in"}, Duration(10, "seconds")).subscrib
 	// note: publish turns cold into hot
 }
 
+/////////////////////////////////////////////////////
+// Run SIMON on module load in REPL 
+//   (don't make the user type Simon.run() every time.)
+Simon.run();
+println("SIMON loaded!");
+/////////////////////////////////////////////////////
+
 
 /////////////////////////////////////////////////////
 // Development notes to self
@@ -96,3 +96,6 @@ scala> Simon.run()
  Had silent failure instantiating ExpectViolation() in expect, because new ExpectViolation()
  threw malformed class name. Not sure why.
 */
+
+
+		
