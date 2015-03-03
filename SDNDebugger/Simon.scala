@@ -2,11 +2,17 @@ import net.sdn.debugger.Debugger;
 import net.sdn.debugger.EmptyEvent;
 import net.sdn.event.Event;
 
+// for timers
+import scala.concurrent.duration._;
+
 // use Scala's observable here
 import rx.lang.scala.Observable;
 import rx.lang.scala.JavaConversions;
 
+// order matters on loading in REPL
+class ExpectViolation() extends Event {
 
+} 
 
 object Simon {
 	var d: Debugger = new Debugger();
@@ -52,12 +58,31 @@ object Simon {
 		// ignored even if we re-invoke. This is because events() is a hot observable.
 	}
 
-
+	// Expect to see an event matching pred within duration d.
+	// If this isn't seen after d, result contains an ExpectViolation. 
+	// If this is seen before d, result completes.
+	def expect(pred: Event=>Boolean, d: Duration): Observable[Event] = {
+		// timer, filter components
+		val t = Observable.timer(d);
+		val f = events().filter(pred).map(e => 1); // to make types match		
+		return t.merge(f).first.flatMap(
+			{n => 
+				if(n == 1) { println("returning empty for flatmap"+n); return Observable.empty } // saw the event, no violation
+				else { println("returning violation for flatmap"+n); return Observable.just(new ExpectViolation())}}); // timer ran out
+		// ^ Must be a cleaner way to write this?
+	}
 	
+/*
+// prints if expectation violated
+Simon.expect({e:Event => e.direction == "in"}, Duration(10, "seconds")).subscribe({e => println("violation: "+e)})
+
+
+
+
+*/
+
 	// note: publish turns cold into hot
 }
-
-
 
 
 /////////////////////////////////////////////////////
