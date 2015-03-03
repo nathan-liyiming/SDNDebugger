@@ -5,28 +5,27 @@ import net.sdn.event.Event;
 // use scala's observable here
 import rx.lang.scala.Observable;
 import rx.lang.scala.JavaConversions;
-//import rx.Observable;
-
 
 object Simon {
 	var d: Debugger = new Debugger();
-	var events: Observable[Event] = Observable.empty; // note no ()
 
 	def run() {
 		println("Creating debugger object and opening monitor listener...");
 		new Thread(d).start();
-		events = JavaConversions.toScalaObservable(d.events)
-		println("Obtained observable object:"+events); // events is now a Rx Scala object 
+		// Dont make a fixed variable! Will never be updated when monitors join,
+		// which will happen after this function terminates...
+		// events = JavaConversions.toScalaObservable(d.events)		
 	}
 
-/*
-
-	def showmefirst(o: Observable[Event]) {
-		// this will give an exception if no monitors yet (i.e., d is Observable.empty())
-		//o.first().subscribe(Debugger.func_printevent); // d.printevent is a RxJava Apply1 object, defined in Java		
-		events.defaultIfEmpty(new EmptyEvent()).first().subscribe(Debugger.func_printevent);
+	// WARNING: this won't auto-update existing Observables as new monitors join,
+	// so wait until monitor registration is complete before calling (or be 
+	// aware that you may need to reconstruct streams you've already built.)
+	// NOTE: this should be a *hot* Observable, i.e., it doesn't save events 
+	// that have happened before subscription. 	
+	def events(): Observable[Event] = {		
+		JavaConversions.toScalaObservable(d.events)		
 	}
-*/
+
 
 }
 

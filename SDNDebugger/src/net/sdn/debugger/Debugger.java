@@ -45,7 +45,8 @@ public class Debugger implements Runnable {
 		createServer().startAndWait();
 	}
 
-	public Observable<Event> events = Observable.empty(); // nothing in here to begin with
+	// Start with an empty stream that doesn't terminate...
+	public Observable<Event> events = Observable.never(); 
 
 	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
 	protected LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
@@ -55,8 +56,7 @@ public class Debugger implements Runnable {
 	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
 	private String partialLine = "";
 
-	public Debugger() {
-		//super();
+	public Debugger() {		
 	}
 
 	public static Action1<Event> func_printevent = new Action1<Event>() {
@@ -144,7 +144,7 @@ public class Debugger implements Runnable {
 					}
 
 					// Return a stream of 0..n events. flatMap will combine the streams in order.
-					System.out.println("Debug: adding event(s): "+result.toString());
+					//System.out.println("Debug: adding event(s): "+result.toString());
 					return Observable.from(result); // .just would try to create an Observable<Set<Event>>
 				}
 			}) // end flatMap to construct stream of full events
@@ -166,35 +166,30 @@ public class Debugger implements Runnable {
 					// "Invoked whenever a new connection is established." Must return Observable<Void>
 					public Observable<Void> handle(
 							final ObservableConnection<String, String> connection) {
-						System.out.println("Monitor connection established.");
+						System.out.println("\nA monitor connected to the debugger...\n");
 
 						/*
 							val o = Observable.just(1,2,3,4)
 							o.subscribe(n => println("n = " + n))
 							o.subscribe(n => println("n = " + n))
-							// prints the sequence twice.
+							// prints the sequence twice (this is "cold observable" behavior)
 							subscribe returns a subscription object, which at this point is unsubscribed.
 
-							merging will complete both streams unless one returns an error (not same as complete)
+							merging will complete both streams unless one returns an error (not same as complete!)
 						*/
 
 
-							// calling defer here: not quite right
-						Observable<Event> newStream = Observable.defer(
-							new Func0() {
-								@Override
-								public Observable<Event> call () { return buildNewStream(connection); }});
-
+						// Build the stream of events from this new monitor
+						Observable<Event> newStream = buildNewStream(connection);
 						// May have multiple streams coming from multiple connections, so merge them.
 						events = Observable.merge(events, newStream);
 
 						// keep going while not an error
-						//return connection.getInput()
-						return newStream // *** It was not safe to use the above ^. Needed to use newStream here. Why?
-								.flatMap(new Func1<Event, Observable<Notification<Void>>>() {
+						return connection.getInput()
+						//return newStream // *** It was not safe to use the above ^. Needed to use newStream here. Why?
+								.flatMap(new Func1<String, Observable<Notification<Void>>>() {
 											@Override
-											public Observable<Notification<Void>> call(
-													Event e) {
+											public Observable<Notification<Void>> call(String str) {
 												//System.out.println("debug: flatmap: "+e.toString());
 												return Observable.empty(); // normally would call materialize() here to get proper return type
 											}})
@@ -214,7 +209,8 @@ public class Debugger implements Runnable {
 										}).finallyDo(new Action0() {
 									@Override
 									public void call() {
-										System.out.println(" --> Closing monitor handler and stream...");
+										// This happens when we ctrl-C out of the monitor window
+										System.out.println(" --> Error in connection; closing monitor handler and stream...");
 									}
 
 								}).map(new Func1<Notification<Void>, Void>() {
@@ -228,7 +224,7 @@ public class Debugger implements Runnable {
 						} // end handle
 				});
 
-		System.out.println("Monitor handler started. Waiting for connections.\n");
+		//System.out.println("Monitor handler started. Waiting for connections.\n");
 		return server;
 	}
 
