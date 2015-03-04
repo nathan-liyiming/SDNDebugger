@@ -1,3 +1,4 @@
+mn -c
 xterm -T "Debugger" -e java -cp "../../SDNDebugger/bin:../../SDNDebugger/lib/*" net.sdn.debugger.SFVerifier ./topo.xml &
 sleep 1
 xterm -T "Mininet" -e mn --topo=single,2 --mac --controller=remote,ip=127.0.0.1,port=6633 &

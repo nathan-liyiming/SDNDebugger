@@ -1,3 +1,4 @@
+mn -c
 xterm -T "Debugger" -e java -cp "../../SDNDebugger/bin:../../SDNDebugger/lib/*" net.sdn.debugger.SPVerifier ./topo.xml &
 sleep 1
 xterm -T "Mininet" -e mn --custom ./topo-4sw-4host.py --topo=rftest2 --controller=remote,ip=192.168.56.102,port=6633 --switch=ovsk --mac --pre=ipconfig &
