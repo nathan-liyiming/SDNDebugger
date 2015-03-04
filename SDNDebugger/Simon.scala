@@ -12,6 +12,11 @@ import scala.concurrent.duration._;
 import rx.lang.scala.Observable;
 import rx.lang.scala.JavaConversions;
 
+// Note on adding new classes that extend Event:
+//  Event.toString() uses GSON to produce a JSON expression for the event. 
+//  Unfortunately this doesn't work well for Scala classes that inherit the method.
+//  If you get a malformed class name error, make sure you've overridden the toString() method.
+
 object Simon {
 	var d: Debugger = new Debugger();
 	private var running = false;
@@ -49,15 +54,30 @@ object Simon {
 		// ignored even if we re-invoke. This is because events() is a hot observable.
 	}
 
-	// Expect to see an event matching pred within duration d.
-	// If this isn't seen after d, result contains an ExpectViolation. 
-	// If this is seen before d, result contains just the event that matched.
+	/*
+		EXPECTATIONS
+
+		Expect to see an event matching pred within duration d.
+		If this isn't seen after d, result contains an ExpectViolation. 
+		If this is seen before d, result contains just the event that matched.
+
+		Note that expectation observables can be re-used. Re-subscribe to start a fresh timer and resume listening.
+	*/
+
 	def expect(pred: Event=>Boolean, d: Duration): Observable[Event] = {
+		return expect(pred, d, Observable.never)
+	}
+	// Cancellable expectation. 
+	// If the cancel observable fires an event, this expectation will never fire either way.
+	def expect(pred: Event=>Boolean, d: Duration, cancel: Observable[AnyVal]): Observable[Event] = {
 		// timer, filter components 
 		val t = Observable.timer(d).map(n => new ExpectViolation());
 		val f = events().filter(pred); 		
-		return t.merge(f).first; 
-	}
+		return t.merge(f).first.takeUntil(cancel); 
+	}	
+	
+
+
 	
 /*
 // prints if expectation violated
@@ -70,13 +90,6 @@ Simon.expect({e:Event => e.direction == "in"}, Duration(10, "seconds")).subscrib
 
 	// note: publish turns cold into hot
 }
-
-/////////////////////////////////////////////////////
-// Run SIMON on module load in REPL 
-//   (don't make the user type Simon.run() every time.)
-Simon.run();
-println("SIMON loaded!");
-/////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////
