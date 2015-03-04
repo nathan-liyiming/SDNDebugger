@@ -1,8 +1,8 @@
 import net.sdn.debugger.Debugger;
-import net.sdn.debugger.EmptyEvent;
+import net.sdn.event.EmptyEvent;
 
 // TODO: issues creating this class if defined in Scala?
-import net.sdn.debugger.ExpectViolation;
+import net.sdn.event.ExpectViolation;
 import net.sdn.event.Event;
 
 // for timers

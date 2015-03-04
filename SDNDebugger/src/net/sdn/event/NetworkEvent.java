@@ -7,9 +7,7 @@ import com.google.gson.Gson;
 
 import net.sdn.event.packet.Packet;
 
-public class NetworkEvent extends Event{
-	private EventType eventType = EventType.NetworkEvent;
-	
+public class NetworkEvent extends Event{	
 	public static final int DEFAULT_PRIORITY = 0;
 	public Packet pkt;
 	public List<String> interf = new ArrayList<String>();
@@ -46,9 +44,5 @@ public class NetworkEvent extends Event{
 
 	public String toString() {
 		return new Gson().toJson(this);
-	}
-	
-	public EventType getEventType(){
-		return eventType;
 	}
 }

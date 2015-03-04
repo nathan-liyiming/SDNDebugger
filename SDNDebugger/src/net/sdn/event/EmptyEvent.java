@@ -1,14 +1,7 @@
 package net.sdn.event;
 
-public class EmptyEvent extends Event {	
-	
-	private EventType eventType = EventType.EmptyEvent;
-	
+public class EmptyEvent extends Event {		
 	public EmptyEvent() {
 		
-	}
-	
-	public EventType getEventType(){
-		return eventType;
 	}
 }
