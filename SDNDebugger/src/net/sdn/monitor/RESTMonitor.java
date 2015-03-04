@@ -119,7 +119,7 @@ public class RESTMonitor {
 				Http http = new Http();
 
 				// simplified packets objects
-				net.sdn.event.Event sEvt = new net.sdn.event.Event();
+				net.sdn.event.NetworkEvent sEvt = new net.sdn.event.NetworkEvent();
 				net.sdn.event.packet.Packet sPkt = new net.sdn.event.packet.Packet();
 				net.sdn.event.packet.Ethernet sEth = new net.sdn.event.packet.Ethernet();
 				net.sdn.event.packet.Ip sIp = new net.sdn.event.packet.Ip();

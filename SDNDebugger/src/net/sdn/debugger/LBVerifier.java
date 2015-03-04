@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import net.sdn.event.Event;
+import net.sdn.event.NetworkEvent;
+import net.sdn.event.NetworkEventDirection;
 import net.sdn.event.packet.PacketType;
 import net.sdn.phytopo.PhyTopo;
 import net.sdn.phytopo.Switch;
@@ -28,7 +29,7 @@ public class LBVerifier extends Verifier{
 	}
 	
 	@Override
-	protected void checkEvents(Event e){
+	protected void checkEvents(NetworkEvent e){
 		for (String s : outPorts){
 			System.out.println("Port: " + s + portMonitor.get(s));
 		}
@@ -36,9 +37,9 @@ public class LBVerifier extends Verifier{
 	}
 
 	@Override
-	public void verify(Event event) {
+	public void verify(NetworkEvent event) {
 		// TODO Auto-generated method stub
-		if (event.direction.equalsIgnoreCase("in") && event.sw.equalsIgnoreCase(loadBalancer.getId())
+		if (event.direction == NetworkEventDirection.IN && event.sw.equalsIgnoreCase(loadBalancer.getId())
 				&& inPorts.contains(event.interf.get(0))) {
 			if (count < ALARM_PACKET_NUMBER)
 				count++;
@@ -50,7 +51,7 @@ public class LBVerifier extends Verifier{
 			return;
 		}
 		
-		if (event.direction.equalsIgnoreCase("out") && event.sw.equalsIgnoreCase(loadBalancer.getId())
+		if (event.direction == NetworkEventDirection.OUT && event.sw.equalsIgnoreCase(loadBalancer.getId())
 				&& outPorts.contains(event.interf.get(0))){
 			long temp = portMonitor.get(event.interf.get(0));
 			portMonitor.put(event.interf.get(0), temp + event.pkt.eth.ip.tcp.payload.length);

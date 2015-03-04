@@ -1,3 +1,4 @@
+mn -c
 xterm -T "Debugger" -e java -cp "../../SDNDebugger/bin:../../SDNDebugger/lib/*" net.sdn.debugger.RFVerifier ./topo.xml &
 sleep 1
 xterm -T "Mininet" -e mn --topo=single,3 --controller=remote,ip=127.0.0.1,port=6633 --switch=ovsk,protocols=OpenFlow13 &

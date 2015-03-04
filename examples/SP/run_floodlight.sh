@@ -1,3 +1,4 @@
+mn -c
 xterm -T "Debugger" -e java -cp "../../SDNDebugger/bin:../../SDNDebugger/lib/*" net.sdn.debugger.SPVerifier ./topo.xml &
 sleep 1
 xterm -T "Mininet" -e floodlight/run_mininet.py & 

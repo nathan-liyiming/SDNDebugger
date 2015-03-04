@@ -3,7 +3,8 @@ package net.sdn.debugger;
 import java.util.HashMap;
 import java.util.List;
 
-import net.sdn.event.Event;
+import net.sdn.event.NetworkEvent;
+import net.sdn.event.NetworkEventDirection;
 import net.sdn.event.packet.PacketType;
 import net.sdn.event.util.BellmanFord;
 import net.sdn.event.util.BellmanFord.Triple;
@@ -21,7 +22,7 @@ public class SPVerifier extends Verifier {
 	}
 
 	@Override
-	public void verify(Event event) {
+	public void verify(NetworkEvent event) {
 		// ideal model
 		String nw_src = event.pkt.eth.ip.nw_src;
 		String nw_dst = event.pkt.eth.ip.nw_dst;
@@ -29,7 +30,7 @@ public class SPVerifier extends Verifier {
 
 		BellmanFord.Pair b = new BellmanFord.Pair(nw_src, nw_dst);
 		// check whether the event is in
-		if (event.direction.equalsIgnoreCase("in")) {
+		if (event.direction == NetworkEventDirection.IN) {
 			// get all attached hosts
 			for (String host : s.getAttachedHosts()) {
 				// first hop, generate events
@@ -48,7 +49,7 @@ public class SPVerifier extends Verifier {
 		}
 
 		// check whether the event is out
-		if (event.direction.equalsIgnoreCase("out")) {
+		if (event.direction == NetworkEventDirection.OUT) {
 			// get all attached hosts
 			for (String host : s.getAttachedHosts()) {
 				// final hop, generate events

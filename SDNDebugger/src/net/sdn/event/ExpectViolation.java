@@ -1,5 +1,4 @@
-package net.sdn.debugger;
-import net.sdn.event.Event;
+package net.sdn.event;
 
 public class ExpectViolation extends Event {	
 	public ExpectViolation() {
