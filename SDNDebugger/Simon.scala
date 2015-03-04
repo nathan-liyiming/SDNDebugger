@@ -10,7 +10,10 @@ import scala.concurrent.duration._;
 
 // use Scala's observable here
 import rx.lang.scala.Observable;
+import rx.lang.scala.Subscription;
 import rx.lang.scala.JavaConversions;
+
+import scala.collection.mutable.SortedSet;
 
 // Note on adding new classes that extend Event:
 //  Event.toString() uses GSON to produce a JSON expression for the event. 
@@ -75,14 +78,25 @@ object Simon {
 		val f = events().filter(pred); 		
 		return t.merge(f).first.takeUntil(cancel); 
 	}	
-	
 
+	/* 
+		State management: ideal models may have internal state. 
+		We may also just want to store info extracted from a stream. 		
+	*/
+	
+	def rememberInSet[T](o: Observable[Event], s: mutable.SortedSet[T], f: Event=>Option[T]): Subscription = {
+		return o.subscribe({e => f(e) match { case Some(t) => s += t case None => ()}})
+	}
 
 	
 /*
 // prints if expectation violated
 Simon.expect({e:Event => e.direction == "in"}, Duration(10, "seconds")).subscribe(e => println("result: "+e))
 
+// to create a fresh tree set:
+scala.collection.mutable.SortedSet[String]()
+// to remember in that set (where it's referenced at res19):
+Simon.rememberInSet[String](Simon.events(), res19, {e=>Some(e.toString())})
 
 
 
