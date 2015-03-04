@@ -5,6 +5,7 @@ import java.util.Iterator;
 import com.google.gson.Gson;
 
 import net.sdn.event.NetworkEvent;
+import net.sdn.event.NetworkEventDirection;
 import net.sdn.event.NetworkEventGenerator;
 import net.sdn.event.packet.Packet;
 import net.sdn.event.packet.PacketType;
@@ -35,7 +36,7 @@ public class RFVerifier extends Verifier {
 		}
 
 //		Switch s1 = phyTopo.getSwitch("s1");
-		if (event.direction.equals("in")) {
+		if (event.direction == NetworkEventDirection.IN) {
 			for (Policy p : firewallSwitch.getPolicies()) {
 				if (p.isMatched(pkt)) {
 					// DROP
@@ -43,13 +44,13 @@ public class RFVerifier extends Verifier {
 						addNotExpectedEvents(NetworkEventGenerator.generateEvent(
 								p.priority, pkt, firewallSwitch.getId(),
 								firewallSwitch.getAllPortsExcept(event.interf.get(0)),
-								"out", event.timeStamp));
+								NetworkEventDirection.OUT, event.timeStamp));
 					} else {
 						// ALLOW
 						addExpectedEvents(NetworkEventGenerator.generateEvent(
 								p.priority, pkt, firewallSwitch.getId(),
 								firewallSwitch.getAllPortsExcept(event.interf.get(0)),
-								"out", event.timeStamp));
+								NetworkEventDirection.OUT, event.timeStamp));
 					}
 					return;
 				}
@@ -58,7 +59,7 @@ public class RFVerifier extends Verifier {
 			// default drop
 			addNotExpectedEvents(NetworkEventGenerator.generateEvent(
 					NetworkEvent.DEFAULT_PRIORITY, pkt, firewallSwitch.getId(),
-					firewallSwitch.getAllPortsExcept(event.interf.get(0)), "out",
+					firewallSwitch.getAllPortsExcept(event.interf.get(0)), NetworkEventDirection.OUT,
 					event.timeStamp));
 		} else {
 			checkEvents(event);

@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sdn.event.NetworkEventDirection;
 import net.sdn.event.packet.PacketType;
-import net.sdn.event.util.NetworkEventDirection;
 import net.sdn.phytopo.Controller;
 import net.sdn.phytopo.Link;
 import net.sdn.phytopo.PhyTopo;

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.sdn.event.NetworkEvent;
+import net.sdn.event.NetworkEventDirection;
 import net.sdn.event.NetworkEventGenerator;
 import net.sdn.event.packet.Packet;
 import net.sdn.event.packet.PacketType;
@@ -26,14 +27,14 @@ public class SFVerifier extends Verifier {
 	public void verify(NetworkEvent event) {
 		// ideal model
 		// check whether the event is in
-		if (event.direction.equalsIgnoreCase("in") && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {			
+		if (event.direction == NetworkEventDirection.IN && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {			
 			String interf = event.interf.get(0);
 			Packet pkt = event.pkt;
 			if (allowInterfs.contains(interf)) {
 				// ALLOW
 				addExpectedEvents(NetworkEventGenerator.generateEvent(0, pkt,
 						firewallSwitch.getId(),
-						firewallSwitch.getAllPortsExcept(interf), "out",
+						firewallSwitch.getAllPortsExcept(interf), NetworkEventDirection.OUT,
 						event.timeStamp));
 				// Add the allowing interface
 				Host h = phyTopo.getHostByMAC(event.pkt.eth.dl_dst);
@@ -43,7 +44,7 @@ public class SFVerifier extends Verifier {
 				// DROP
 				addNotExpectedEvents(NetworkEventGenerator.generateEvent(0, pkt,
 						firewallSwitch.getId(),
-						firewallSwitch.getAllPortsExcept(interf), "out",
+						firewallSwitch.getAllPortsExcept(interf), NetworkEventDirection.OUT,
 						event.timeStamp));
 			}
 		} else {

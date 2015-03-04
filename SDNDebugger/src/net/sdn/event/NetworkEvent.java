@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.gson.Gson;
 
 import net.sdn.event.packet.Packet;
-import net.sdn.event.util.NetworkEventDirection;
 
 public class NetworkEvent extends Event{
 	private EventType eventType = EventType.NetworkEvent;
