@@ -3,7 +3,7 @@ package net.sdn.debugger;
 import java.util.HashMap;
 import java.util.List;
 
-import net.sdn.event.Event;
+import net.sdn.event.NetworkEvent;
 import net.sdn.event.packet.PacketType;
 import net.sdn.event.util.BellmanFord;
 import net.sdn.event.util.BellmanFord.Triple;
@@ -21,7 +21,7 @@ public class SPVerifier extends Verifier {
 	}
 
 	@Override
-	public void verify(Event event) {
+	public void verify(NetworkEvent event) {
 		// ideal model
 		String nw_src = event.pkt.eth.ip.nw_src;
 		String nw_dst = event.pkt.eth.ip.nw_dst;

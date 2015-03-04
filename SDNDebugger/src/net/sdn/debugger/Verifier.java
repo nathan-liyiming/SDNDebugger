@@ -9,7 +9,7 @@ import java.util.LinkedList;
 
 import com.google.gson.Gson;
 
-import net.sdn.event.Event;
+import net.sdn.event.NetworkEvent;
 import net.sdn.event.packet.PacketType;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
@@ -26,20 +26,20 @@ abstract public class Verifier implements Runnable {
 		createServer().startAndWait();
 	}
 
-	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
-	protected LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
+	protected LinkedList<NetworkEvent> expectedEvents = new LinkedList<NetworkEvent>();
+	protected LinkedList<NetworkEvent> notExpectedEvents = new LinkedList<NetworkEvent>();
 	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
 
 	private final int port = 8200;
 	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
 	private String partialLine = "";
 
-	private void timer(Event e) {
+	private void timer(NetworkEvent e) {
 		// clean expired events in notExpected and raise error in expectedEvent
-		Iterator<Event> it = this.notExpectedEvents.iterator();
+		Iterator<NetworkEvent> it = this.notExpectedEvents.iterator();
 		while (it.hasNext()) {
 			// remove expired rules
-			Event temp = it.next();
+			NetworkEvent temp = it.next();
 			if (e.timeStamp - temp.timeStamp >= EXPIRE_TIME){
 				System.out.println("Not Expected Event Expired:");
 				System.out.println(temp);
@@ -51,7 +51,7 @@ abstract public class Verifier implements Runnable {
 
 		it = this.expectedEvents.iterator();
 		while (it.hasNext()) {
-			Event ev = it.next();
+			NetworkEvent ev = it.next();
 			if (e.timeStamp - ev.timeStamp >= EXPIRE_TIME) {
 				System.err.println("Expected Event but Not Happened:");
 				System.err.println(ev);
@@ -78,7 +78,7 @@ abstract public class Verifier implements Runnable {
 
 	// Is this event an OpenFlow echo request or reply?
 	// TODO: why all of these null checks? Should be a method in the class for this.
-	boolean isOFEcho(Event eve) {
+	boolean isOFEcho(NetworkEvent eve) {
 		return eve.pkt.eth != null
 			&& eve.pkt.eth.ip != null
 			&& eve.pkt.eth.ip.tcp != null
@@ -111,9 +111,9 @@ abstract public class Verifier implements Runnable {
 													// deserialize
 													// TODO: why re-create the Gson object for every event?
 													Gson gson = new Gson();
-													Event eve = gson.fromJson(
+													NetworkEvent eve = gson.fromJson(
 															fullMessage,
-															Event.class);
+															NetworkEvent.class);
 													// check expired rules and
 													// gc
 													synchronized (this) {
@@ -157,9 +157,9 @@ abstract public class Verifier implements Runnable {
 		return server;
 	}
 
-	abstract public void verify(Event event);
+	abstract public void verify(NetworkEvent event);
 
-	protected void addExpectedEvents(Event eve) {
+	protected void addExpectedEvents(NetworkEvent eve) {
 		System.out.println("Adding Expected Event:");
 		System.out.println(eve);
 		for (int i = 0; i < expectedEvents.size(); i++) {
@@ -171,7 +171,7 @@ abstract public class Verifier implements Runnable {
 		expectedEvents.add(eve);
 	}
 
-	protected void addNotExpectedEvents(Event eve) {
+	protected void addNotExpectedEvents(NetworkEvent eve) {
 		System.out.println("Adding Not Expected Event:");
 		System.out.println(eve);
 		for (int i = 0; i < notExpectedEvents.size(); i++) {
@@ -188,7 +188,7 @@ abstract public class Verifier implements Runnable {
 	}
 
 	// always allow heartbeat for rule expriations
-	private boolean isInterestedEvent(Event e) {
+	private boolean isInterestedEvent(NetworkEvent e) {
 //		System.out.println(e);
 		if ((interestedEvents.contains(PacketType.ARP) && e.pkt.eth.arp != null)
 				|| (interestedEvents.contains(PacketType.IP) && e.pkt.eth.ip != null)
@@ -209,9 +209,9 @@ abstract public class Verifier implements Runnable {
 		return false;
 	}
 
-	protected void checkEvents(Event e) {
+	protected void checkEvents(NetworkEvent e) {
 		// check notExpectedEvent List
-		for (Event notExpected : notExpectedEvents) {
+		for (NetworkEvent notExpected : notExpectedEvents) {
 			if (notExpected.equals(e)) {
 				System.err.println("Not Expected Event Happened:");
 				System.err.println(notExpected);
@@ -221,7 +221,7 @@ abstract public class Verifier implements Runnable {
 			}
 		}
 		// check expectedEvent List
-		for (Event expected : expectedEvents) {
+		for (NetworkEvent expected : expectedEvents) {
 			if (expected.equals(e)) {
 				System.out.println("Expected Event Happened:");
 				System.out.println(expected);
@@ -234,10 +234,10 @@ abstract public class Verifier implements Runnable {
 		System.err.println("Unknown Event:");
 		System.err.println(e);
 		System.out.println("*********NE***************");
-		for (Event ev : notExpectedEvents)
+		for (NetworkEvent ev : notExpectedEvents)
 			System.out.println(new Gson().toJson(ev).toString());
 		System.out.println("*********E***************");
-		for (Event ev : expectedEvents)
+		for (NetworkEvent ev : expectedEvents)
 			System.out.println(new Gson().toJson(ev).toString());
 		return;
 	}

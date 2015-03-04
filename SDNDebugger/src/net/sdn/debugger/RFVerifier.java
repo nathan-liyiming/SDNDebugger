@@ -4,8 +4,8 @@ import java.util.Iterator;
 
 import com.google.gson.Gson;
 
-import net.sdn.event.Event;
-import net.sdn.event.EventGenerator;
+import net.sdn.event.NetworkEvent;
+import net.sdn.event.NetworkEventGenerator;
 import net.sdn.event.packet.Packet;
 import net.sdn.event.packet.PacketType;
 import net.sdn.phytopo.PhyTopo;
@@ -23,7 +23,7 @@ public class RFVerifier extends Verifier {
 	}
 
 	@Override
-	public void verify(Event event) {
+	public void verify(NetworkEvent event) {
 		// ideal model
 		Packet pkt = event.pkt;
 
@@ -40,13 +40,13 @@ public class RFVerifier extends Verifier {
 				if (p.isMatched(pkt)) {
 					// DROP
 					if (p.actions.equalsIgnoreCase("DENY")) {
-						addNotExpectedEvents(EventGenerator.generateEvent(
+						addNotExpectedEvents(NetworkEventGenerator.generateEvent(
 								p.priority, pkt, firewallSwitch.getId(),
 								firewallSwitch.getAllPortsExcept(event.interf.get(0)),
 								"out", event.timeStamp));
 					} else {
 						// ALLOW
-						addExpectedEvents(EventGenerator.generateEvent(
+						addExpectedEvents(NetworkEventGenerator.generateEvent(
 								p.priority, pkt, firewallSwitch.getId(),
 								firewallSwitch.getAllPortsExcept(event.interf.get(0)),
 								"out", event.timeStamp));
@@ -56,8 +56,8 @@ public class RFVerifier extends Verifier {
 			}
 
 			// default drop
-			addNotExpectedEvents(EventGenerator.generateEvent(
-					Event.DEFAULT_PRIORITY, pkt, firewallSwitch.getId(),
+			addNotExpectedEvents(NetworkEventGenerator.generateEvent(
+					NetworkEvent.DEFAULT_PRIORITY, pkt, firewallSwitch.getId(),
 					firewallSwitch.getAllPortsExcept(event.interf.get(0)), "out",
 					event.timeStamp));
 		} else {
@@ -65,7 +65,7 @@ public class RFVerifier extends Verifier {
 		}
 	}
 
-	public void changeInternalState(Event e) { 
+	public void changeInternalState(NetworkEvent e) { 
 		// System.out.println(new String(e.pkt.eth.ip.tcp.payload));
 		Policy p = new Gson().fromJson(new String(e.pkt.eth.ip.tcp.payload),
 				Policy.class);
@@ -74,9 +74,9 @@ public class RFVerifier extends Verifier {
 		// solve conflicts
 		if (p.actions != null && p.actions.equalsIgnoreCase("deny")) {
 			// remove expectedEvents
-			Iterator<Event> eIt = expectedEvents.iterator();
+			Iterator<NetworkEvent> eIt = expectedEvents.iterator();
 			while (eIt.hasNext()) {
-				Event temp = eIt.next();
+				NetworkEvent temp = eIt.next();
 				if (!temp.sw.equalsIgnoreCase(firewallSwitch.getId())
 						|| temp.priority > p.priority) {
 					continue;
@@ -87,9 +87,9 @@ public class RFVerifier extends Verifier {
 			}
 		} else {
 			// remove notexpectedevents
-			Iterator<Event> eIt = notExpectedEvents.iterator();
+			Iterator<NetworkEvent> eIt = notExpectedEvents.iterator();
 			while (eIt.hasNext()) {
-				Event temp = eIt.next();
+				NetworkEvent temp = eIt.next();
 				if (!temp.sw.equalsIgnoreCase(firewallSwitch.getId())
 						|| temp.priority > p.priority) {
 					continue;

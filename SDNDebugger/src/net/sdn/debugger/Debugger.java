@@ -12,7 +12,7 @@ import java.util.LinkedList;
 
 import com.google.gson.Gson;
 
-import net.sdn.event.Event;
+import net.sdn.event.NetworkEvent;
 import net.sdn.event.packet.PacketType;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
@@ -32,7 +32,7 @@ import rx.functions.Func0;
 
 
 
-class ErrorEvent extends Event {
+class ErrorEvent extends NetworkEvent {
 	Throwable exn;
 	public ErrorEvent(Throwable exn) {
 		this.exn = exn;
@@ -46,10 +46,10 @@ public class Debugger implements Runnable {
 	}
 
 	// Start with an empty stream that doesn't terminate...
-	public Observable<Event> events = Observable.never(); 
+	public Observable<NetworkEvent> events = Observable.never(); 
 
-	protected LinkedList<Event> expectedEvents = new LinkedList<Event>();
-	protected LinkedList<Event> notExpectedEvents = new LinkedList<Event>();
+	protected LinkedList<NetworkEvent> expectedEvents = new LinkedList<NetworkEvent>();
+	protected LinkedList<NetworkEvent> notExpectedEvents = new LinkedList<NetworkEvent>();
 	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
 
 	private final int port = 8200;
@@ -59,19 +59,19 @@ public class Debugger implements Runnable {
 	public Debugger() {		
 	}
 
-	public static Action1<Event> func_printevent = new Action1<Event>() {
+	public static Action1<NetworkEvent> func_printevent = new Action1<NetworkEvent>() {
         @Override
-        public void call(Event e) {
+        public void call(NetworkEvent e) {
             System.out.println("Event: "+e.toString());
         }
     };
 
-	private void timer(Event e) {
+	private void timer(NetworkEvent e) {
 		// clean expired events in notExpected and raise error in expectedEvent
-		Iterator<Event> it = this.notExpectedEvents.iterator();
+		Iterator<NetworkEvent> it = this.notExpectedEvents.iterator();
 		while (it.hasNext()) {
 			// remove expired rules
-			Event temp = it.next();
+			NetworkEvent temp = it.next();
 			if (e.timeStamp - temp.timeStamp >= EXPIRE_TIME){
 				System.out.println("Not Expected Event Expired:");
 				System.out.println(temp);
@@ -83,7 +83,7 @@ public class Debugger implements Runnable {
 
 		it = this.expectedEvents.iterator();
 		while (it.hasNext()) {
-			Event ev = it.next();
+			NetworkEvent ev = it.next();
 			if (e.timeStamp - ev.timeStamp >= EXPIRE_TIME) {
 				System.err.println("Expected Event but Not Happened:");
 				System.err.println(ev);
@@ -110,7 +110,7 @@ public class Debugger implements Runnable {
 
 	// Is this event an OpenFlow echo request or reply?
 	// TODO: why all of these null checks? Should be a method in the class for this.
-	boolean isOFEcho(Event eve) {
+	boolean isOFEcho(NetworkEvent eve) {
 		return eve.pkt.eth != null
 			&& eve.pkt.eth.ip != null
 			&& eve.pkt.eth.ip.tcp != null
@@ -119,21 +119,21 @@ public class Debugger implements Runnable {
 				eve.pkt.eth.ip.tcp.of_packet.type.equalsIgnoreCase("echo_request"));
 	}
 
-	private Observable<Event> buildNewStream(ObservableConnection<String, String> connection) {
+	private Observable<NetworkEvent> buildNewStream(ObservableConnection<String, String> connection) {
 		return connection.getInput().flatMap(
 			// flatMap over the stream of string chunks to create event stream
 			// This func turns every string into a stream of events (possibly empty)
-			new Func1<String, Observable<Event>>() {
+			new Func1<String, Observable<NetworkEvent>>() {
 				@Override
-				public Observable<Event> call(String msg) {
+				public Observable<NetworkEvent> call(String msg) {
 					// Add the new string and see if we get any full messages
 					String[] fullMessages = getFullMessages(msg);
-					List<Event> result = new ArrayList<Event>();
+					List<NetworkEvent> result = new ArrayList<NetworkEvent>();
 					for (String fullMessage : fullMessages) {
 						// get event; deserialize
 						// TODO: why re-create the Gson object for every event?
 						Gson gson = new Gson();
-						Event eve = gson.fromJson(fullMessage,Event.class);
+						NetworkEvent eve = gson.fromJson(fullMessage,NetworkEvent.class);
 						// check expired rules and gc
 						synchronized (this) {
 							timer(eve);
@@ -149,9 +149,9 @@ public class Debugger implements Runnable {
 				}
 			}) // end flatMap to construct stream of full events
 			// "onErrorReturn will instead emit a specified item and invoke the observer’s onCompleted method."
-			.onErrorReturn(new Func1<Throwable, Event>() {
+			.onErrorReturn(new Func1<Throwable, NetworkEvent>() {
 				@Override
-				public Event call(Throwable exn) {
+				public NetworkEvent call(Throwable exn) {
 					System.out.println(" --> Error/Exception thrown in stream. Returning an ErrorEvent and stopping.");
 					return new ErrorEvent(exn); // include error context in stream
 				}
@@ -180,7 +180,7 @@ public class Debugger implements Runnable {
 
 
 						// Build the stream of events from this new monitor
-						Observable<Event> newStream = buildNewStream(connection);
+						Observable<NetworkEvent> newStream = buildNewStream(connection);
 						// May have multiple streams coming from multiple connections, so merge them.
 						events = Observable.merge(events, newStream);
 
@@ -230,7 +230,7 @@ public class Debugger implements Runnable {
 
 	//abstract public void verify(Event event);
 
-	protected void addExpectedEvents(Event eve) {
+	protected void addExpectedEvents(NetworkEvent eve) {
 		System.out.println("Adding Expected Event:");
 		System.out.println(eve);
 		for (int i = 0; i < expectedEvents.size(); i++) {
@@ -242,7 +242,7 @@ public class Debugger implements Runnable {
 		expectedEvents.add(eve);
 	}
 
-	protected void addNotExpectedEvents(Event eve) {
+	protected void addNotExpectedEvents(NetworkEvent eve) {
 		System.out.println("Adding Not Expected Event:");
 		System.out.println(eve);
 		for (int i = 0; i < notExpectedEvents.size(); i++) {
@@ -259,7 +259,7 @@ public class Debugger implements Runnable {
 	}
 
 	// always allow heartbeat for rule expriations
-	private boolean isInterestedEvent(Event e) {
+	private boolean isInterestedEvent(NetworkEvent e) {
 //		System.out.println(e);
 		if ((interestedEvents.contains(PacketType.ARP) && e.pkt.eth.arp != null)
 				|| (interestedEvents.contains(PacketType.IP) && e.pkt.eth.ip != null)
@@ -280,9 +280,9 @@ public class Debugger implements Runnable {
 		return false;
 	}
 
-	protected void checkEvents(Event e) {
+	protected void checkEvents(NetworkEvent e) {
 		// check notExpectedEvent List
-		for (Event notExpected : notExpectedEvents) {
+		for (NetworkEvent notExpected : notExpectedEvents) {
 			if (notExpected.equals(e)) {
 				System.err.println("Not Expected Event Happened:");
 				System.err.println(notExpected);
@@ -292,7 +292,7 @@ public class Debugger implements Runnable {
 			}
 		}
 		// check expectedEvent List
-		for (Event expected : expectedEvents) {
+		for (NetworkEvent expected : expectedEvents) {
 			if (expected.equals(e)) {
 				System.out.println("Expected Event Happened:");
 				System.out.println(expected);
@@ -305,10 +305,10 @@ public class Debugger implements Runnable {
 		System.err.println("Unknown Event:");
 		System.err.println(e);
 		System.out.println("*********NE***************");
-		for (Event ev : notExpectedEvents)
+		for (NetworkEvent ev : notExpectedEvents)
 			System.out.println(new Gson().toJson(ev).toString());
 		System.out.println("*********E***************");
-		for (Event ev : expectedEvents)
+		for (NetworkEvent ev : expectedEvents)
 			System.out.println(new Gson().toJson(ev).toString());
 		return;
 	}

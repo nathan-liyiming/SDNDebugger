@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.sdn.event.packet.PacketType;
+import net.sdn.event.util.NetworkEventDirection;
 import net.sdn.phytopo.Controller;
 import net.sdn.phytopo.Link;
 import net.sdn.phytopo.PhyTopo;
@@ -177,7 +178,7 @@ public class Monitor {
 				Udp udp = new Udp();
 
 				// simplified packets objects
-				net.sdn.event.Event sEvt = new net.sdn.event.Event();
+				net.sdn.event.NetworkEvent sEvt = new net.sdn.event.NetworkEvent();
 				net.sdn.event.packet.Packet sPkt = new net.sdn.event.packet.Packet();
 				net.sdn.event.packet.Ethernet sEth = new net.sdn.event.packet.Ethernet();
 				net.sdn.event.packet.Arp sArp = new net.sdn.event.packet.Arp();
@@ -190,11 +191,11 @@ public class Monitor {
 				// eth
 				sEvt.timeStamp = jpacket.getCaptureHeader().timestampInNanos();
 				if (direction == Direction.IN) {
-					sEvt.direction = "in";
+					sEvt.direction = NetworkEventDirection.IN;
 				} else if (direction == Direction.OUT) {
-					sEvt.direction = "out";
+					sEvt.direction = NetworkEventDirection.OUT;
 				} else {
-					sEvt.direction = "inout";
+					sEvt.direction = NetworkEventDirection.CONTROLLER;
 				}
 				if (jpacket.hasHeader(eth)) {
 					sEvt.pkt = sPkt;
