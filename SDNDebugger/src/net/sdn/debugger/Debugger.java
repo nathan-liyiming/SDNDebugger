@@ -159,8 +159,10 @@ public class Debugger implements Runnable {
 				.onErrorReturn(new Func1<Throwable, NetworkEvent>() {
 					@Override
 					public NetworkEvent call(Throwable exn) {
-						System.out
-								.println(" --> Error/Exception thrown in stream. Returning an ErrorEvent and stopping.");
+						System.out.println(" --> Error/Exception thrown in stream. Returning an ErrorEvent and stopping.");
+						System.out.println(" --> "+exn.toString());
+						exn.printStackTrace();
+						System.out.println("\n\n");
 						return new ErrorEvent(exn); // include error context in
 													// stream
 					}

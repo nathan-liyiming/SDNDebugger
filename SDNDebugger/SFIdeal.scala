@@ -29,8 +29,9 @@ import scala.collection.immutable.Set;
 	Pass in a switch ID that is the firewall and a set of internal/external ports.
 	TODO: should take set of switches and mappings for internal/external.
 */
-class SFIdeal(topofn: String, fwswitchid: String, fwinternals: Set[String], fwexternals: Set[String]) {
-	val topo = new PhyTopo(topofn);
+class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[String]) {
+	//val topo = new PhyTopo(topofn);
+	
 	// use (dst,src) for incoming from external; this records outgoing pairs.
 	val allowed = new scala.collection.mutable.TreeSet[Tuple2[String, String]]();
 
@@ -63,7 +64,9 @@ class SFIdeal(topofn: String, fwswitchid: String, fwinternals: Set[String], fwex
 
 	// Listen in for necessary state changes
 	Simon.rememberInSet(Simon.nwEvents(), allowed,
-		{e: NetworkEvent =>Some(new Tuple2[String,String](e.pkt.eth.dl_src, e.pkt.eth.dl_dst))});
+		{e: NetworkEvent => if(is_incoming_int(e)) 
+								Some(new Tuple2[String,String](e.pkt.eth.dl_src, e.pkt.eth.dl_dst))
+							else None});
 
 	// Note: flatMap will _merge_ the streams that come out of each map. So we want flatMap after all.
 	//       concatMap would _concat_ them, which we don't want.
