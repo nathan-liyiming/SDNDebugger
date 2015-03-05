@@ -23,9 +23,15 @@ import net.sdn.phytopo.Switch;
 import net.sdn.event._;
 import net.sdn.event.packet._;
 import scala.concurrent.duration._;
+import scala.collection.immutable.Set;
 
-class SFIdeal(topofn: String) {
+/*
+	Pass in a switch ID that is the firewall and a set of internal/external ports.
+	TODO: should take set of switches and mappings for internal/external.
+*/
+class SFIdeal(topofn: String, fwswitchid: String, fwinternals: Set[String], fwexternals: Set[String]) {
 	val topo = new PhyTopo(topofn);
+	// use (dst,src) for incoming from external; this records outgoing pairs.
 	val allowed = new scala.collection.mutable.TreeSet[Tuple2[String, String]]();
 
 	def printwarning(e: Event) {
@@ -42,13 +48,16 @@ class SFIdeal(topofn: String) {
 		}
 	}
 	def is_incoming_int(e: NetworkEvent): Boolean = {
-		e.direction == NetworkEventDirection.IN && true // todo
+		e.direction == NetworkEventDirection.IN && 
+		e.sw == fwswitchid && fwinternals(e.sw)
 	}
 	def is_incoming_ext_allowed(e: NetworkEvent): Boolean = {
-		e.direction == NetworkEventDirection.IN && true // todo
+		e.direction == NetworkEventDirection.IN && 
+		e.sw == fwswitchid && fwexternals(e.sw) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 	def is_incoming_ext_not_allowed(e: NetworkEvent): Boolean = {
-		e.direction == NetworkEventDirection.IN && true // todo
+		e.direction == NetworkEventDirection.IN && 
+		e.sw == fwswitchid && fwexternals(e.sw) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 
 
