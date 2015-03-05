@@ -56,7 +56,10 @@ class SFIdeal(topofn: String) {
 	Simon.rememberInSet(Simon.nwEvents(), allowed,
 		{e: NetworkEvent =>Some(new Tuple2[String,String](e.pkt.eth.dl_src, e.pkt.eth.dl_dst))});
 
-	// TODO: is flatMap safe here? i doubt it. may delay. want something like running merge
+	// Note: flatMap will _merge_ the streams that come out of each map. So we want flatMap after all.
+	//       concatMap would _concat_ them, which we don't want.
+	//        [apparently, with concatMap, subscriptions may only happen after the previous stream terminates,
+	//          which can cause problems for concatMapping hot observables. (Source: stackoverflow.)]
 
 	// e1: ext -> int [not in state] => expect dropped
 	val e1 = Simon.nwEvents().filter(is_incoming_ext_not_allowed).flatMap(e =>
