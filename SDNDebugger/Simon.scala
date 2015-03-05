@@ -1,11 +1,6 @@
 import net.sdn.debugger.Debugger;
-import net.sdn.event.EmptyEvent;
 
-// TODO: issues creating this class if defined in Scala?
-import net.sdn.event.ExpectViolation;
-import net.sdn.event.Event;
-
-// for timers
+import net.sdn.event._;
 import scala.concurrent.duration._;
 
 // use Scala's observable here
@@ -42,6 +37,9 @@ object Simon {
 	def events(): Observable[Event] = {
 		JavaConversions.toScalaObservable(d.events)
 	}
+	def nwEvents(): Observable[NetworkEvent] = {
+		events().flatMap(e => e match {case et: NetworkEvent => Observable.just(et) case _ => Observable.empty})
+	}
 
 	// TODO: ideally we'd have another function that created a new xterm and ran a continuous monitor until completion
 	def showmenext(o: Observable[Event]) {
@@ -67,16 +65,22 @@ object Simon {
 		Note that expectation observables can be re-used. Re-subscribe to start a fresh timer and resume listening.
 	*/
 
-	def expect(pred: Event=>Boolean, d: Duration): Observable[Event] = {
-		return expect(pred, d, Observable.never)
+	def expect[EVT <: Event](src: Observable[EVT], pred: EVT=>Boolean, d: Duration): Observable[Event] = {
+		return expect(src, pred, d, Observable.never)
 	}
 	// Cancellable expectation.
 	// If the cancel observable fires an event, this expectation will never fire either way.
-	def expect(pred: Event=>Boolean, d: Duration, cancel: Observable[AnyVal]): Observable[Event] = {
+	def expect[EVT <: Event](src: Observable[EVT], pred: EVT=>Boolean, d: Duration, cancel: Observable[Any]): Observable[Event] = {
 		// timer, filter components
 		val t = Observable.timer(d).map(n => new ExpectViolation());
-		val f = events().filter(pred);
+		val f = src.filter(pred);
 		return t.merge(f).first.takeUntil(cancel);
+	}
+	def expectNot[EVT <: Event](src: Observable[EVT], pred: EVT=>Boolean, d: Duration): Observable[Event] = {
+		return expectNot(src, pred, d, Observable.never)
+	}
+	def expectNot[EVT <: Event](src: Observable[EVT], pred: EVT=>Boolean, d: Duration, cancel: Observable[Any]): Observable[Event] = {
+		return expect(src, pred, d, cancel).map(e => e match {case eviol: ExpectViolation => new ExpectSuccess() case e => new ExpectViolation(e)})
 	}
 
 	/*
@@ -84,7 +88,7 @@ object Simon {
 		We may also just want to store info extracted from a stream.
 	*/
 
-	def rememberInSet[T](o: Observable[Event], s: scala.collection.mutable.SortedSet[T], f: Event=>Option[T]): Subscription = {
+	def rememberInSet[EVT <: Event,T](o: Observable[EVT], s: scala.collection.mutable.SortedSet[T], f: EVT=>Option[T]): Subscription = {
 		return o.subscribe({e => f(e) match { case Some(t) => s += t case None => ()}})
 	}
 

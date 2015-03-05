@@ -22,40 +22,54 @@ import net.sdn.phytopo.PhyTopo;
 import net.sdn.phytopo.Switch;
 import net.sdn.event._;
 import net.sdn.event.packet._;
+import scala.concurrent.duration._;
 
 class SFIdeal(topofn: String) {
 	val topo = new PhyTopo(topofn);
 	val allowed = new scala.collection.mutable.TreeSet[Tuple2[String, String]]();
-
-	// TODO: this is way too verbose
-	def stateHelper(e: Event): Option[Tuple2[String, String]] = {
-		e match {
-			case et: NetworkEvent => {
-					if(et.pkt.eth == null) return None
-					else return Some(new Tuple2[String,String](et.pkt.eth.dl_src, et.pkt.eth.dl_dst))
-			}
-			case _ => return None
-		}
-	}
 
 	def printwarning(e: Event) {
 		println("**** Expectation violated!");
 		println(e); // TODO more detail
 	}
 
+	//
+	def is_outgoing_same(orig: NetworkEvent): NetworkEvent => Boolean = {
+		{e =>
+			e.pkt.eth.dl_src == orig.pkt.eth.dl_src &&
+			e.pkt.eth.dl_dst == orig.pkt.eth.dl_dst &&
+			e.sw == orig.sw && e.direction == NetworkEventDirection.OUT
+		}
+	}
+	def is_incoming_int(e: NetworkEvent): Boolean = {
+		e.direction == NetworkEventDirection.IN && true // todo
+	}
+	def is_incoming_ext_allowed(e: NetworkEvent): Boolean = {
+		e.direction == NetworkEventDirection.IN && true // todo
+	}
+	def is_incoming_ext_not_allowed(e: NetworkEvent): Boolean = {
+		e.direction == NetworkEventDirection.IN && true // todo
+	}
+
+
 	// Listen in for necessary state changes
-	Simon.rememberInSet[Tuple2[String,String]](Simon.events(), allowed, stateHelper);
+	Simon.rememberInSet(Simon.nwEvents(), allowed,
+		{e: NetworkEvent =>Some(new Tuple2[String,String](e.pkt.eth.dl_src, e.pkt.eth.dl_dst))});
 
-	// ext -> int [not in state] => expect dropped
+	// TODO: is flatMap safe here? i doubt it. may delay. want something like running merge
 
-	// int -> ext => expect pass, add to state
-	// TODO: is flatMap safe here?
-	Simon.events().filter(is_incoming_int).flatMap(e =>
-		e match
-			case et: NetworkEvent =>
-				Simon.expect({e2 => /* outgoing, same sw, same addrs... et.pkt.eth.dl_src*/}, Duration(10, "milliseconds"))).subscribe(printwarning);
+	// e1: ext -> int [not in state] => expect dropped
+	val e1 = Simon.nwEvents().filter(is_incoming_ext_not_allowed).flatMap(e =>
+				Simon.expectNot(Simon.nwEvents(), is_outgoing_same(e), Duration(10, "milliseconds")));
 
+	// e2: int -> ext => expect pass, add to state
+	val e2 = Simon.nwEvents().filter(is_incoming_int).flatMap(e =>
+				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(10, "milliseconds")));
 
+	// e3: ext -> int [in state] => expect pass
+	val e3 = Simon.nwEvents().filter(is_incoming_ext_allowed).flatMap(e =>
+				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(10, "milliseconds")));
 
-	// ext -> int [in state] => expect pass
+	val violations = e1.merge(e2).merge(e3);
+	val autosubscribe = violations.subscribe({e => printwarning(e)});
 }
