@@ -3,6 +3,8 @@ package net.sdn.debugger;
 /**
  * @author Da Yu, Yiming Li, Tim Nelson
  */
+import java.util.HashMap;
+import java.util.Map;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -52,7 +54,10 @@ public class Debugger implements Runnable {
 
 	private final int port = 8200;
 	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
-	private String partialLine = "";
+	
+	// Separate partial lines for each connection:
+	private Map<ObservableConnection<String, String>, String> partialLines = 
+		new HashMap<ObservableConnection<String, String>, String>();	
 
 	public Debugger() {
 	}
@@ -92,16 +97,20 @@ public class Debugger implements Runnable {
 
 	// Extend current partial line by <msg> and extract what full lines have
 	// been created.
-	String[] getFullMessages(String msg) {
+	String[] getFullMessages(ObservableConnection<String, String> connection, String msg) {
+		if(!partialLines.containsKey(connection))
+			partialLines.put(connection, "");
+		String partialLine = partialLines.get(connection);
+
 		partialLine += msg;
 		String temp[] = partialLine.split("\n");
 		if (partialLine.endsWith("\n")) {
 			// full message line
-			partialLine = "";
+			partialLines.put(connection, "");
 			return temp;
 		} else {
 			// part message line
-			partialLine = temp[temp.length - 1];
+			partialLines.put(connection, temp[temp.length - 1]);			
 			return java.util.Arrays.copyOf(temp, temp.length - 1);
 		}
 	}
@@ -120,7 +129,7 @@ public class Debugger implements Runnable {
 	}
 
 	private Observable<Event> buildNewStream(
-			ObservableConnection<String, String> connection) {
+			final ObservableConnection<String, String> connection) {
 		return connection.getInput().flatMap(
 		// flatMap over the stream of string chunks to create event stream
 		// This func turns every string into a stream of events (possibly empty)
@@ -129,7 +138,7 @@ public class Debugger implements Runnable {
 					public Observable<Event> call(String msg) {
 						// Add the new string and see if we get any full
 						// messages
-						String[] fullMessages = getFullMessages(msg);
+						String[] fullMessages = getFullMessages(connection, msg);
 						List<Event> result = new ArrayList<Event>();
 						for (String fullMessage : fullMessages) {
 							// get event; deserialize

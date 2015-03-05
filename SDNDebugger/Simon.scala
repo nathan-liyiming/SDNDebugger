@@ -16,7 +16,7 @@ import scala.collection.mutable.SortedSet;
 //  If you get a malformed class name error, make sure you've overridden the toString() method.
 
 object Simon {
-	var d: Debugger = new Debugger();
+	val d: Debugger = new Debugger();
 	private var running = false;
 
 	def run() {
