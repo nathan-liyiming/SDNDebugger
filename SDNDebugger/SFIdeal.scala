@@ -48,17 +48,24 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 			e.sw == orig.sw && e.direction == NetworkEventDirection.OUT
 		}
 	}
-	def is_incoming_int(e: NetworkEvent): Boolean = {
-		e.direction == NetworkEventDirection.IN && 
-		e.sw == fwswitchid && fwinternals(e.sw)
+	// TODO: OMGZ! Make interf field hold single interface!
+	//   (if this event ever arrives with >1 interface in the list, this check will *fail*)
+	// Also: empty list (for ctrler msg) ---> saved by short circuit evaluation below
+	def is_incoming_int(e: NetworkEvent): Boolean = {		
+		/*println( (e.direction == NetworkEventDirection.IN));
+		println(e.sw == fwswitchid); 
+		println(if(e.interf.size() >= 1) (fwinternals(e.interf.get(0))) else "NONE");*/
+			
+		e.direction == NetworkEventDirection.IN && // short circuit
+		e.sw == fwswitchid && fwinternals(e.interf.get(0))		
 	}
 	def is_incoming_ext_allowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
-		e.sw == fwswitchid && fwexternals(e.sw) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
+		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 	def is_incoming_ext_not_allowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
-		e.sw == fwswitchid && fwexternals(e.sw) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
+		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 
 

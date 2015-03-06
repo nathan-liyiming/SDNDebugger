@@ -79,6 +79,7 @@ object Simon {
 	// If the cancel observable fires an event, this expectation will never fire either way.
 	def expect[EVT <: Event](src: Observable[EVT], pred: EVT=>Boolean, d: Duration, cancel: Observable[Any]): Observable[Event] = {
 		// timer, filter components
+		//println("Creating expectation... duration:"+d);
 		val t = Observable.timer(d).map(n => new ExpectViolation());
 		val f = src.filter(pred);
 		return t.merge(f).first.takeUntil(cancel);
