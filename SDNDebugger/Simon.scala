@@ -5,6 +5,7 @@ import scala.concurrent.duration._;
 
 // use Scala's observable here
 import rx.lang.scala.Observable;
+import rx.lang.scala.observables._;
 import rx.lang.scala.Subscription;
 import rx.lang.scala.JavaConversions;
 
@@ -18,6 +19,8 @@ import scala.collection.mutable.SortedSet;
 object Simon {
 	val d: Debugger = new Debugger();
 	private var running = false;
+	private var last_java_events: rx.Observable[Event] = rx.Observable.never();
+	private var last_scala_events: Observable[Event] = Observable.never;
 
 	def run() {
 		if(running) return;
@@ -35,7 +38,11 @@ object Simon {
 	// NOTE: this should be a *hot* Observable, i.e., it doesn't save events
 	// that have happened before subscription.
 	def events(): Observable[Event] = {
-		JavaConversions.toScalaObservable(d.events)
+		// Don't create a new Observable every call.
+		if(last_java_events == d.events) return last_scala_events;
+		last_java_events = d.events;
+		last_scala_events = JavaConversions.toScalaObservable(d.events);
+		return last_scala_events;
 	}
 	def nwEvents(): Observable[NetworkEvent] = {
 		events().flatMap(e => e match {case et: NetworkEvent => Observable.just(et) case _ => Observable.empty})

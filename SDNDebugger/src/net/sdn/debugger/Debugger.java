@@ -23,6 +23,7 @@ import io.reactivex.netty.pipeline.PipelineConfigurators;
 import io.reactivex.netty.server.RxServer;
 import rx.Notification;
 import rx.Observable;
+import rx.observables.ConnectableObservable;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -54,21 +55,21 @@ public class Debugger implements Runnable {
 
 	private final int port = 8200;
 	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
-	
+
 	// Separate partial lines for each connection:
-	private Map<ObservableConnection<String, String>, String> partialLines = 
-		new HashMap<ObservableConnection<String, String>, String>();	
+	private Map<ObservableConnection<String, String>, String> partialLines =
+		new HashMap<ObservableConnection<String, String>, String>();
 
 	public Debugger() {
 	}
 
-	public static Action1<Event> func_printevent = new Action1<Event>() {
+	public static Action1<Event> func_do_nothing = new Action1<Event>() {
 		@Override
 		public void call(Event e) {
-			System.out.println("Event: " + e.toString());
 		}
 	};
 
+/*
 	private void timer(NetworkEvent e) {
 		// clean expired events in notExpected and raise error in expectedEvent
 		Iterator<NetworkEvent> it = this.notExpectedEvents.iterator();
@@ -94,6 +95,7 @@ public class Debugger implements Runnable {
 				break;
 		}
 	}
+*/
 
 	// Extend current partial line by <msg> and extract what full lines have
 	// been created.
@@ -110,7 +112,7 @@ public class Debugger implements Runnable {
 			return temp;
 		} else {
 			// part message line
-			partialLines.put(connection, temp[temp.length - 1]);			
+			partialLines.put(connection, temp[temp.length - 1]);
 			return java.util.Arrays.copyOf(temp, temp.length - 1);
 		}
 	}
@@ -149,7 +151,7 @@ public class Debugger implements Runnable {
 									NetworkEvent.class);
 							// check expired rules and gc
 							synchronized (this) {
-								timer(eve);
+								//timer(eve);
 								// if (isOFEcho(eve))
 								// return Observable.empty();
 								result.add(eve);
@@ -197,38 +199,30 @@ public class Debugger implements Runnable {
 						 * "cold observable" behavior) subscribe returns a
 						 * subscription object, which at this point is
 						 * unsubscribed.
-						 * 
+						 *
 						 * merging will complete both streams unless one returns
 						 * an error (not same as complete!)
 						 */
 
-						// Build the stream of events from this new monitor
-						Observable<Event> newStream = buildNewStream(connection);
+						/* Build the stream of events from this new monitor
+						   Make it hot via publish/connect. Originally, this was COLD, which
+						   meant that multiple subscribers to Simon.events() would cause the same
+						   message to be processed multiple times.
+						*/
+						Observable<Event> newStream = buildNewStream(connection).publish().refCount();
+
 						// May have multiple streams coming from multiple
 						// connections, so merge them.
 						events = Observable.merge(events, newStream);
 
 						// keep going while not an error
 						return connection.getInput()
-						// return newStream // *** It was not safe to
-						// use the above ^. Needed to use newStream
-						// here. Why?
 								.flatMap(
 										new Func1<String, Observable<Notification<Void>>>() {
 											@Override
 											public Observable<Notification<Void>> call(
 													String str) {
-												// System.out.println("debug: flatmap: "+e.toString());
-												return Observable.empty(); // normally
-																			// would
-																			// call
-																			// materialize()
-																			// here
-																			// to
-																			// get
-																			// proper
-																			// return
-																			// type
+												return Observable.empty();
 											}
 										})
 
@@ -245,7 +239,6 @@ public class Debugger implements Runnable {
 											@Override
 											public Boolean call(
 													Notification<Void> notification) {
-												// System.out.println("debug: takewhile predicate (expect not to see): "+!notification.isOnError());
 												return !notification
 														.isOnError();
 											} // once an error, print this
@@ -276,89 +269,6 @@ public class Debugger implements Runnable {
 
 		// System.out.println("Monitor handler started. Waiting for connections.\n");
 		return server;
-	}
-
-	protected void addExpectedEvents(NetworkEvent eve) {
-		System.out.println("Adding Expected Event:");
-		System.out.println(eve);
-		for (int i = 0; i < expectedEvents.size(); i++) {
-			if (expectedEvents.get(i).priority <= eve.priority) {
-				expectedEvents.add(i, eve);
-				return;
-			}
-		}
-		expectedEvents.add(eve);
-	}
-
-	protected void addNotExpectedEvents(NetworkEvent eve) {
-		System.out.println("Adding Not Expected Event:");
-		System.out.println(eve);
-		for (int i = 0; i < notExpectedEvents.size(); i++) {
-			if (notExpectedEvents.get(i).priority <= eve.priority) {
-				notExpectedEvents.add(i, eve);
-				return;
-			}
-		}
-		notExpectedEvents.add(eve);
-	}
-
-	protected void addInterestedEvents(PacketType t) {
-		interestedEvents.add(t);
-	}
-
-	// always allow heartbeat for rule expriations
-	private boolean isInterestedEvent(NetworkEvent e) {
-		// System.out.println(e);
-		if ((interestedEvents.contains(PacketType.ARP) && e.pkt.eth.arp != null)
-				|| (interestedEvents.contains(PacketType.IP) && e.pkt.eth.ip != null)
-				|| (interestedEvents.contains(PacketType.ICMP)
-						&& e.pkt.eth.ip != null && e.pkt.eth.ip.icmp != null)
-				|| (interestedEvents.contains(PacketType.TCP)
-						&& e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null && e.pkt.eth.ip.tcp.of_packet == null)
-				|| (interestedEvents.contains(PacketType.UDP)
-						&& e.pkt.eth.ip != null && e.pkt.eth.ip.udp != null)
-				|| (interestedEvents.contains(PacketType.OF)
-						&& e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null && e.pkt.eth.ip.tcp.of_packet != null)
-				|| (e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null
-						&& e.pkt.eth.ip.tcp.of_packet != null && (e.pkt.eth.ip.tcp.of_packet.type
-						.equals("echo_reply") || e.pkt.eth.ip.tcp.of_packet.type
-						.equals("echo_request")))) {
-			return true;
-		}
-		return false;
-	}
-
-	protected void checkEvents(NetworkEvent e) {
-		// check notExpectedEvent List
-		for (NetworkEvent notExpected : notExpectedEvents) {
-			if (notExpected.equals(e)) {
-				System.err.println("Not Expected Event Happened:");
-				System.err.println(notExpected);
-				notExpectedEvents.remove(notExpected);
-				// printEvents(notExpectedEvents);
-				return;
-			}
-		}
-		// check expectedEvent List
-		for (NetworkEvent expected : expectedEvents) {
-			if (expected.equals(e)) {
-				System.out.println("Expected Event Happened:");
-				System.out.println(expected);
-				expectedEvents.remove(expected);
-				// printEvents(expectedEvents);
-				return;
-			}
-		}
-
-		System.err.println("Unknown Event:");
-		System.err.println(e);
-		System.out.println("*********NE***************");
-		for (NetworkEvent ev : notExpectedEvents)
-			System.out.println(new Gson().toJson(ev).toString());
-		System.out.println("*********E***************");
-		for (NetworkEvent ev : expectedEvents)
-			System.out.println(new Gson().toJson(ev).toString());
-		return;
 	}
 
 }
