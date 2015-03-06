@@ -81,16 +81,16 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	//          which can cause problems for concatMapping hot observables. (Source: stackoverflow.)]
 
 	// e1: ext -> int [not in state] => expect dropped
-	val e1 = Simon.nwEvents().filter(is_incoming_ext_not_allowed).flatMap(e =>
-				Simon.expectNot(Simon.nwEvents(), is_outgoing_same(e), Duration(10, "milliseconds")));
+	val e1 = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents).filter(is_incoming_ext_not_allowed).flatMap(e =>
+				Simon.expectNot(Simon.nwEvents(), is_outgoing_same(e), Duration(100, "milliseconds")));
 
 	// e2: int -> ext => expect pass, add to state
-	val e2 = Simon.nwEvents().filter(is_incoming_int).flatMap(e =>
-				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(10, "milliseconds")));
+	val e2 = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents).filter(is_incoming_int).flatMap(e =>
+				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(100, "milliseconds")));
 
 	// e3: ext -> int [in state] => expect pass
-	val e3 = Simon.nwEvents().filter(is_incoming_ext_allowed).flatMap(e =>
-				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(10, "milliseconds")));
+	val e3 = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents).filter(is_incoming_ext_allowed).flatMap(e =>
+				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(100, "milliseconds")));
 
 	val violations = e1.merge(e2).merge(e3);
 	val autosubscribe = violations.subscribe({e => printwarning(e)});
