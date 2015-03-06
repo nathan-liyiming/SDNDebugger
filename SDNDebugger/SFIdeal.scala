@@ -36,8 +36,15 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	val allowed = new scala.collection.mutable.TreeSet[Tuple2[String, String]]();
 
 	def printwarning(e: Event) {
-		println("**** Expectation violated!");
-		println(e); // TODO more detail
+		e match {
+		case eviol: ExpectViolation => {
+			println("**** Expectation violated!");
+			println(e); // TODO more detail
+		}
+		case _ => {
+			println("**** Expectation occurs!");
+		}
+		}
 	}
 
 	//
@@ -61,11 +68,11 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	}
 	def is_incoming_ext_allowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
-		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
+		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 	def is_incoming_ext_not_allowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
-		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
+		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 
 
@@ -82,15 +89,15 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 
 	// e1: ext -> int [not in state] => expect dropped
 	val e1 = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents).filter(is_incoming_ext_not_allowed).flatMap(e =>
-				Simon.expectNot(Simon.nwEvents(), is_outgoing_same(e), Duration(100, "milliseconds")));
+				Simon.expectNot(Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents), is_outgoing_same(e), Duration(100, "milliseconds")));
 
 	// e2: int -> ext => expect pass, add to state
 	val e2 = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents).filter(is_incoming_int).flatMap(e =>
-				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(100, "milliseconds")));
+				Simon.expect(Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents), is_outgoing_same(e), Duration(100, "milliseconds")));
 
 	// e3: ext -> int [in state] => expect pass
 	val e3 = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents).filter(is_incoming_ext_allowed).flatMap(e =>
-				Simon.expect(Simon.nwEvents(), is_outgoing_same(e), Duration(100, "milliseconds")));
+				Simon.expect(Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents), is_outgoing_same(e), Duration(100, "milliseconds")));
 
 	val violations = e1.merge(e2).merge(e3);
 	val autosubscribe = violations.subscribe({e => printwarning(e)});
