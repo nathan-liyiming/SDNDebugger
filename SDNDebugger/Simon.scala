@@ -49,7 +49,7 @@ object Simon {
 	}
 
 	// TODO: ideally we'd have another function that created a new xterm and ran a continuous monitor until completion
-	def showmenext(o: Observable[Event]) {
+	def nextEvent(o: Observable[Event]) {
 		//println("Printing first event in observable (if empty, will print after something arrives):");
 		//o.first.subscribe(e => println(e)); // o.first seems to become cold.
 
@@ -82,7 +82,8 @@ object Simon {
 		//println("Creating expectation... duration:"+d);
 		val t = Observable.timer(d).map(n => new ExpectViolation());
 		val f = src.filter(pred);
-		return t.merge(f).first.takeUntil(cancel);
+		//return t.merge(f).first.takeUntil(cancel);
+		t.merge(f).first.takeUntil(cancel).map(e => e match {case eviol: ExpectViolation => new ExpectViolation(eviol) case e => new ExpectSuccess()})
 	}
 	def expectNot[EVT <: Event](src: Observable[EVT], pred: EVT=>Boolean, d: Duration): Observable[Event] = {
 		return expectNot(src, pred, d, Observable.never)

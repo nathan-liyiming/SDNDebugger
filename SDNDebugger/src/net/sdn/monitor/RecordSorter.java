@@ -3,6 +3,11 @@ package net.sdn.monitor;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 
+import net.sdn.event.NetworkEvent;
+import net.sdn.event.NetworkEventDirection;
+
+import com.google.gson.Gson;
+
 public class RecordSorter extends Thread {
 
 	private final static long interval = 200000000;
@@ -16,14 +21,14 @@ public class RecordSorter extends Thread {
 		this.out = out;
 	}
 
-	public void insertRecord(long time, String recorder) {
+	public void insertRecord(long time, NetworkEvent recorder) {
 		int i = 0;
 		synchronized (this) {
 			for (i = store.size() - 1; i >= 0; i--) {
 				if (time > store.get(i).time) {
 					break;
 				} else if (time == store.get(i).time) {
-					if (recorder.contains("out")) {
+					if (recorder.direction == NetworkEventDirection.OUT) {
 						// remove "in", add "out"
 						store.remove(i);
 					} else {
@@ -38,14 +43,18 @@ public class RecordSorter extends Thread {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		while (true) {
 			split = System.currentTimeMillis() * 1000000 - interval;
 			synchronized (this) {
 				while (store.size() != 0 && store.getFirst().time <= split) {
-					String tmp = store.removeFirst().recorder;
-					System.out.println(tmp);
-					out.println(tmp);
+					NetworkEvent sEvt = store.removeFirst().recorder;
+					
+					// serialization
+					Gson gson = new Gson();
+					String json = gson.toJson(sEvt);
+					
+					System.out.println(json);
+					out.println(json);
 					out.flush();
 				}
 			}
@@ -60,9 +69,9 @@ public class RecordSorter extends Thread {
 
 	public class Pair {
 		public long time;
-		public String recorder;
+		public NetworkEvent recorder;
 
-		public Pair(long time, String recorder) {
+		public Pair(long time, NetworkEvent recorder) {
 			this.time = time;
 			this.recorder = recorder;
 		}

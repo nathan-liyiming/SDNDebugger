@@ -336,10 +336,7 @@ public class Monitor {
 						sEvt.sw = port_sw.get(sw_port);
 					}
 
-					// serialization
-					Gson gson = new Gson();
-					String json = gson.toJson(sEvt);
-					rs.insertRecord(sEvt.timeStamp, json);
+					rs.insertRecord(sEvt.timeStamp, sEvt);
 				}
 			}
 		};

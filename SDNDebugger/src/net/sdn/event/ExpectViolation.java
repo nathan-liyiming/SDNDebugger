@@ -11,6 +11,9 @@ public class ExpectViolation extends Event {
 	}
 
 	public String toString() {
-		return "ExpectViolation";
+		if (context == null) {
+			return "ExpectViolation";
+		}
+		return "ExpectViolation:\n " + context.toString();
 	}
 }
