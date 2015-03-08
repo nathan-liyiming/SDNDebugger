@@ -57,8 +57,7 @@ class SPIdeal(topofn: String) {
 
 	val ICMPStream = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents)
 
-	ICMPStream.filter(isFirstHop).subscribe(e => setCounter(e))
-	// ICMPStream.filter(isFirstHop).flatMap(e => Simon.expect(ICMPStream, ))
+	ICMPStream.filter(isFirstHop).subscribe(setCounter)
 
 	ICMPStream.filter(e => e.direction == NetworkEventDirection.IN).flatMap(e =>
 				Simon.expect(ICMPStream, isPassThrough(e), Duration(100, "milliseconds")));
