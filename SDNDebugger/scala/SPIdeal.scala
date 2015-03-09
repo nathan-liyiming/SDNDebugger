@@ -15,20 +15,6 @@ class SPIdeal(topofn: String) {
 	val routes = BellmanFord.bellmanFordCompute(topo)
 	val count = Map[BellmanFord.Pair, Int]()
 
-	def printwarning(e: Event) {
-		e match {
-			case eviol: ExpectViolation => 
-				println("**** Violation: ****")
-				println(eviol)
-			case esucc: ExpectSuccess =>
-				println("**** Success: ****") 
-				println(esucc)
-			case _ =>
-				println("**** Unknown: ****")
-				println(e)
-		}
-	}
-
 	def isComingIn(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN
 	}
@@ -90,5 +76,5 @@ class SPIdeal(topofn: String) {
 
 	val violations = e1.merge(e2)
 	
-	val autosubscribe = violations.subscribe(printwarning(_))
+	val autosubscribe = violations.subscribe(Simon.printwarning(_))
 }

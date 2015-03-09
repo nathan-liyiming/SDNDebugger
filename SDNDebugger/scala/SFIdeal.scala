@@ -35,20 +35,6 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	// use (dst,src) for incoming from external; this records outgoing pairs.
 	val allowed = new scala.collection.mutable.TreeSet[Tuple2[String, String]]();
 
-	def printwarning(e: Event) {
-		e match {
-			case eviol: ExpectViolation => 
-				println("**** Violation: ****")
-				println(eviol)
-			case esucc: ExpectSuccess =>
-				println("**** Success: ****") 
-				println(esucc)
-			case _ =>
-				println("**** Unknown: ****")
-				println(e)
-		}
-	}
-
 	//
 	def isOutgoingSame(orig: NetworkEvent): NetworkEvent => Boolean = {
 		{e =>
@@ -105,5 +91,5 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 				Simon.expect(ICMPStream, isOutgoingSame(e), Duration(100, "milliseconds")));
 
 	val violations = e1.merge(e2).merge(e3);
-	val autosubscribe = violations.subscribe({e => printwarning(e)});
+	val autosubscribe = violations.subscribe({e => Simon.printwarning(e)});
 }

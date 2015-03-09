@@ -32,6 +32,22 @@ object Simon {
 		// events = JavaConversions.toScalaObservable(d.events)
 	}
 
+	def printwarning(e: Event) {
+		e match {
+			case eviol: ExpectViolation => 
+				println(Console.RED + "**** Violation: ****")
+				println(Console.RED + eviol)
+			case esucc: ExpectSuccess =>
+				println(Console.GREEN + "**** Success: ****") 
+				println(Console.GREEN + esucc)
+			case _ =>
+				println(Console.BLUE + "**** Unknown: ****")
+				println(Console.BLUE + e)
+		}
+		// reset
+		println(Console.RESET)
+	}
+
 	// WARNING: this won't auto-update existing Observables as new monitors join,
 	// so wait until monitor registration is complete before calling (or be
 	// aware that you may need to reconstruct streams you've already built.)
@@ -137,5 +153,6 @@ scala> Simon.run()
  threw malformed class name. Not sure why.
 */
 
-
+Simon.run()
+println("Simon has been loaded!")
 
