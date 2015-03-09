@@ -52,15 +52,15 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 		println(if(e.interf.size() >= 1) (fwinternals(e.interf.get(0))) else "NONE");*/
 			
 		e.direction == NetworkEventDirection.IN && // short circuit
-		e.sw == fwswitchid && fwinternals(e.interf.get(0))
+		e.sw == fwswitchid && fwinternals(e.interf)
 	}
 	def isIncomingExtAllowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
-		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
+		e.sw == fwswitchid && fwexternals(e.interf) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 	def isIncomingExtNotAllowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
-		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
+		e.sw == fwswitchid && fwexternals(e.interf) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 
 	// we only handle icmp flow

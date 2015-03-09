@@ -40,7 +40,7 @@ public class LBVerifier extends Verifier{
 	public void verify(NetworkEvent event) {
 		// TODO Auto-generated method stub
 		if (event.direction == NetworkEventDirection.IN && event.sw.equalsIgnoreCase(loadBalancer.getId())
-				&& inPorts.contains(event.interf.get(0))) {
+				&& inPorts.contains(event.interf)) {
 			if (count < ALARM_PACKET_NUMBER)
 				count++;
 			else {
@@ -52,9 +52,9 @@ public class LBVerifier extends Verifier{
 		}
 		
 		if (event.direction == NetworkEventDirection.OUT && event.sw.equalsIgnoreCase(loadBalancer.getId())
-				&& outPorts.contains(event.interf.get(0))){
-			long temp = portMonitor.get(event.interf.get(0));
-			portMonitor.put(event.interf.get(0), temp + event.pkt.eth.ip.tcp.payload.length);
+				&& outPorts.contains(event.interf)){
+			long temp = portMonitor.get(event.interf);
+			portMonitor.put(event.interf, temp + event.pkt.eth.ip.tcp.payload.length);
 			return;
 		}
 		

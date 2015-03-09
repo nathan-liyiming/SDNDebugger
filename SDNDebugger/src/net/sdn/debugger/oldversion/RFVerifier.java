@@ -43,13 +43,13 @@ public class RFVerifier extends Verifier {
 					if (p.actions.equalsIgnoreCase("DENY")) {
 						addNotExpectedEvents(NetworkEventGenerator.generateEvent(
 								p.priority, pkt, firewallSwitch.getId(),
-								firewallSwitch.getAllPortsExcept(event.interf.get(0)),
+								firewallSwitch.getAllPortsExcept(event.interf),
 								NetworkEventDirection.OUT, event.timeStamp));
 					} else {
 						// ALLOW
 						addExpectedEvents(NetworkEventGenerator.generateEvent(
 								p.priority, pkt, firewallSwitch.getId(),
-								firewallSwitch.getAllPortsExcept(event.interf.get(0)),
+								firewallSwitch.getAllPortsExcept(event.interf),
 								NetworkEventDirection.OUT, event.timeStamp));
 					}
 					return;
@@ -59,7 +59,7 @@ public class RFVerifier extends Verifier {
 			// default drop
 			addNotExpectedEvents(NetworkEventGenerator.generateEvent(
 					NetworkEvent.DEFAULT_PRIORITY, pkt, firewallSwitch.getId(),
-					firewallSwitch.getAllPortsExcept(event.interf.get(0)), NetworkEventDirection.OUT,
+					firewallSwitch.getAllPortsExcept(event.interf), NetworkEventDirection.OUT,
 					event.timeStamp));
 		} else {
 			checkEvents(event);

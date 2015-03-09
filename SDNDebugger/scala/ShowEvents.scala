@@ -34,7 +34,7 @@ object ShowEvents {
    							  pipefile.delete(); })
 
    		o.subscribe({e => writer.println(s"${e.toString()}");
-   						  if(writer.checkError()) 
+   						  // if(writer.checkError()) 
    						  // println("error encountered!");
    						  // TODO: when process exits, we need to close write and unsubscribe
    						  })

@@ -53,7 +53,7 @@ public class Monitor {
 	private static int count = 0;
 	private HashMap<String, String> port_sw = new HashMap<String, String>();
 
-	//private OFFactory factory = OFFactory.getInstance();
+	// private OFFactory factory = OFFactory.getInstance();
 
 	public Monitor(int port, PhyTopo topo) {
 		try {
@@ -115,12 +115,16 @@ public class Monitor {
 
 		for (Link link : monitor.getPhyTopo().getLinks()) {
 			if (link.left.getType().equals("S")) {
-				monitor.capturePackets(((Switch)(link.left)).getId() + "-" + link.left_interf, rs, Direction.IN);
-				monitor.capturePackets(((Switch)(link.left)).getId() + "-" + link.left_interf, rs, Direction.OUT);
+				monitor.capturePackets(((Switch) (link.left)).getId() + "-"
+						+ link.left_interf, rs, Direction.IN);
+				monitor.capturePackets(((Switch) (link.left)).getId() + "-"
+						+ link.left_interf, rs, Direction.OUT);
 			}
 			if (link.right.getType().equals("S")) {
-				monitor.capturePackets(((Switch)(link.right)).getId() + "-" + link.right_interf, rs, Direction.IN);
-				monitor.capturePackets(((Switch)(link.right)).getId() + "-" + link.right_interf, rs, Direction.OUT);
+				monitor.capturePackets(((Switch) (link.right)).getId() + "-"
+						+ link.right_interf, rs, Direction.IN);
+				monitor.capturePackets(((Switch) (link.right)).getId() + "-"
+						+ link.right_interf, rs, Direction.OUT);
 			}
 		}
 
@@ -242,7 +246,7 @@ public class Monitor {
 								if (tcp.source() == 0 || tcp.destination() == 0) {
 									return;
 								}
-								sTcp.payload = tcp.getPayload();	
+								sTcp.payload = tcp.getPayload();
 							} else {
 								sTcp.of_packet = sOf;
 
@@ -250,10 +254,14 @@ public class Monitor {
 								if (tcp.getPayload().length == 0) {
 									return;
 								}
-								
+
 								OFMessage message = null;
 								try {
-									message = OFFactories.getGenericReader().readFrom(ChannelBuffers.copiedBuffer(tcp.getPayload()));
+									message = OFFactories
+											.getGenericReader()
+											.readFrom(
+													ChannelBuffers.copiedBuffer(tcp
+															.getPayload()));
 									// first two heart beat
 									if (message.getType() == OFType.ECHO_REPLY) {
 										sOf.type = "echo_reply";
@@ -282,18 +290,26 @@ public class Monitor {
 									} else if (message.getType() == OFType.FLOW_MOD) {
 										sOf.type = "flow_mod";
 										Gson gson = new Gson();
-										sOf.match = gson.toJson((((OFFlowMod) message).getMatch())).toString();
+										sOf.match = gson.toJson(
+												(((OFFlowMod) message)
+														.getMatch()))
+												.toString();
 										if (message.getVersion() == OFVersion.OF_13)
-											sOf.instruction = gson.toJson((((OFFlowMod) message).getInstructions())).toString();
-//											sOf.instruction =(((OFFlowMod) message).getInstructions()).toString();
+											sOf.instruction = gson
+													.toJson((((OFFlowMod) message)
+															.getInstructions()))
+													.toString();
+										// sOf.instruction =(((OFFlowMod)
+										// message).getInstructions()).toString();
 										else
-											sOf.instruction = ((OFFlowMod) message).getActions().toString();
+											sOf.instruction = ((OFFlowMod) message)
+													.getActions().toString();
 
 									} /*
 									 * else if (message.getType() ==
 									 * OFType.FLOW_REMOVED) { sOf.type =
-									 * "flow_removed"; sOf.match = ((OFFlowRemoved)
-									 * message
+									 * "flow_removed"; sOf.match =
+									 * ((OFFlowRemoved) message
 									 * ).getMatch().getMatchFields().toString();
 									 * sOf.instruction = ((OFFlowMod)
 									 * message).getInstructions().toString(); }
@@ -321,7 +337,7 @@ public class Monitor {
 
 					if (!interf.equals("lo")) {
 						sEvt.sw = interf.split("-")[0];
-						sEvt.interf.add(interf.split("-")[1]);
+						sEvt.interf = interf.split("-")[1];
 					} else {
 						String sw_port = "";
 						if (!sTcp.tcp_src.equals(controller_port)) {

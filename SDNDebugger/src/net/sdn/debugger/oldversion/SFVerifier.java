@@ -28,7 +28,7 @@ public class SFVerifier extends Verifier {
 		// ideal model
 		// check whether the event is in
 		if (event.direction == NetworkEventDirection.IN && event.sw.equalsIgnoreCase(firewallSwitch.getId())) {			
-			String interf = event.interf.get(0);
+			String interf = event.interf;
 			Packet pkt = event.pkt;
 			if (allowInterfs.contains(interf)) {
 				// ALLOW
