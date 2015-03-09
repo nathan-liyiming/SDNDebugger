@@ -19,8 +19,8 @@ import scala.collection.mutable.SortedSet;
 object Simon {
 	val d: Debugger = new Debugger();
 	private var running = false;
-	private var last_java_events: rx.Observable[Event] = rx.Observable.never();
-	private var last_scala_events: Observable[Event] = Observable.never;
+	private var lastJavaEvents: rx.Observable[Event] = rx.Observable.never();
+	private var lastScalaEvents: Observable[Event] = Observable.never;
 
 	def run() {
 		if(running) return;
@@ -39,10 +39,10 @@ object Simon {
 	// that have happened before subscription.
 	def events(): Observable[Event] = {
 		// Don't create a new Observable every call.
-		if(last_java_events == d.events) return last_scala_events;
-		last_java_events = d.events;
-		last_scala_events = JavaConversions.toScalaObservable(d.events);
-		return last_scala_events;
+		if(lastJavaEvents == d.events) return lastScalaEvents;
+		lastJavaEvents = d.events;
+		lastScalaEvents = JavaConversions.toScalaObservable(d.events);
+		return lastScalaEvents;
 	}
 	def nwEvents(): Observable[NetworkEvent] = {
 		events().flatMap(e => e match {case et: NetworkEvent => Observable.just(et) case _ => Observable.empty})

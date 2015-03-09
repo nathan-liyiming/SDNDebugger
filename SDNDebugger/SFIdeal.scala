@@ -50,7 +50,7 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	}
 
 	//
-	def is_outgoing_same(orig: NetworkEvent): NetworkEvent => Boolean = {
+	def isOutgoingSame(orig: NetworkEvent): NetworkEvent => Boolean = {
 		{e =>
 			e.pkt.eth.dl_src == orig.pkt.eth.dl_src &&
 			e.pkt.eth.dl_dst == orig.pkt.eth.dl_dst &&
@@ -60,7 +60,7 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	// TODO: OMGZ! Make interf field hold single interface!
 	//   (if this event ever arrives with >1 interface in the list, this check will *fail*)
 	// Also: empty list (for ctrler msg) ---> saved by short circuit evaluation below
-	def is_incoming_int(e: NetworkEvent): Boolean = {		
+	def isIncomingInt(e: NetworkEvent): Boolean = {		
 		/*println( (e.direction == NetworkEventDirection.IN));
 		println(e.sw == fwswitchid); 
 		println(if(e.interf.size() >= 1) (fwinternals(e.interf.get(0))) else "NONE");*/
@@ -68,11 +68,11 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 		e.direction == NetworkEventDirection.IN && // short circuit
 		e.sw == fwswitchid && fwinternals(e.interf.get(0))
 	}
-	def is_incoming_ext_allowed(e: NetworkEvent): Boolean = {
+	def isIncomingExtAllowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
 		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
-	def is_incoming_ext_not_allowed(e: NetworkEvent): Boolean = {
+	def isIncomingExtNotAllowed(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN && 
 		e.sw == fwswitchid && fwexternals(e.interf.get(0)) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
@@ -82,7 +82,7 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 
 	// Listen in for necessary state changes
 	Simon.rememberInSet(ICMPStream, allowed,
-		{e: NetworkEvent => if(is_incoming_int(e)) 
+		{e: NetworkEvent => if(isIncomingInt(e)) 
 								Some(new Tuple2[String,String](e.pkt.eth.dl_src, e.pkt.eth.dl_dst))
 							else None});
 
@@ -93,16 +93,16 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 
 	// e1: ext -> int [not in state] => expect dropped
 
-	val e1 = ICMPStream.filter(is_incoming_ext_not_allowed).flatMap(e =>
-				Simon.expectNot(ICMPStream, is_outgoing_same(e), Duration(100, "milliseconds")));
+	val e1 = ICMPStream.filter(isIncomingExtNotAllowed).flatMap(e =>
+				Simon.expectNot(ICMPStream, isOutgoingSame(e), Duration(100, "milliseconds")));
 
 	// e2: int -> ext => expect pass, add to state
-	val e2 = ICMPStream.filter(is_incoming_int).flatMap(e =>
-				Simon.expect(ICMPStream, is_outgoing_same(e), Duration(100, "milliseconds")));
+	val e2 = ICMPStream.filter(isIncomingInt).flatMap(e =>
+				Simon.expect(ICMPStream, isOutgoingSame(e), Duration(100, "milliseconds")));
 
 	// e3: ext -> int [in state] => expect pass
-	val e3 = ICMPStream.filter(is_incoming_ext_allowed).flatMap(e =>
-				Simon.expect(ICMPStream, is_outgoing_same(e), Duration(100, "milliseconds")));
+	val e3 = ICMPStream.filter(isIncomingExtAllowed).flatMap(e =>
+				Simon.expect(ICMPStream, isOutgoingSame(e), Duration(100, "milliseconds")));
 
 	val violations = e1.merge(e2).merge(e3);
 	val autosubscribe = violations.subscribe({e => printwarning(e)});
