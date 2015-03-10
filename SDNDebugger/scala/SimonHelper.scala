@@ -18,4 +18,9 @@ object SimonHelper {
 	def isRESTNetworkEvents(e: NetworkEvent): Boolean = {
 		e.pkt != null && e.pkt.eth != null && e.pkt.eth.ip != null && e.pkt.eth.ip.tcp != null && e.pkt.eth.ip.tcp.tcp_dst == "8080" && e.pkt.eth.ip.tcp.payload != null
 	}
+
+	def isOFNetworkEvents(e: NetworkEvent): Boolean = {
+		// OF event has no interface
+		e.direction == NetworkEventDirection.CONTROLLER
+	}
 }

@@ -117,6 +117,9 @@ object Simon {
 		return o.subscribe({e => f(e) match { case Some(t) => s += t case None => ()}})
 	}
 
+	def cpRelatedTo(orig: NetworkEvent): Observable[NetworkEvent] = {
+		nwEvents.filter(SimonHelper.isOFNetworkEvents).filter(e => e.pkt.eth.ip.tcp.of_packet.packet != null && e.pkt.eth.ip.tcp.of_packet.packet.equals(orig))
+	}
 
 /*
 // prints if expectation violated
@@ -151,6 +154,15 @@ scala> Simon.run()
 
  Had silent failure instantiating ExpectViolation() in expect, because new ExpectViolation()
  threw malformed class name. Not sure why.
+*/
+
+/*
+How to replay? Cache can start to cache when the first subscribe happens.
+> Simon.nwEvents.cache.subscribe(e => println(e))
+
+Now, we get res11 and replay 
+
+> res11.subscribe(e => println(e)) // print again
 */
 
 Simon.run()
