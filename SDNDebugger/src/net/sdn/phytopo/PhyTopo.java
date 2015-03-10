@@ -8,8 +8,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.sdn.policy.Policy;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -213,10 +211,6 @@ public class PhyTopo {
 
 	public HashMap<String, Controller> getControllers() {
 		return controllers;
-	}
-
-	public void addPolicyToSwitch(String s, Policy p) {
-		getSwitch(s).addPolicy(p);
 	}
 	
 	public Host getHostByIP(String ip){
