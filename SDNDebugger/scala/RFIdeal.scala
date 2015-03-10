@@ -25,9 +25,11 @@ class RFIdeal(fwswitchid: String) {
 		breakable {
 			for (p <- policyList) {
 				if (p.isMatched(e.pkt)) {
-					if (p.actions == "ALLOW") {
+					// default empty string is "ALLOW"
+					if (p.actions != "DENY") {
 						ret = true
 					}
+					println(p.actions)
 					break
 				}
 			}
@@ -37,12 +39,14 @@ class RFIdeal(fwswitchid: String) {
 	}
 
 	def isMatchPolicyDeny(e: NetworkEvent): Boolean = {
-		var ret = false
+		// no policy means deny
+		var ret = true
 		breakable {
 			for (p <- policyList) {
 				if (p.isMatched(e.pkt)) {
-					if (p.actions == "DENY") {
-						ret = true
+					// default empty string is "ALLOW"
+					if (p.actions != "DENY") {
+						ret = false
 					}
 					break
 				}
@@ -84,7 +88,7 @@ class RFIdeal(fwswitchid: String) {
 					// check again for immediately updating rule
 					case eviol: ExpectViolation => if (isMatchPolicyAllow(e)) new ExpectSuccess() else eviol
 				 	case _ => new ExpectSuccess()
-				});	
+				});
 
 	val violations = e1.merge(e2)
 	
