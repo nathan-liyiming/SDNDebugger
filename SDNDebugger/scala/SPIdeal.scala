@@ -15,11 +15,11 @@ class SPIdeal(topofn: String) {
 	val routes = BellmanFord.bellmanFordCompute(topo)
 	val count = Map[BellmanFord.Pair, Int]()
 
-	def isComingIn(e: NetworkEvent): Boolean = {
+	def isInInt(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN
 	}
 
-	def isPassThrough(orig: NetworkEvent): NetworkEvent => Boolean = {
+	def isSameSrcdst(orig: NetworkEvent): NetworkEvent => Boolean = {
 		{e => {
 			e.pkt.eth.ip.nw_src == orig.pkt.eth.ip.nw_src &&
 			e.pkt.eth.ip.nw_dst == orig.pkt.eth.ip.nw_dst &&
@@ -67,10 +67,10 @@ class SPIdeal(topofn: String) {
 
 	val ICMPStream = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents)
 
-	ICMPStream.filter(isComingIn).subscribe(setCounter(_))
+	ICMPStream.filter(isInInt).subscribe(setCounter(_))
 
-	val e1 = ICMPStream.filter(isComingIn).flatMap(e =>
-				Simon.expect(ICMPStream, isPassThrough(e), Duration(100, "milliseconds")));
+	val e1 = ICMPStream.filter(isInInt).flatMap(e =>
+				Simon.expect(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds")));
 
 	val e2 = ICMPStream.filter(isLastHop).map(expectCounterZero(_))
 

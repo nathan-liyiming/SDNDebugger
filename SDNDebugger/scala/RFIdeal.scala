@@ -7,11 +7,11 @@ import rx.lang.scala.Observable
 class RFIdeal(fwswitchid: String) {
 	var policyList: List[Policy] = List()
 
-	def isComingIn(e: NetworkEvent): Boolean = {
+	def isInInt(e: NetworkEvent): Boolean = {
 		e.direction == NetworkEventDirection.IN
 	}
 
-	def isPassThrough(orig: NetworkEvent): NetworkEvent => Boolean = {
+	def isSameSrcdst(orig: NetworkEvent): NetworkEvent => Boolean = {
 		{e => {
 			e.pkt.eth.ip.nw_src == orig.pkt.eth.ip.nw_src &&
 			e.pkt.eth.ip.nw_dst == orig.pkt.eth.ip.nw_dst &&
@@ -74,16 +74,16 @@ class RFIdeal(fwswitchid: String) {
 
 	RESTStream.subscribe(addPolicy(_))
 
-	val e1 = ICMPStream.filter(isComingIn).filter(isMatchPolicyAllow).map(e =>
-				Simon.expect(ICMPStream, isPassThrough(e), Duration(100, "milliseconds")).first
+	val e1 = ICMPStream.filter(isInInt).filter(isMatchPolicyAllow).map(e =>
+				Simon.expect(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds")).first
 				match {
 					// check again for immediately updating rule
 					case eviol: ExpectViolation => if (isMatchPolicyAllow(e)) new ExpectSuccess() else eviol
 				 	case _ => new ExpectSuccess()
 				});
 
-	val e2 = ICMPStream.filter(isComingIn).filter(isMatchPolicyDeny).map(e =>
-				Simon.expectNot(ICMPStream, isPassThrough(e), Duration(100, "milliseconds")).first
+	val e2 = ICMPStream.filter(isInInt).filter(isMatchPolicyDeny).map(e =>
+				Simon.expectNot(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds")).first
 				match {
 					// check again for immediately updating rule
 					case eviol: ExpectViolation => if (isMatchPolicyAllow(e)) new ExpectSuccess() else eviol

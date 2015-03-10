@@ -14,7 +14,8 @@ import rx.lang.scala.Observable;
 object ShowEvents {
 	def openShowEvents(o: Observable[Event]) {
 		val pipename = s"simon_temp${UUID.randomUUID}.pipe"
-		val pipefile = new File(".", pipename);
+		val pipefile = new File(".", pipename)
+		var exit = false
 
     	// Receiver must call mkfifo
     	// tail -f didn't work here, but cat did. (If normal file, cat will terminate on EOF.)
@@ -34,9 +35,10 @@ object ShowEvents {
    							  pipefile.delete(); })
 
    		o.subscribe({e => writer.println(s"${e.toString()}");
-   						  // if(writer.checkError()) 
-   						  // println("error encountered!");
-   						  // TODO: when process exits, we need to close write and unsubscribe
+   						  	if(writer.checkError() && !exit) {
+   						  		exit = true
+   						  		println("process exits!")
+   						  	}
    						  })
 
 	}
