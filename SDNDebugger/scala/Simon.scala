@@ -21,7 +21,6 @@ object Simon {
 	private var running = false;
 	private var lastJavaEvents: rx.Observable[Event] = rx.Observable.never();
 	private var lastScalaEvents: Observable[Event] = Observable.never;
-	private val saveEvents = nwEvents().replay.cache
 
 	def run() {
 		if(running) return;
@@ -116,10 +115,6 @@ object Simon {
 
 	def rememberInSet[EVT <: Event,T](o: Observable[EVT], s: scala.collection.mutable.SortedSet[T], f: EVT=>Option[T]): Subscription = {
 		return o.subscribe({e => f(e) match { case Some(t) => s += t case None => ()}})
-	}
-
-	def getSaveEvents(): Observable[Event] = {
-		saveEvents
 	}
 
 
