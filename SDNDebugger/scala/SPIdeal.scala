@@ -23,7 +23,8 @@ class SPIdeal(topofn: String) {
 		{e => {
 			e.pkt.eth.ip.nw_src == orig.pkt.eth.ip.nw_src &&
 			e.pkt.eth.ip.nw_dst == orig.pkt.eth.ip.nw_dst &&
-			e.sw == orig.sw && e.direction == NetworkEventDirection.OUT
+			e.sw == orig.sw && e.pkt.eth.ip.icmp.sequence == orig.pkt.eth.ip.icmp.sequence &&
+			e.direction == NetworkEventDirection.OUT
 			}
 		}
 	}

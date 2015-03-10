@@ -60,10 +60,8 @@ public class Monitor {
 			socket = new Socket("127.0.0.1", port);
 			this.topo = topo;
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -231,9 +229,15 @@ public class Monitor {
 							sIp.nw_proto = PacketType.ICMP;
 							sIp.icmp = sIcmp;
 							if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
+								Icmp.EchoRequest echo = new Icmp.EchoRequest();
+								icmp.hasSubHeader(echo);
 								sIcmp.op = "request";
+								sIcmp.sequence = echo.sequence();
 							} else if (icmp.typeEnum() == IcmpType.ECHO_REPLY) {
+								Icmp.EchoReply echo = new Icmp.EchoReply();
+								icmp.hasSubHeader(echo);
 								sIcmp.op = "reply";
+								sIcmp.sequence = echo.sequence();
 							}
 							// tcp
 						} else if (jpacket.hasHeader(tcp)) {
@@ -412,9 +416,15 @@ public class Monitor {
 					sIp.nw_proto = PacketType.ICMP;
 					sIp.icmp = sIcmp;
 					if (icmp.typeEnum() == IcmpType.ECHO_REQUEST) {
+						Icmp.EchoRequest echo = new Icmp.EchoRequest();
+						icmp.hasSubHeader(echo);
 						sIcmp.op = "request";
+						sIcmp.sequence = echo.sequence();
 					} else if (icmp.typeEnum() == IcmpType.ECHO_REPLY) {
+						Icmp.EchoReply echo = new Icmp.EchoReply();
+						icmp.hasSubHeader(echo);
 						sIcmp.op = "reply";
+						sIcmp.sequence = echo.sequence();
 					}
 					// tcp
 				} else if (jpacket.hasHeader(tcp)) {

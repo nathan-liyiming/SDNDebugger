@@ -40,7 +40,8 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 		{e =>
 			e.pkt.eth.dl_src == orig.pkt.eth.dl_src &&
 			e.pkt.eth.dl_dst == orig.pkt.eth.dl_dst &&
-			e.sw == orig.sw && e.direction == NetworkEventDirection.OUT
+			e.sw == orig.sw && e.pkt.eth.ip.icmp.sequence == orig.pkt.eth.ip.icmp.sequence &&
+			e.direction == NetworkEventDirection.OUT
 		}
 	}
 
