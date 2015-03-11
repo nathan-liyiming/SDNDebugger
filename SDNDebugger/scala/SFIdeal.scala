@@ -73,6 +73,12 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 		e.sw == fwswitchid && fwexternals(e.interf) && !allowed((e.pkt.eth.dl_dst, e.pkt.eth.dl_src))
 	}
 
+	// filter flow_mod
+	// the user can define own match filter functions
+	def relatedFd(orig: NetworkEvent): Observable[NetworkEvent] = {
+		Simon.nwEvents.filter(SimonHelper.isOFNetworkEvents).filter(e => e.pkt.eth.ip.tcp.of_packet.matchFields != null && e.pkt.eth.ip.tcp.of_packet.matchFields.contains("\"portNumber\":" + orig.interf(orig.interf.length - 1)))
+	}
+
 	// we only handle icmp flow
 	val ICMPStream = Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents)
 

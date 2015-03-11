@@ -294,7 +294,7 @@ public class Monitor {
 									} else if (message.getType() == OFType.FLOW_MOD) {
 										sOf.type = "flow_mod";
 										Gson gson = new Gson();
-										sOf.match = gson.toJson(
+										sOf.matchFields = gson.toJson(
 												(((OFFlowMod) message)
 														.getMatch()))
 												.toString();

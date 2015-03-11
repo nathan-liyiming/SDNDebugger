@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import com.google.gson.Gson;
@@ -23,7 +22,6 @@ import io.reactivex.netty.pipeline.PipelineConfigurators;
 import io.reactivex.netty.server.RxServer;
 import rx.Notification;
 import rx.Observable;
-import rx.observables.ConnectableObservable;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -54,7 +52,6 @@ public class Debugger implements Runnable {
 	protected HashSet<PacketType> interestedEvents = new HashSet<PacketType>();
 
 	private final int port = 8200;
-	private final long EXPIRE_TIME = 1000 * 1000000; // nano seconds
 
 	// Separate partial lines for each connection:
 	private Map<ObservableConnection<String, String>, String> partialLines =
