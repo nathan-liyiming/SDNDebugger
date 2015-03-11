@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.sdn.event.NetworkEventDirection;
+import net.sdn.event.packet.OFPacket;
 import net.sdn.event.packet.PacketType;
 import net.sdn.phytopo.Controller;
 import net.sdn.phytopo.Link;
@@ -41,6 +42,8 @@ import org.projectfloodlight.openflow.protocol.OFFlowMod;
 import org.projectfloodlight.openflow.protocol.OFPacketOut;
 import org.projectfloodlight.openflow.protocol.OFType;
 import org.projectfloodlight.openflow.protocol.OFVersion;
+import org.projectfloodlight.openflow.protocol.match.Match;
+import org.projectfloodlight.openflow.protocol.match.MatchField;
 
 import com.google.gson.Gson;
 
@@ -268,11 +271,11 @@ public class Monitor {
 															.getPayload()));
 									// first two heart beat
 									if (message.getType() == OFType.ECHO_REPLY) {
-										sOf.type = "echo_reply";
+										sOf.of_type = OFPacket.OFPacketType.ECHO_REPLY;
 									} else if (message.getType() == OFType.ECHO_REQUEST) {
-										sOf.type = "echo_request";
+										sOf.of_type = OFPacket.OFPacketType.ECHO_REQUEST;
 									} else if (message.getType() == OFType.PACKET_IN) {
-										sOf.type = "packet_in";
+										sOf.of_type = OFPacket.OFPacketType.PACKET_IN;
 										if (((OFPacketIn) message).getData().length == 0) {
 											return;
 										}
@@ -285,39 +288,44 @@ public class Monitor {
 											return;
 										}
 									} else if (message.getType() == OFType.PACKET_OUT) {
-										sOf.type = "packet_out";
+										sOf.of_type = OFPacket.OFPacketType.PACKET_OUT;
 										JPacket innerPacket = new JMemoryPacket(
 												Ethernet.ID,
 												((OFPacketOut) message)
 														.getData());
 										sOf.packet = generateInnnerPacket(innerPacket);
 									} else if (message.getType() == OFType.FLOW_MOD) {
-										sOf.type = "flow_mod";
-										Gson gson = new Gson();
-										sOf.matchFields = gson.toJson(
-												(((OFFlowMod) message)
-														.getMatch()))
-												.toString();
-										if (message.getVersion() == OFVersion.OF_13)
+										sOf.of_type = OFPacket.OFPacketType.FLOW_MOD;
+										OFPacket.MatchFields smatch = new OFPacket.MatchFields();
+										Match match = ((OFFlowMod) message).getMatch();
+										// set all the fields
+										try {
+											smatch.int_port = match.get(MatchField.IN_PORT).getPortNumber();
+										} catch (Exception e) {
+											// if it has no port set
+										}
+										try {
+											smatch.dl_src = match.get(MatchField.ETH_SRC).toString();
+											smatch.dl_dst = match.get(MatchField.ETH_DST).toString();
+											smatch.nw_src = match.get(MatchField.IPV4_SRC).toString();
+											smatch.nw_dst = match.get(MatchField.IPV4_DST).toString();
+											smatch.tcp_src = match.get(MatchField.TCP_SRC).toString();
+											smatch.tcp_dst = match.get(MatchField.TCP_DST).toString();
+										} catch (Exception e) {
+											// from low to high
+										}
+										sOf.matchFields = smatch;
+										if (message.getVersion() == OFVersion.OF_13) {
+											Gson gson = new Gson();
 											sOf.instruction = gson
 													.toJson((((OFFlowMod) message)
-															.getInstructions()))
-													.toString();
-										// sOf.instruction =(((OFFlowMod)
-										// message).getInstructions()).toString();
-										else
+															.getInstructions()));
+										} else {
 											sOf.instruction = ((OFFlowMod) message)
 													.getActions().toString();
+										}
 
-									} /*
-									 * else if (message.getType() ==
-									 * OFType.FLOW_REMOVED) { sOf.type =
-									 * "flow_removed"; sOf.match =
-									 * ((OFFlowRemoved) message
-									 * ).getMatch().getMatchFields().toString();
-									 * sOf.instruction = ((OFFlowMod)
-									 * message).getInstructions().toString(); }
-									 */else {
+									}else {
 										return;
 									}
 								} catch (OFParseError e) {

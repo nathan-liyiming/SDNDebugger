@@ -1,6 +1,7 @@
 import net.sdn.debugger.Debugger;
 
 import net.sdn.event._;
+import net.sdn.event.packet._;
 import scala.concurrent.duration._;
 
 // use Scala's observable here
@@ -117,8 +118,13 @@ object Simon {
 		return o.subscribe({e => f(e) match { case Some(t) => s += t case None => ()}})
 	}
 
+	// packet_in, packet_out, flow_mod
 	def cpRelatedTo(orig: NetworkEvent): Observable[NetworkEvent] = {
-		nwEvents.filter(SimonHelper.isOFNetworkEvents).filter(e => e.pkt.eth.ip.tcp.of_packet.packet != null && e.pkt.eth.ip.tcp.of_packet.packet.equals(orig))
+		nwEvents.filter(SimonHelper.isOFNetworkEvents).filter(e => ((e.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.PACKET_IN || 
+																		e.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.PACKET_OUT) && 
+																		e.pkt.eth.ip.tcp.of_packet.packet.equals(orig)) ||
+																	(e.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.FLOW_MOD &&
+																		e.pkt.eth.ip.tcp.of_packet.isMatch(orig)))
 	}
 
 /*

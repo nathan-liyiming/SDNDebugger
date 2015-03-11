@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 
 import net.sdn.event.Event;
 import net.sdn.event.NetworkEvent;
+import net.sdn.event.packet.OFPacket;
 import net.sdn.event.packet.PacketType;
 import io.reactivex.netty.RxNetty;
 import io.reactivex.netty.channel.ConnectionHandler;
@@ -122,9 +123,7 @@ public class Debugger implements Runnable {
 				&& eve.pkt.eth.ip != null
 				&& eve.pkt.eth.ip.tcp != null
 				&& eve.pkt.eth.ip.tcp.of_packet != null
-				&& (eve.pkt.eth.ip.tcp.of_packet.type
-						.equalsIgnoreCase("echo_reply") || eve.pkt.eth.ip.tcp.of_packet.type
-						.equalsIgnoreCase("echo_request"));
+				&& (eve.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.ECHO_REPLY || eve.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.ECHO_REQUEST);
 	}
 
 	private Observable<Event> buildNewStream(
