@@ -19,7 +19,7 @@ class SPIdeal(topofn: String) {
 		e.direction == NetworkEventDirection.IN
 	}
 
-	def isSameSrcdst(orig: NetworkEvent): NetworkEvent => Boolean = {
+	def isOutSame(orig: NetworkEvent): NetworkEvent => Boolean = {
 		{e => {
 			e.pkt.eth.ip.nw_src == orig.pkt.eth.ip.nw_src &&
 			e.pkt.eth.ip.nw_dst == orig.pkt.eth.ip.nw_dst &&
@@ -71,7 +71,7 @@ class SPIdeal(topofn: String) {
 	ICMPStream.filter(isInInt).subscribe(setCounter(_))
 
 	val e1 = ICMPStream.filter(isInInt).flatMap(e =>
-				Simon.expect(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds")));
+				Simon.expect(ICMPStream, isOutSame(e), Duration(100, "milliseconds")));
 
 	val e2 = ICMPStream.filter(isLastHop).map(expectCounterZero(_))
 

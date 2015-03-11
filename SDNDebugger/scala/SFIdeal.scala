@@ -36,7 +36,7 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	val allowed = new scala.collection.mutable.TreeSet[Tuple2[String, String]]();
 
 	//
-	def isSameSrcdst(orig: NetworkEvent): NetworkEvent => Boolean = {
+	def isOutSame(orig: NetworkEvent): NetworkEvent => Boolean = {
 		{e =>
 			e.pkt.eth.dl_src == orig.pkt.eth.dl_src &&
 			e.pkt.eth.dl_dst == orig.pkt.eth.dl_dst &&
@@ -49,7 +49,7 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 		{e =>
 			e.pkt.eth.dl_src == orig.pkt.eth.dl_dst &&
 			e.pkt.eth.dl_dst == orig.pkt.eth.dl_src &&
-			e.sw == orig.sw && e.direction == NetworkEventDirection.OUT
+			e.sw == orig.sw && e.direction == NetworkEventDirection.IN
 		}
 	}
 
@@ -96,15 +96,15 @@ class SFIdeal(fwswitchid: String, fwinternals: Set[String], fwexternals: Set[Str
 	// e1: ext -> int [not in state] => expect dropped
 
 	val e1 = ICMPStream.filter(isInExtNAllow).flatMap(e =>
-				Simon.expectNot(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds")));
+				Simon.expectNot(ICMPStream, isOutSame(e), Duration(100, "milliseconds"), ICMPStream.filter(inOppositeSrcdst(e))));
 
 	// e2: int -> ext => expect pass, add to state
 	val e2 = ICMPStream.filter(isInInt).flatMap(e =>
-				Simon.expect(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds"), ICMPStream.filter(inOppositeSrcdst(e))));
+				Simon.expect(ICMPStream, isOutSame(e), Duration(100, "milliseconds")));
 
 	// e3: ext -> int [in state] => expect pass
 	val e3 = ICMPStream.filter(isInExtAllow).flatMap(e =>
-				Simon.expect(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds"), ICMPStream.filter(inOppositeSrcdst(e))));
+				Simon.expect(ICMPStream, isOutSame(e), Duration(100, "milliseconds")));
 
 	val violations = e1.merge(e2).merge(e3);
 	val autosubscribe = violations.subscribe({e => Simon.printwarning(e)});

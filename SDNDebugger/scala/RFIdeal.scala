@@ -11,7 +11,7 @@ class RFIdeal(fwswitchid: String) {
 		e.direction == NetworkEventDirection.IN
 	}
 
-	def isSameSrcdst(orig: NetworkEvent): NetworkEvent => Boolean = {
+	def isOutSame(orig: NetworkEvent): NetworkEvent => Boolean = {
 		{e => {
 			e.pkt.eth.ip.nw_src == orig.pkt.eth.ip.nw_src &&
 			e.pkt.eth.ip.nw_dst == orig.pkt.eth.ip.nw_dst &&
@@ -76,7 +76,7 @@ class RFIdeal(fwswitchid: String) {
 	RESTStream.subscribe(addPolicy(_))
 
 	val e1 = ICMPStream.filter(isInInt).filter(isMatchPolicyAllow).map(e =>
-				Simon.expect(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds")).first
+				Simon.expect(ICMPStream, isOutSame(e), Duration(100, "milliseconds")).first
 				match {
 					// check again for immediately updating rule
 					case eviol: ExpectViolation => if (isMatchPolicyAllow(e)) new ExpectSuccess() else eviol
@@ -84,7 +84,7 @@ class RFIdeal(fwswitchid: String) {
 				});
 
 	val e2 = ICMPStream.filter(isInInt).filter(isMatchPolicyDeny).map(e =>
-				Simon.expectNot(ICMPStream, isSameSrcdst(e), Duration(100, "milliseconds")).first
+				Simon.expectNot(ICMPStream, isOutSame(e), Duration(100, "milliseconds")).first
 				match {
 					// check again for immediately updating rule
 					case eviol: ExpectViolation => if (isMatchPolicyAllow(e)) new ExpectSuccess() else eviol
