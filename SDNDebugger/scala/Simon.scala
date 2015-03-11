@@ -10,6 +10,7 @@ import rx.lang.scala.observables._;
 import rx.lang.scala.Subscription;
 import rx.lang.scala.JavaConversions;
 
+import sys.process._
 import scala.collection.mutable.SortedSet;
 
 // Note on adding new classes that extend Event:

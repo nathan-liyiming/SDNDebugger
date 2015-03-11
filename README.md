@@ -15,10 +15,36 @@ Features
 
 4.	Black-box testing: it does not assume the user is knowledgeable about intricacies of the controller being debugged.
 
-5.	Powerful: support 1.0 - 1.3 OpenFlow messages and all the controllers. We have tested FlowLog (1.0), Ryu (1.1 and 1.3), FloodLight (1.3) and RouteFlow(Quagga) with RFProxy.
+5.	Compatible: support 1.0 - 1.3 OpenFlow messages and all the controllers. We have tested FlowLog (1.0), Ryu (1.1 and 1.3), FloodLight (1.3) and RouteFlow(Quagga, 1.3) with RFProxy.
 
-SIMON API functions
+API functions
 -------------------
+1.	Based functions from reactive Scala:
+
+	*	_filter_: Applies a function to every event in the stream, keeping only events on which the function returns true.
+
+	*	_map_: Applies a function to every event in the stream, keeping only events on which the function returns true.
+
+	*	_subscribe_: Applies a function to every event in the stream, keeping only events on which the function returns true.
+
+	*	_cache_: Cache can start to cache when the first subscribe happens.
+
+	*	More: [details of observable](http://reactivex.io/documentation/observable.html) and [API of observable](http://reactivex.io/rxscala/scaladoc/index.html#rx.lang.scala.Observable)
+
+2.	Based functions from Simon
+
+	*	_expect_: Expect to see an event matching pred within duration d.
+
+	*	_expectNot_: Not expect to see an event matching pred within duration d.
+
+	*	_cpRelatedTo_: Produce related PacketIn, PacketOut, and FlowMod messages corresponding to an event.
+
+3.	Other helper functions:
+
+	*	_openShowEvents_: Open another xterm and print the the user observable stream.
+
+	*	_isArpNetworkEvents_, _isDHCPNetworkEvents_, _isICMPNetworkEvents_, _isRESTNetworkEvents_, _isOFNetworkEvents_: judge whether the network event is what the user needs.
+
 
 Installation
 ------------
@@ -41,16 +67,16 @@ How to run?
 	$ ./compile.sh
 	```
 
-2.	Run controller, one terminal(T1) runs controller with app.
+2.	Run controller, one term(T1) runs controller with app.
 
 
-3.	Run our debugger in the new terminal(T2) and wait for connection:
+3.	Run our debugger in the new term(T2) and wait for connection:
 
 	```
 	$ ./simon.sh
 	```
 
-4. 	Another terminal(T3) connects listening debugger, runs Mininet and Monitor
+4. 	Another term(T3) connects listening debugger, runs Mininet and Monitor
 
 	```
 	$ sudo ./run.sh
@@ -60,6 +86,25 @@ How to run?
 
 Examples
 --------
+*	State Firewall(one bug in app)
+
+	1.	
+
+
+*	Reactive Firewall
+
+*	Shortest-Path Routing
+
+*	Others: we can also run mininet in Scala after running mn.
+
+	```
+	./mininet/util/m h1 ping -c 1 10.0.0.2
+	```
+
+	```
+	./mininet/util/m h1 ifconfig
+	```
+
 	
 Limitation
 ----------
