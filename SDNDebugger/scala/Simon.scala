@@ -122,7 +122,7 @@ object Simon {
 	def cpRelatedTo(orig: NetworkEvent): Observable[NetworkEvent] = {
 		nwEvents.filter(SimonHelper.isOFNetworkEvents).filter(e => ((e.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.PACKET_IN || 
 																		e.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.PACKET_OUT) && 
-																		e.pkt.eth.ip.tcp.of_packet.packet.equals(orig)) ||
+																		e.pkt.eth.ip.tcp.of_packet.packet.equals(orig.pkt)) ||
 																	(e.pkt.eth.ip.tcp.of_packet.of_type == OFPacket.OFPacketType.FLOW_MOD &&
 																		e.pkt.eth.ip.tcp.of_packet.isMatch(orig)))
 	}

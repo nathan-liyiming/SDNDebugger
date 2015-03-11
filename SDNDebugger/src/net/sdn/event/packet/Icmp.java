@@ -5,7 +5,7 @@ public class Icmp {
 	public int sequence;
 
 	public boolean equals(Object icmp) {
-		return this.op.equalsIgnoreCase(((Icmp) icmp).op)
-				&& this.sequence == ((Icmp) icmp).sequence;
+		return this.op.equalsIgnoreCase(((Icmp) icmp).op) &&
+				this.sequence == ((Icmp) icmp).sequence;
 	}
 }
