@@ -112,7 +112,7 @@ Examples
 	$ sudo ./run.sh
 	```
 
-	__Step 4__: run state firewall ideal model
+	__Step 4__: run state firewall ideal model in T2
 
 	```
 	scala> new SFIdeal("s1", Set("eth1"), Set("eth2"))
@@ -140,8 +140,8 @@ Examples
 	__Note__: we can also run mininet in Scala after running mn.
 
 	```
-	scala> ./mininet/util/m h1 ifconfig
-	scala> ./mininet/util/m h1 ping -c 1 10.0.0.2
+	scala> "./mininet/util/m h1 ifconfig" !
+	scala> "./mininet/util/m h1 ping -c 1 10.0.0.2" !
 	```
 
 2.	__Reactive Firewall__
@@ -170,7 +170,7 @@ Examples
 	$ sudo ./run.sh
 	```
 
-	__Step 4__: run reactive firewall ideal model
+	__Step 4__: run reactive firewall ideal model in T2
 
 	```
 	scala> new RFIdeal("s1")
@@ -229,7 +229,7 @@ Examples
 	$ sudo ./run_routeflow.sh
 	```
 
-	__Step 4__: run shortest path ideal model
+	__Step 4__: run shortest path ideal model in T2
 
 	```
 	scala> new SPIdeal("../examples/SP/topo.xml")
