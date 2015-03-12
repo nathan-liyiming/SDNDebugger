@@ -88,7 +88,7 @@ How to run and debug?
 
 Examples
 --------
-1.	State Firewall
+1.	__State Firewall__
 
  	One bug is both apps in SF and SF10, where 10 means 1.0 OpenFlow. We just have one switch and two hosts. ```s1-eth1``` allows to pass through, but ```s1-eth2``` denies any passing. Once, the first packet is sent to ```s1-eth1```, then go to controller, which sends out two Flow_Mod rules to allow both ports of ```s1```. However, app ignores to send out the first packet leading to the bug. In order to capture it, we do as follows:
 
@@ -118,20 +118,16 @@ Examples
 
 	__Note__: we can also run mininet in Scala after running mn.
 
-	```
-	./mininet/util/m h1 ping -c 1 10.0.0.2
-	```
+	```scala> ./mininet/util/m h1 ping -c 1 10.0.0.2```
 
-	```
-	./mininet/util/m h1 ifconfig
-	```
+	```scala> ./mininet/util/m h1 ifconfig```
 
-2.	Reactive Firewall
+2.	__Reactive Firewall__
 	
 	We also created an ideal model in SIMON for the reactive firewall module released with the Ryu controller plat-form. This module accepts packet-filtering rules via HTTP messages, which it then enforces with corresponding OpenFlow rules on firewall switches. See: http://osrg.github.io/ryu-book/en/html/rest_firewall.html
 
 	<p align="center">
-  		<img src="http://osrg.github.io/ryu-book/en/html/_images/fig13.png" alt="Reactive Firewall" height="300" width="400">
+  		<img src="http://osrg.github.io/ryu-book/en/html/_images/fig13.png" alt="Reactive Firewall" height="300" width="400" />
 	</p>
 
 	__Step 1__: run controller in T1
