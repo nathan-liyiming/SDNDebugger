@@ -200,7 +200,7 @@ Examples
 	We have two kinds of controller(application) for testing: _FloodLight_ and _RouteFlow_ with RFProxy. We modify the [final project-SDN](http://cs.brown.edu/courses/cs168/f14/content/projects/sdn.pdf) from Computer Networks (CS168 Fall 2014) in the Department of Computer Science at Brown to compute the shortest path by Bellman–Ford algorithm. For RouteFlow VM, be careful to set the same gateway of Debugger VM. The topo is coming from Tutorial-2 of RouteFlow: https://github.com/CPqD/RouteFlow/wiki/Tutorial-2:-rftest2
 	
 	<p align="center">
-  		<img src="https://raw.githubusercontent.com/wiki/CPqD/RouteFlow/images/rftest2_scenario.png" alt="Reactive Firewall" height="300" width="400" />
+  		<img src="https://raw.githubusercontent.com/wiki/CPqD/RouteFlow/images/rftest2_scenario.png" alt="Reactive Firewall" height="330" width="550" />
 	</p>
 
 	__Step 1__: run controller in T1
@@ -224,6 +224,7 @@ Examples
 	```
 	$ sudo ./run_floodlight.sh
 	```
+	Or
 	```
 	$ sudo ./run_routeflow.sh
 	```
