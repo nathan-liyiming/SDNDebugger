@@ -94,33 +94,47 @@ Examples
 
 	__Step 1__: run controller in T1
 
-	```$ ryu-manager state_firewall.py```
+	```
+	$ ryu-manager state_firewall.py
+	```
 
 	__Step 2__: run debugger in T2
 
-	```$ ./simon.sh```
+	```
+	$ ./simon.sh
+	```
 
 	__Step 3__: until T2 prints ``Rx server started at port: 8200'', run Mininet and Monitor
 
-	```$ sudo ./run.sh```
+	```
+	$ sudo ./run.sh
+	```
 
 	__Step 4__: try to capture OpenFlow message related to ICMP event
 
-	```scala> ShowEvents.openShowEvents(Simon.nwEvents().filter(SimonHelper.isICMPNetworkEvents).flatMap(Simon.cpRelatedTo))```
+	```
+	scala> ShowEvents.openShowEvents(Simon.nwEvents().
+		   filter(SimonHelper.isICMPNetworkEvents).flatMap(Simon.cpRelatedTo))
+	```
 
 	__Step 5__: try to h1 ping h2 once in T3-mn-xterm
 
-	```mininet> h1 ping h2 -c 1```
+	```
+	mininet> h1 ping h2 -c 1
+	```
 
 	__Step 6__: display Packet_In, Flow_Mod, miss Packet_Out. Now, check state_firewall.py and find:
 
-	```datapath.send_msg(out)```
+	```
+	datapath.send_msg(out)
+	```
 
 	__Note__: we can also run mininet in Scala after running mn.
 
-	```scala> ./mininet/util/m h1 ping -c 1 10.0.0.2```
-
-	```scala> ./mininet/util/m h1 ifconfig```
+	```
+	scala> ./mininet/util/m h1 ifconfig
+	scala> ./mininet/util/m h1 ping -c 1 10.0.0.2
+	```
 
 2.	__Reactive Firewall__
 	
@@ -132,30 +146,40 @@ Examples
 
 	__Step 1__: run controller in T1
 
-	```$ ryu-manager rest_firewall.py```
+	```
+	$ ryu-manager rest_firewall.py
+	```
 
 	__Step 2__: run debugger in T2
 
-	```$ ./simon.sh```
+	```
+	$ ./simon.sh
+	```
 
 	__Step 3__: until T2 prints ``Rx server started at port: 8200'', run Mininet and Monitor. In addition, we add REST Monitor to capture HTTP message for changing rules.
 
-	```$ sudo ./run.sh```
+	```
+	$ sudo ./run.sh
+	```
 
-	__Step 4__: try to h1 ping h2 once in T3-mn-xterm, it will fail
+	__Step 4__: try to h1 ping h2 once in T3-mn-xterm, it will fail and filter OpenFlow messages, you don't find any Flow_Mod
 
-	```mininet> h1 ping h2 -c 1```
+	```
+	mininet> h1 ping h2 -c 1
+	```
 
 	__Step 5__: try to send REST command to add rules, allow passing from h1 to h2 and from h2 to h1
-	```$ ./enable.sh```
+	```
+	$ ./enable.sh
 
-	```$ ./add.sh```
+	$ ./add.sh
+	```
 
-	__Step 6__: try to h1 ping h2 once in T3-mn-xterm, it will be successful
+	__Step 6__: try to h1 ping h2 once in T3-mn-xterm, it will be successful, you will see Flow_Mod messages.
 
-	```mininet> h1 ping h2 -c 1```
-
-	Now, you can modify to load any bug for testing.
+	```
+	mininet> h1 ping h2 -c 1
+	```
 
 3.	Shortest-Path Routing
 
