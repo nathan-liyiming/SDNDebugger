@@ -90,7 +90,7 @@ How to run and debug?
 
 Examples
 --------
-__1.	State Firewall__
+1.	__State Firewall__
 
  	One bug is both apps in SF and SF10, where 10 means 1.0 OpenFlow. We just have one switch and two hosts. ```s1-eth1``` allows to pass through, but ```s1-eth2``` denies any passing. Once, the first packet is sent to ```s1-eth1```, then go to controller, which sends out two Flow_Mod rules to allow both ports of ```s1```. However, app ignores to send out the first packet leading to the bug. In order to capture it, we do as follows:
 
@@ -144,7 +144,7 @@ __1.	State Firewall__
 	scala> ./mininet/util/m h1 ping -c 1 10.0.0.2
 	```
 
-__2.	Reactive Firewall__
+2.	__Reactive Firewall__
 	
 	We also created an ideal model in SIMON for the reactive firewall module released with the Ryu controller plat-form. This module accepts packet-filtering rules via HTTP messages, which it then enforces with corresponding OpenFlow rules on firewall switches. See: http://osrg.github.io/ryu-book/en/html/rest_firewall.html
 
@@ -195,7 +195,7 @@ __2.	Reactive Firewall__
 	mininet> h1 ping h2 -c 1
 	```
 
-__3.	Shortest-Path Routing__
+3.	__Shortest-Path Routing__
 	
 	We have two kinds of controller(application) for testing: _FloodLight_ and _RouteFlow_ with RFProxy. We modify the [final project-SDN](http://cs.brown.edu/courses/cs168/f14/content/projects/sdn.pdf) from Computer Networks (CS168 Fall 2014) in the Department of Computer Science at Brown to compute the shortest path by Bellman–Ford algorithm. For RouteFlow VM, be careful to set the same gateway of Debugger VM. The topo is coming from Tutorial-2 of RouteFlow: https://github.com/CPqD/RouteFlow/wiki/Tutorial-2:-rftest2
 	
