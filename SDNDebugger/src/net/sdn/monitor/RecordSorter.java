@@ -1,5 +1,6 @@
 package net.sdn.monitor;
 
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.LinkedList;
 
@@ -16,14 +17,24 @@ public class RecordSorter extends Thread {
 	private PrintWriter out;
 
 	private long split;
+	
+	PrintWriter writer;
 
 	public RecordSorter(PrintWriter out) {
 		this.out = out;
+		try {
+			writer = new PrintWriter("/home/yli/SDNDebugger/SDNDebugger/a.txt");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void insertRecord(long time, NetworkEvent recorder) {
 		int i = 0;
 		synchronized (this) {
+			writer.println(System.currentTimeMillis() + "\t" + recorder.timeStamp / 1000000);
+			writer.flush();
 			for (i = store.size() - 1; i >= 0; i--) {
 				if (time > store.get(i).time) {
 					break;
